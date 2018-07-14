@@ -19,7 +19,13 @@
 #include "control.h"
 #include "img.h"
 
+#ifdef IIGS
+segment "screen";
+#pragma noroot
+#endif
+
 #include "img_splash.e"
+
 
 /*
  * Display XRICK splash screen

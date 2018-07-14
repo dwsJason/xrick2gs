@@ -14,18 +14,23 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
+
+#pragma memorymodel 1
+
 /* version */
 #define VERSION "021212"
 
 /* graphics (choose one) */
-#define GFXST
+#undef GFXST
 #undef GFXPC
+#define GFXGS
 
 /* joystick support */
 #undef ENABLE_JOYSTICK
 
 /* sound support */
-#define ENABLE_SOUND
+//#define ENABLE_SOUND
+#undef ENABLE_SOUND
 
 /* cheats support */
 #define ENABLE_CHEATS

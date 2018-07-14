@@ -21,6 +21,11 @@
 #include "pics.h"
 #include "control.h"
 
+#ifdef IIGS
+#pragma noroot
+segment "screen";
+#endif
+
 /*
  * Main introduction
  *

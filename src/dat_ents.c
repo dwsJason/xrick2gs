@@ -14,6 +14,11 @@
 #include "system.h"
 #include "ents.h"
 
+#ifdef IIGS
+#pragma noroot
+segment "dat";
+#endif
+
 entdata_t ent_entdata[ENT_NBR_ENTDATA] = {
   {0000, 0000, 000000, 000000, 0000, 0000, 0x00},
   {0x18, 0x15, 000000, 000000, 0000, 0000, 0x00},

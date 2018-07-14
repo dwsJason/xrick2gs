@@ -11,6 +11,11 @@
  * You must not remove this notice, or any other, from this software.
  */
 
+#ifdef IIGS
+#pragma noroot
+segment "dat";
+#endif
+
 #include "system.h"
 #include "maps.h"
 

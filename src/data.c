@@ -17,11 +17,19 @@
 #include "system.h"
 #include "data.h"
 
+#ifndef IIGS
 #include "unzip.h"
+#endif
+
+#ifdef IIGS
+#pragma noroot
+segment "dat";
+#endif
 
 /*
  * Private typedefs
  */
+#ifndef IIGS
 typedef struct {
 	char *name;
 	unzFile zip;
@@ -43,6 +51,7 @@ static path_t path;
 static int str_zipext(char *);
 static char *str_dup(char *);
 static char *str_slash(char *);
+#endif //IIGS
 
 /*
  *
@@ -50,6 +59,8 @@ static char *str_slash(char *);
 void
 data_setpath(char *name)
 {
+#ifdef IIGS
+#else
 	unzFile zip;
 	char *n;
 
@@ -70,6 +81,7 @@ data_setpath(char *name)
 		path.zip = NULL;
 		path.name = str_dup(name);
 	}
+#endif
 }
 
 /*
@@ -78,14 +90,18 @@ data_setpath(char *name)
 void
 data_closepath()
 {
+#ifdef IIGS
+#else
 	if (path.zip) {
 		unzClose(path.zip);
 		path.zip = NULL;
 	}
 	free(path.name);
 	path.name = NULL;
+#endif
 }
 
+#ifndef IIGS
 /*
  * Open a data file.
  */
@@ -234,5 +250,7 @@ str_slash(char *s)
 #endif
 	return s;
 }
+
+#endif //IIGS
 
 /* eof */

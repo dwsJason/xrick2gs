@@ -33,6 +33,10 @@
 #include "devtools.h"
 #endif
 
+#ifdef IIGS
+#pragma noroot
+segment "game";
+#endif
 
 /*
  * local typedefs
@@ -74,7 +78,7 @@ U8 game_cheat1 = 0;
 U8 game_cheat2 = 0;
 U8 game_cheat3 = 0;
 
-#ifdef GFXST
+#if defined(GFXST) || defined(GFXGS)
 hscore_t game_hscores[8] = {
   { 8000, "SIMES@@@@@" },
   { 7000, "JAYNE@@@@@" },
@@ -209,7 +213,7 @@ game_stopmusic(void)
 void
 game_run(void)
 {
-  U32 tm, tmx;
+	U32 tm, tmx;
 
 	loaddata(); /* load cached data */
 
@@ -223,6 +227,8 @@ game_run(void)
 		/* timer */
 		tmx = tm; tm = sys_gettime(); tmx = tm - tmx;
 		if (tmx < game_period) sys_sleep(game_period - tmx);
+
+		printf("tmx=%x\n");
 
 		/* video */
 		/*DEBUG*//*game_rects=&draw_SCREENRECT;*//*DEBUG*/

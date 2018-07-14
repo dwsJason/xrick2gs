@@ -30,6 +30,11 @@
 #include "maps.h"
 #include "draw.h"
 
+#ifdef IIGS
+#pragma noroot
+segment "game";
+#endif
+
 /*
  * global vars
  */

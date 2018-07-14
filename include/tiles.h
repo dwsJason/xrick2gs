@@ -37,6 +37,9 @@
 #ifdef GFXST
 #define TILES_NBR_BANKS 3
 #endif
+#ifdef GFXGS
+#define TILES_NBR_BANKS 3
+#endif
 
 #define TILES_SIZEOF8 (0x10)
 #define TILES_SIZEOF16 (0x08)
@@ -55,6 +58,9 @@
 typedef U16 tile_t[TILES_SIZEOF16];
 #endif
 #ifdef GFXST
+typedef U32 tile_t[0x08];
+#endif
+#ifdef GFXGS
 typedef U32 tile_t[0x08];
 #endif
 

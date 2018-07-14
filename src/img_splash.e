@@ -1,4 +1,5 @@
-static U8 IMG_SPLASH_PIXELS[] = {
+#ifndef GFXGS
+U8 IMG_SPLASH_PIXELS[] = {
 0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -4012,4 +4013,7 @@ static img_t IMG_SPLASH_OBJECT = {
 };
 
 img_t *IMG_SPLASH = &IMG_SPLASH_OBJECT;
+#else
+img_t *IMG_SPLASH = 0;
+#endif
 

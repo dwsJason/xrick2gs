@@ -11,6 +11,10 @@
  * You must not remove this notice, or any other, from this software.
  */
 
+#ifdef IIGS
+#pragma noroot
+#endif
+
 #include <stdlib.h>  /* NULL */
 
 #include "system.h"

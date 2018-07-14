@@ -15,10 +15,16 @@
  * 20021010 added test to prevent buffer overrun in -keys parsing.
  */
 
+#ifdef IIGS
+#pragma noroot
+#endif
+
 #include <stdlib.h>  /* atoi */
 #include <string.h>  /* strcasecmp */
 
+#ifndef IIGS
 #include <SDL.h>
+#endif
 
 #include "system.h"
 #include "config.h"
@@ -37,9 +43,11 @@ typedef struct {
   int code;
 } sdlcodes_t;
 
+#ifndef IIGS
 static sdlcodes_t sdlcodes[SDLK_LAST] = {
 #include "sdlcodes.e"
 };
+#endif
 
 int sysarg_args_period = 0;
 int sysarg_args_map = 0;
@@ -49,6 +57,9 @@ int sysarg_args_zoom = 0;
 int sysarg_args_nosound = 0;
 int sysarg_args_vol = 0;
 char *sysarg_args_data = NULL;
+
+segment "system";
+
 
 /*
  * Fail
@@ -64,6 +75,8 @@ sysarg_fail(char *msg)
 	exit(1);
 }
 
+
+#ifndef IIGS
 /*
  * Get SDL key code
  */
@@ -85,6 +98,7 @@ sysarg_sdlcode(char *k)
 
   return result;
 }
+#endif
 
 /*
  * Scan key codes sequence
@@ -92,6 +106,7 @@ sysarg_sdlcode(char *k)
 int
 sysarg_scankeys(char *keys)
 {
+#ifndef IIGS
   char k[16];
   int i, j;
 
@@ -131,7 +146,7 @@ sysarg_scankeys(char *keys)
   k[j] = '\0';
   syskbd_fire = sysarg_sdlcode(k);
   if (!syskbd_fire) return -1;
-
+#endif
   return 0;
 }
 

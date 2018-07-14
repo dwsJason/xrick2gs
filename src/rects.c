@@ -16,6 +16,9 @@
 #include "system.h"
 #include "rects.h"
 
+#ifdef IIGS
+#pragma noroot
+#endif
 
 /*
  * Free a list of rectangles and set the pointer to NULL.

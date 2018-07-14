@@ -22,6 +22,11 @@
 #include "control.h"
 #include "maps.h"
 
+#ifdef IIGS
+#pragma noroot
+segment "screen";
+#endif
+
 /*
  * local vars
  */

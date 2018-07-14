@@ -22,6 +22,11 @@
 #include "maps.h"
 #include "util.h"
 
+#ifdef IIGS
+#pragma noroot
+segment "e";
+#endif
+
 /*
  * FIXME this is because the same structure is used
  * for all entities. Need to replace this w/ an inheritance

@@ -27,6 +27,8 @@ typedef struct {
   U16 base;  /* base for sprite numbers table */
 } screen_imapsteps_t;  /* description of one step */
 
+//segment "screen";
+
 extern U8 screen_imapsl[];  /* sprite lists */
 extern screen_imapsteps_t screen_imapsteps[];  /* map intro steps */
 extern U8 screen_imapsofs[];  /* first step for each map */

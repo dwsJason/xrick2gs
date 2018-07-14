@@ -11,7 +11,13 @@
  * You must not remove this notice, or any other, from this software.
  */
 
+#ifdef IIGS
+#pragma noroot
+#endif
+
+#ifndef IIGS
 #include <SDL.h>
+#endif
 
 #include <stdarg.h>   /* args for sys_panic */
 #include <fcntl.h>    /* fcntl in sys_panic */
@@ -73,6 +79,9 @@ sys_printf(char *msg, ...)
 U32
 sys_gettime(void)
 {
+#ifdef IIGS
+	return 0;
+#else
   static U32 ticks_base = 0;
   U32 ticks;
 
@@ -82,6 +91,7 @@ sys_gettime(void)
     ticks_base = ticks;
 
   return ticks - ticks_base;
+#endif
 }
 
 /*
@@ -90,7 +100,9 @@ sys_gettime(void)
 void
 sys_sleep(int s)
 {
+#ifndef IIGS
   SDL_Delay(s);
+#endif
 }
 
 /*

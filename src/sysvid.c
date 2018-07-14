@@ -11,9 +11,15 @@
  * You must not remove this notice, or any other, from this software.
  */
 
+#ifdef IIGS
+#pragma noroot
+#endif
+
 #include <stdlib.h> /* malloc */
 
+#ifndef IIGS
 #include <SDL.h>
+#endif
 
 #include "system.h"
 #include "game.h"
@@ -24,11 +30,15 @@
 #include <memory.h> /* memset */
 #endif
 
+segment "system";
+
 U8 *sysvid_fb; /* frame buffer */
 rect_t SCREENRECT = {0, 0, SYSVID_WIDTH, SYSVID_HEIGHT, NULL}; /* whole fb */
 
+#ifndef IIGS
 static SDL_Color palette[256];
 static SDL_Surface *screen;
+#endif
 static U32 videoFlags;
 
 static U8 zoom = SYSVID_ZOOM; /* actual zoom level */
@@ -46,7 +56,7 @@ static U8 RED[] = { 0x00, 0x50, 0xf0, 0xf0, 0x00, 0x50, 0xf0, 0xf0 };
 static U8 GREEN[] = { 0x00, 0xf8, 0x50, 0xf8, 0x00, 0xf8, 0x50, 0xf8 };
 static U8 BLUE[] = { 0x00, 0x50, 0x50, 0x50, 0x00, 0xf8, 0xf8, 0xf8 };
 #endif
-#ifdef GFXST
+#if defined(GFXST) || defined(GFXGS)
 static U8 RED[] = { 0x00, 0xd8, 0xb0, 0xf8,
                     0x20, 0x00, 0x00, 0x20,
                     0x48, 0x48, 0x90, 0xd8,
@@ -81,15 +91,18 @@ static U8 BLUE[] = { 0x00, 0x00, 0x68, 0x68,
 /*
  * Initialize screen
  */
+#ifndef IIGS
 static
 SDL_Surface *initScreen(U16 w, U16 h, U8 bpp, U32 flags)
 {
   return SDL_SetVideoMode(w, h, bpp, flags);
 }
+#endif
 
 void
 sysvid_setPalette(img_color_t *pal, U16 n)
 {
+#ifndef IIGS
   U16 i;
 
   for (i = 0; i < n; i++) {
@@ -98,12 +111,15 @@ sysvid_setPalette(img_color_t *pal, U16 n)
     palette[i].b = pal[i].b;
   }
   SDL_SetColors(screen, (SDL_Color *)&palette, 0, n);
+#endif
 }
 
 void
 sysvid_restorePalette()
 {
+#ifndef IIGS
   SDL_SetColors(screen, (SDL_Color *)&palette, 0, 256);
+#endif
 }
 
 void
@@ -126,6 +142,7 @@ sysvid_setGamePalette()
 void
 sysvid_chkvm(void)
 {
+#ifndef IIGS
   SDL_Rect **modes;
   U8 i, mode = 0;
 
@@ -164,6 +181,7 @@ sysvid_chkvm(void)
       fszoom = 1;
     }
   }
+#endif
 }
 
 /*
@@ -172,6 +190,7 @@ sysvid_chkvm(void)
 void
 sysvid_init(void)
 {
+#ifndef IIGS
   SDL_Surface *s;
   U8 *mask, tpix;
   U32 len, i;
@@ -242,6 +261,7 @@ sysvid_init(void)
     sys_panic("xrick/video: sysvid_fb malloc failed\n");
 
   IFDEBUG_VIDEO(printf("xrick/video: ready\n"););
+#endif
 }
 
 /*
@@ -250,10 +270,12 @@ sysvid_init(void)
 void
 sysvid_shutdown(void)
 {
+#ifndef IIGS
   free(sysvid_fb);
   sysvid_fb = NULL;
 
   SDL_Quit();
+#endif
 }
 
 /*
@@ -263,6 +285,7 @@ sysvid_shutdown(void)
 void
 sysvid_update(rect_t *rects)
 {
+#ifndef IIGS
   static SDL_Rect area;
   U16 x, y, xz, yz;
   U8 *p, *q, *p0, *q0;
@@ -321,6 +344,7 @@ sysvid_update(rect_t *rects)
   }
 
   SDL_UnlockSurface(screen);
+#endif
 }
 
 
@@ -331,7 +355,9 @@ sysvid_update(rect_t *rects)
 void
 sysvid_clear(void)
 {
+#ifndef IIGS
   memset(sysvid_fb, 0, SYSVID_WIDTH * SYSVID_HEIGHT);
+#endif
 }
 
 
@@ -341,6 +367,7 @@ sysvid_clear(void)
 void
 sysvid_zoom(S8 z)
 {
+#ifndef IIGS
   if (!(videoFlags & SDL_FULLSCREEN) &&
       ((z < 0 && zoom > 1) ||
        (z > 0 && zoom < SYSVID_MAXZOOM))) {
@@ -351,6 +378,7 @@ sysvid_zoom(S8 z)
     sysvid_restorePalette();
     sysvid_update(&SCREENRECT);
   }
+#endif
 }
 
 /*
@@ -359,6 +387,7 @@ sysvid_zoom(S8 z)
 void
 sysvid_toggleFullscreen(void)
 {
+#ifndef IIGS
   videoFlags ^= SDL_FULLSCREEN;
 
   if (videoFlags & SDL_FULLSCREEN) {  /* go fullscreen */
@@ -373,6 +402,7 @@ sysvid_toggleFullscreen(void)
 		      screen->format->BitsPerPixel, videoFlags);
   sysvid_restorePalette();
   sysvid_update(&SCREENRECT);
+#endif
 }
 
 /* eof */

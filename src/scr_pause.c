@@ -21,6 +21,10 @@
 #include "control.h"
 #include "ents.h"
 
+#ifdef IIGS
+#pragma noroot
+segment "screen";
+#endif
 
 /*
  * Display the pause indicator

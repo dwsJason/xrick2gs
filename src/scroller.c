@@ -24,6 +24,11 @@
 
 static U8 period;
 
+#ifdef IIGS
+#pragma noroot
+segment "screen";
+#endif
+
 /*
  * Scroll up
  *

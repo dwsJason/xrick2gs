@@ -51,6 +51,15 @@
 #define __WIN32__
 #endif
 
+#ifdef __ORCAC__
+/* Apple IIgs */
+typedef unsigned char U8;         /*  8 bits unsigned */
+typedef unsigned int U16;   /* 16 bits unsigned */
+typedef unsigned long U32;         /* 32 bits unsigned */
+typedef signed char S8;           /*  8 bits signed   */
+typedef signed int S16;     /* 16 bits signed   */
+typedef signed long S32;           /* 32 bits signed   */
+#else
 /* there are true at least on x86 platforms */
 typedef unsigned char U8;         /*  8 bits unsigned */
 typedef unsigned short int U16;   /* 16 bits unsigned */
@@ -58,6 +67,7 @@ typedef unsigned int U32;         /* 32 bits unsigned */
 typedef signed char S8;           /*  8 bits signed   */
 typedef signed short int S16;     /* 16 bits signed   */
 typedef signed int S32;           /* 32 bits signed   */
+#endif
 
 /* this must be after typedefs because it relies on types defined above */
 #include "rects.h"

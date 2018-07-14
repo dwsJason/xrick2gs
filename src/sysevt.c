@@ -16,7 +16,9 @@
  *          requires that SHIFT be pressed to input numbers.
  */
 
+#ifndef IIGS
 #include <SDL.h>
+#endif
 
 #include "system.h"
 #include "config.h"
@@ -31,7 +33,14 @@
 #define SETBIT(x,b) x |= (b)
 #define CLRBIT(x,b) x &= ~(b)
 
+#ifndef IIGS
 static SDL_Event event;
+#endif
+
+#ifdef IIGS
+segment "system";
+#pragma noroot
+#endif
 
 /*
  * Process an event
@@ -39,6 +48,7 @@ static SDL_Event event;
 static void
 processEvent()
 {
+#ifndef IIGS
 	U16 key;
 #ifdef ENABLE_FOCUS
 	SDL_ActiveEvent *aevent;
@@ -206,6 +216,7 @@ processEvent()
   default:
     break;
   }
+#endif //IIGS
 }
 
 /*
@@ -214,8 +225,10 @@ processEvent()
 void
 sysevt_poll(void)
 {
+#ifndef IIGS
   while (SDL_PollEvent(&event))
     processEvent();
+#endif
 }
 
 /*
@@ -224,11 +237,11 @@ sysevt_poll(void)
 void
 sysevt_wait(void)
 {
+#ifndef IIGS
   SDL_WaitEvent(&event);
   processEvent();
+#endif
 }
 
 /* eof */
-
-
 

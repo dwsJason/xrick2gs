@@ -11,7 +11,13 @@
  * You must not remove this notice, or any other, from this software.
  */
 
+#ifdef IIGS
+#pragma noroot
+#endif
+
+#ifndef IIGS
 #include <SDL.h>
+#endif
 #include <stdlib.h>
 #include <memory.h>
 
@@ -24,6 +30,8 @@
 #include "syssnd.h"
 #include "debug.h"
 #include "data.h"
+
+segment "system";
 
 #define ADJVOL(S) (((S)*sndVol)/SDL_MIX_MAXVOLUME)
 

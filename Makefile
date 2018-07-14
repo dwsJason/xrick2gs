@@ -1,89 +1,101 @@
 #
-# xrick/Makefile
-#
-# Copyright (C) 1998-2002 BigOrno (bigorno@bigorno.net). All rights reserved.
-#
-# The use and distribution terms for this software are contained in the file
-# named README, which can be found in the root of this distribution. By
-# using this software in any fashion, you are agreeing to be bound by the
-# terms of this license.
-#
-# You must not remove this notice, or any other, from this software.
+# xrick2gs/Makefile
 #
 
+# This makefile was created by Jason Andersen
 #
-# Vars
+# I build on Windows-10 64-bit, this makefile is designed to run under
+# a Windows-10 Command Prompt, and makes use of DOS shell commands
 #
-
-SDLVERSION=$(shell sdl-config --version 2>/dev/null)
-ROOTDIR=$(shell pwd)
-TARGET=$(shell uname -s | tr [a-z] [A-Z])
-
+# In order to build this you need GoldenGate, and ORCA/C
 #
-# Config
+# http://golden-gate.ksherlock.com/
 #
-
-ifeq ($(strip $(SDLVERSION)),) 
-$(error SDL is missing) 
-else 
-$(warning Detected SDL version $(SDLVERSION)) 
-endif
-
-ifeq ($(strip $(SDLVERSION)),)
-$(error SDL is missing)
-endif
-
-SDL_MAJ=$(word 1,$(subst ., ,$(SDLVERSION)))
-SDL_MIN=$(word 2,$(subst ., ,$(SDLVERSION)))
-SDL_MIC=$(word 3,$(subst ., ,$(SDLVERSION)))
-
-SDL_MAJ_REQ=1
-SDL_MIN_REQ=2
-SDL_MIC_REQ=1
-
-SDL_CHKVER=$(shell if [ $(SDL_MAJ) -lt $(SDL_MAJ_REQ) ]; then echo "BAD"; fi)
-ifeq ($(SDL_CHKVER),BAD)
-$(error SDL version $(SDL_MAJ_REQ).$(SDL_MIN_REQ).$(SDL_MIC_REQ) is required)
-endif
-
-SDL_CHKVER=$(shell if [ $(SDL_MAJ) -eq $(SDL_MAJ_REQ) -a $(SDL_MIN) -lt $(SDL_MIN_REQ) ]; then echo "BAD"; fi)
-ifeq ($(SDL_CHKVER),BAD)
-$(error SDL version $(SDL_MAJ_REQ).$(SDL_MIN_REQ).$(SDL_MIC_REQ) is required)
-endif
-
-SDL_CHKVER=$(shell if [ $(SDL_MAJ) -eq $(SDL_MAJ_REQ) -a $(SDL_MIN) -eq $(SDL_MIN_REQ) -a $(SDL_MIC) -lt $(SDL_MIC_REQ) ]; then echo "BAD"; fi)
-ifeq ($(SDL_CHKVER),BAD)
-$(error SDL version $(SDL_MAJ_REQ).$(SDL_MIN_REQ).$(SDL_MIC_REQ) is required)
-endif
-
-ifneq (,$(findstring CYGWIN,$(TARGET)))
-XOBJ=xrick.res
-endif
-
-ifneq (,$(findstring MINGW,$(TARGET)))
-XOBJ=xrick.res
-endif
-
+# I have the contents  of the OPUS-II collection installed
 #
-# Rules
+# As far a free stuff, I setup a c:\bin directory, in my path
+# the following packages and executables are in there
+#
+# Fine Tools from Brutal Deluxe
+# http://www.brutaldeluxe.fr/products/crossdevtools/
+# Cadius.exe
+# Merlin32.exe
+# OMFAnalyzer.exe
+# LZ4.exe
+#
+# gnumake-4.2.1-x64.exe (with a symbolic link that aliases this to "make")
+#
+# https://apple2.gs/plus/
+# gsplus32.exe (KEGS based GS Emulator fork by Dagen Brock)
+# I configure this to boot the xrick.po image directly
+# once that's done "make run" will build, update the disk image
+# and boot into xrick2gs.
 #
 
-all:
-	@echo "ROOTDIR=$(ROOTDIR)" > Makefile.global
-	@echo "XOBJ=$(XOBJ)" >> Makefile.global
-	@echo "CFLAGS=-g -ansi -pedantic -Wall -W -O2 -I $(ROOTDIR)/include $(shell sdl-config --cflags)" >> Makefile.global
-	@echo "LDFLAGS=-lz $(shell sdl-config --libs)" >> Makefile.global
-	@echo "CC=gcc" >> Makefile.global
-	@echo "CPP=gcc -E" >> Makefile.global
-	$(MAKE) -C src all
+# Make and Build Variables
+
+VPATH = src:obj
+SOURCEFILES = $(wildcard src/*.c)
+OBJFILES = $(patsubst src/%.c,obj/%.a,$(SOURCEFILES))
+CC = iix compile
+CFLAGS = cc=-DIIGS=1 cc=-Iinclude cc=-Isrc
+
+
+help:
+	@echo. 
+	@echo xrickgs Makefile
+	@echo -------------------------------------------------
+	@echo build commands:
+	@echo    make gs     - Apple IIgs
+	@echo    make image  - Build Bootable .PO File
+	@echo    make run    - Build / Run IIgs on emulator
+	@echo    make clean  - Clean intermediate/target files
+	@echo    make depend - Build dependencies
+	@echo -------------------------------------------------
+	@echo.
+
+xrick.lib: $(OBJFILES)
+	@echo Y | del xrick.lib
+	iix makelib -P xrick.lib $(patsubst %,+%,$(OBJFILES))
+
+xrick.sys16: xrick.lib
+#	iix link +L obj\xrick xrick.lib keep=xrick.sys16
+	iix link obj\xrick xrick.lib keep=xrick.sys16
+
+gs: xrick.sys16
+
+image:  gs
+	@echo Updating xrick.po
+	@echo Remove xrick.sys16
+	cadius deletefile xrick.po /xrick/xrick.sys16
+	@echo Add xrick.sys16
+	cadius addfile xrick.po /xrick ./xrick.sys16
+
+run: image
+	gsplus32
 
 clean:
-	for i in src include; do \
-	  $(MAKE) -C $$i clean; \
-	done
-	rm -f *~ log.txt Makefile.global
+	@echo Remove xrick.sys16
+#	ifneq ("$(wildcard ./xrick.sys16)","")
+	@echo Y | del xrick.sys16
+#	endif
+	@echo Clear Object Directory
+	@echo Y | del obj\*
+#	@rmdir obj
+	@echo Y | del xrick.lib
 
 depend:
-	$(MAKE) -C src depend
+	@echo TODO - make dependencies
 
-# eof
+# Generic Rules
+
+# Goofy Object File Rule for ORCA
+obj/%.a : src/%.c obj
+	@echo Compiling $(<F)
+	@$(CC) -P -I +O $< keep=$(basename $@) $(CFLAGS)
+
+# obj directory, depends on obj directory
+obj:
+	@mkdir obj
+
+

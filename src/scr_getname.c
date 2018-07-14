@@ -18,6 +18,11 @@
 #include "draw.h"
 #include "control.h"
 
+#ifdef IIGS
+#pragma noroot
+segment "screen";
+#endif
+
 /*
  * local vars
  */

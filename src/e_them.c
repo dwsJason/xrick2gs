@@ -35,6 +35,11 @@ U32 e_them_rndseed = 0;
  */
 static U16 e_them_rndnbr = 0;
 
+#ifdef IIGS
+#pragma noroot
+segment "e";
+#endif
+
 /*
  * Check if entity boxtests with a lethal e_them i.e. something lethal
  * in slot 0 and 4 to 8.
@@ -335,13 +340,13 @@ e_them_t2_action2(U8 e)
    * end of this function.
    */
   static U16 bx;
-  static U8 *bl = (U8 *)&bx;
-  static U8 *bh = (U8 *)&bx + 1;
+  static U8 *bl = (U8*)&bx;
+  U8 *bh = bl+1;
   static U16 cx;
-  static U8 *cl = (U8 *)&cx;
-  static U8 *ch = (U8 *)&cx + 1;
-  static U16 *sl = (U16 *)&e_them_rndseed;
-  static U16 *sh = (U16 *)&e_them_rndseed + 2;
+  static U8 *cl = (U8*)&cx;
+  U8 *ch = cl+1;
+  static U16 *sl = (U16*)&e_them_rndseed;
+  U16 *sh = sl+1;
 
   /*sys_printf("e_them_t2 ------------------------------\n");*/
 

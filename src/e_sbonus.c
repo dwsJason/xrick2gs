@@ -20,6 +20,10 @@
 #include "maps.h"
 #include "e_rick.h"
 
+#ifdef IIGS
+#pragma noroot
+segment "e";
+#endif
 
 /*
  * public vars

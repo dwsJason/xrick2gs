@@ -23,6 +23,11 @@
 #include "maps.h"
 #include "util.h"
 
+#ifdef IIGS
+#pragma noroot
+segment "e";
+#endif
+
 /*
  * public vars
  */

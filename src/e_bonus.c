@@ -19,6 +19,10 @@
 #include "e_rick.h"
 #include "maps.h"
 
+#ifdef IIGS
+#pragma noroot
+segment "e";
+#endif
 
 /*
  * Entity action

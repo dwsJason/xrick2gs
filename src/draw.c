@@ -54,6 +54,11 @@
 #include "rects.h"
 #include "img.h"
 
+#ifdef IIGS
+#pragma noroot
+segment "game";
+#endif
+
 
 /*
  * counters positions (pixels, screen)
@@ -70,7 +75,11 @@
 #define DRAW_STATUS_LIVES_X 0xF0
 #define DRAW_STATUS_Y 0
 #endif
-
+#ifdef GFXGS
+#define DRAW_STATUS_SCORE_X 0x20
+#define DRAW_STATUS_LIVES_X 0xF0
+#define DRAW_STATUS_Y 0
+#endif
 
 /*
  * public vars
@@ -296,6 +305,18 @@ draw_sprite(U8 nbr, U16 x, U16 y)
     }
     fb += 8;
   }
+}
+#endif
+
+#ifdef GFXGS
+void
+draw_sprite(U8 number, U16 x, U16 y)
+{
+}
+
+void
+draw_sprite2(U8 number, U16 x, U16 y, U8 front)
+{
 }
 #endif
 

@@ -13,6 +13,11 @@
 
 #include "config.h"
 
+#ifdef IIGS
+#pragma noroot
+//segment "dat";
+#endif
+
 #ifdef ENABLE_SOUND
 
 #include "system.h"

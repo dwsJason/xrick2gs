@@ -38,6 +38,10 @@
 #include "screens.h"
 #include "e_sbonus.h"
 
+#ifdef IIGS
+#pragma noroot
+#endif
+
 /*
  * global vars
  */

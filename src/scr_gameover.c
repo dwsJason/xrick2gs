@@ -20,6 +20,11 @@
 #include "draw.h"
 #include "control.h"
 
+#ifdef IIGS
+#pragma noroot
+segment "screen";
+#endif
+
 /*
  * Display the game over screen
  *

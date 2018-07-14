@@ -14,6 +14,11 @@
 #include "system.h"
 #include "screens.h"
 
+#ifdef IIGS
+#pragma noroot
+segment "dat";
+#endif
+
 /*
  * map intro, sprites lists
  */

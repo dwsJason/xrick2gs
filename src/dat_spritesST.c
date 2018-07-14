@@ -13,6 +13,11 @@
 
 #include "config.h"
 
+#ifdef IIGS
+#pragma noroot
+//segment "sprites_dat";
+#endif
+
 #ifdef GFXST
 
 #include "system.h"

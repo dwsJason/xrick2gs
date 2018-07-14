@@ -13,6 +13,10 @@
 
 #include "config.h"
 
+#ifdef IIGS
+#pragma noroot
+#endif
+
 #ifdef ENABLE_DEVTOOLS
 
 #include "system.h"
