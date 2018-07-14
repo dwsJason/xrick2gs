@@ -39,7 +39,8 @@ SOURCEFILES = $(wildcard src/*.c)
 OBJFILES = $(patsubst src/%.c,obj/%.a,$(SOURCEFILES))
 CC = iix compile
 CFLAGS = cc=-DIIGS=1 cc=-Iinclude cc=-Isrc
-
+# List of directories to create
+DIRS=obj
 
 help:
 	@echo. 
@@ -64,7 +65,7 @@ xrick.sys16: xrick.lib
 
 gs: xrick.sys16
 
-image:  gs
+disk image: gs
 	@echo Updating xrick.po
 	@echo Remove xrick.sys16
 	cadius deletefile xrick.po /xrick/xrick.sys16
@@ -76,26 +77,21 @@ run: image
 
 clean:
 	@echo Remove xrick.sys16
-#	ifneq ("$(wildcard ./xrick.sys16)","")
-	@echo Y | del xrick.sys16
-#	endif
-	@echo Clear Object Directory
-	@echo Y | del obj\*
-#	@rmdir obj
-	@echo Y | del xrick.lib
+	$(shell if exist xrick.sys16 echo Y | del xrick.sys16)
+	@echo Remove Intermediate Files
+	@del /q obj\*
+	$(shell if exist xrick.lib echo Y | del xrick.lib)
 
 depend:
 	@echo TODO - make dependencies
 
 # Generic Rules
+#objdir: obj
 
 # Goofy Object File Rule for ORCA
-obj/%.a : src/%.c obj
+obj/%.a : src/%.c
 	@echo Compiling $(<F)
 	@$(CC) -P -I +O $< keep=$(basename $@) $(CFLAGS)
 
-# obj directory, depends on obj directory
-obj:
-	@mkdir obj
-
-
+# Create all the directories
+$(shell if not exist $(DIRS) mkdir $(DIRS))
