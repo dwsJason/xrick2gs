@@ -36,7 +36,9 @@
 
 VPATH = src:obj
 SOURCEFILES = $(wildcard src/*.c)
+ASMFILES = $(wildcard asm/*.s)
 OBJFILES = $(patsubst src/%.c,obj/%.a,$(SOURCEFILES))
+OBJFILES += $(patsubst asm/%.s,obj/%.a,$(ASMFILES))
 CC = iix compile
 CFLAGS = cc=-DIIGS=1 cc=-Iinclude cc=-Isrc
 # List of directories to create
@@ -58,10 +60,11 @@ help:
 xrick.lib: $(OBJFILES)
 	@echo Y | del xrick.lib
 	iix makelib -P xrick.lib $(patsubst %,+%,$(OBJFILES))
+#	iix makelib -P xrick.lib test.obj
 
 xrick.sys16: xrick.lib
 #	iix link +L obj\xrick xrick.lib keep=xrick.sys16
-	iix link obj\xrick xrick.lib keep=xrick.sys16
+	iix link obj\xrick xrick.lib data.lib keep=xrick.sys16
 
 gs: xrick.sys16
 
@@ -91,6 +94,10 @@ depend:
 # Goofy Object File Rule for ORCA
 obj/%.a : src/%.c
 	@echo Compiling $(<F)
+	@$(CC) -P -I +O $< keep=$(basename $@) $(CFLAGS)
+
+obj/%.a : asm/%.s
+	@echo Assembling $(<F)
 	@$(CC) -P -I +O $< keep=$(basename $@) $(CFLAGS)
 
 # Create all the directories

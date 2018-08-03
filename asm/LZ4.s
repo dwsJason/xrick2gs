@@ -1,8 +1,77 @@
+*
+* ORCA/M Format!!
+* LZ4 Decompress by Brutal Deluxe!!!
+*
+ case on
+ longa on
+ longi on
 
-                 MX   %00
+Dummy1 start ASMCODE
+	end
+
+*
+* int LZ4_Unpack(u8* pDest, u8* pPackedSource);
+*
+
+LZ4_Unpack start ASMCODE
+
+pDest equ 5
+pPackedSource equ 9
+
+    phb
+    phk
+    plb
+
+    sep #$20
+    lda pPackedSource+2,s    ; Pull out the src/dst banks
+    xba
+    lda pDest+2,s   		 ; Pull out the src/dst banks
+
+    rep #$31
+    tax                      ; Temp save in X
+
+    lda pDest,s
+    sta LZ4_Dst+1
+
+    lda pPackedSource+1,s    ; address of packed source + 4, is the unpacked len
+    sta upl+2
+	
+    lda pPackedSource,s
+    adc #12
+    sta upl+1
+	
+upl lda >0                  ; packed length
+	adc #16 				; 16 bytes for packed buffer header
+    adc pPackedSource,s 	; start of packed buffer
+    tay                     ; y has the pack data stop address
+	
+    anop ; 1st packed Byte offset
+    lda pPackedSource,s     ; skip 16 byte header on the source
+    adc #16
+    pha
+    txa
+    plx
+	
+    jsr ASM_LZ4_Unpack
+    tay
+	
+    anop ; Copy the Return address
+    lda 1,s
+    sta pPackedSource,s
+    lda 3,s
+    sta pPackedSource+2,s
+		
+    tsc
+	sec
+    sbc #-8
+    tcs
+    tya    ; return length	
+
+    plb
+    rtl
 
 *-------------------------------------------------------------------------------
-LZ4_Unpack       STA  LZ4_Literal_3+1   ; Uncompress a LZ4 Packed Data buffer (64 KB max)
+ASM_LZ4_Unpack   STA  LZ4_Literal_3+1   ; Uncompress a LZ4 Packed Data buffer (64 KB max)
                  SEP  #$20              ; A = Bank Src,Bank Dst
                  STA  LZ4_Match_5+1     ; X = Header Size = 1st Packed Byte offset
                  STA  LZ4_Match_5+2     ; Y = Pack Data Size
@@ -13,8 +82,8 @@ LZ4_Unpack       STA  LZ4_Literal_3+1   ; Uncompress a LZ4 Packed Data buffer (6
                  REP  #$30 
                  STY  LZ4_Limit+1
 *--
-                 LDY  #$0000            ; Init Target unpacked Data offset
-LZ4_ReadToken    LDAL $AA0000,X         ; Read Token Byte
+LZ4_Dst          LDY  #$0000            ; Init Target unpacked Data offset
+LZ4_ReadToken    LDA  >$AA0000,X        ; Read Token Byte
                  INX
                  STA  LZ4_Match_2+1
 *----------------
@@ -24,12 +93,12 @@ LZ4_Literal      AND  #$00F0            ; >>> Process Literal Bytes <<<
                  BNE  LZ4_Literal_1
                  JSR  LZ4_GetLengthLit  ; Compute Literal Length with next bytes
                  BRA  LZ4_Literal_2
-LZ4_Literal_1    LSR                    ; Literal Length use the 4 bit
-                 LSR
-                 LSR
-                 LSR
+LZ4_Literal_1    LSR  A                 ; Literal Length use the 4 bit
+                 LSR  A
+                 LSR  A
+                 LSR  A
 *--
-LZ4_Literal_2    DEC                    ; Copy A+1 Bytes
+LZ4_Literal_2    DEC  A                 ; Copy A+1 Bytes
 LZ4_Literal_3    MVN  $AA,$BB           ; Copy Literal Bytes from packed data buffer
                  PHK                    ; X and Y are auto incremented
                  PLB
@@ -39,7 +108,7 @@ LZ4_Limit        CPX  #$AAAA            ; End Of Packed Data buffer ?
 *----------------
 LZ4_Match        TYA                    ; >>> Process Match Bytes <<<
                  SEC
-LZ4_Match_1      SBCL $AA0000,X         ; Match Offset
+LZ4_Match_1      SBC  >$AA0000,X         ; Match Offset
                  INX
                  INX
                  STA  LZ4_Match_4+1
@@ -63,7 +132,7 @@ LZ4_Match_5      MVN  $BB,$BB           ; Copy Match Bytes from unpacked data bu
 *----------------
 LZ4_GetLengthLit LDA  #$000F            ; Compute Variable Length (Literal or Match)
 LZ4_GetLengthMat STA  LZ4_GetLength_2+1
-LZ4_GetLength_1  LDAL $AA0000,X         ; Read Length Byte
+LZ4_GetLength_1  LDA  >$AA0000,X         ; Read Length Byte
                  INX
                  AND  #$00FF
                  CMP  #$00FF
@@ -78,3 +147,5 @@ LZ4_GetLength_3  ADC  LZ4_GetLength_2+1
 LZ4_End          TYA                    ; A = Length of Unpack Data
                  RTS
 *-------------------------------------------------------------------------------
+                 end
+

@@ -21,13 +21,38 @@
 //extern void waitkey();
 //extern void fbuffer();
 
+extern char title_lz4;
+
+char *VIDEO = (char*)0xE1C029;
+
+extern int LZ4_Unpack(char* pDest, char* pPackedSource);
+
 /*
  * main
  */
 int
 main(int argc, char *argv[])
 {
+	//char *pChar = &testtext;
+
 	printf("Hello from xrick IIgs\n");
+
+	printf("Unpacking Splash!");
+
+	LZ4_Unpack((char*)(0xE12000), &title_lz4);
+
+	//while (pChar[0])
+	//{
+	//	pChar[0]|=0x80;
+	//	pChar++;
+	//}
+
+//	printf("%s\n", &testtext);
+
+	// SHR ON
+	*VIDEO|=0xC0;
+
+
 //	waitkey();
 //	fbuffer();
 
