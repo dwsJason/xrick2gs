@@ -21,7 +21,7 @@
 //extern void waitkey();
 //extern void fbuffer();
 
-extern char title_lz4;
+extern char splash_lz4;
 
 char *VIDEO = (char*)0xE1C029;
 
@@ -39,7 +39,7 @@ main(int argc, char *argv[])
 
 	printf("Unpacking Splash!");
 
-	LZ4_Unpack((char*)(0xE12000), &title_lz4);
+	LZ4_Unpack((char*)(0xE12000), &splash_lz4);
 
 	//while (pChar[0])
 	//{
