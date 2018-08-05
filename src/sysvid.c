@@ -26,6 +26,13 @@
 #include "img.h"
 #include "debug.h"
 
+#ifdef IIGS
+#include <GSOS.h>
+#include <Memory.h>
+#include <Orca.h>
+#include <Misctool.h>
+#endif
+
 #ifdef __MSVC__
 #include <memory.h> /* memset */
 #endif
@@ -190,6 +197,48 @@ sysvid_chkvm(void)
 void
 sysvid_init(void)
 {
+#ifdef IIGS
+	handle hndl;   // "generic memory handle"
+
+//   PushLong  #0                   ;/* Ask Shadowing Screen ($8000 bytes from $01/2000)*/
+//           PushLong  #$8000
+//            PushWord  myID
+//            PushWord  #%11000000_00000011
+//            PushLong  #$012000
+//            _NewHandle
+//            PLA
+//            PLA
+
+	// Allocate Bank 01 memory  + 4K before and after (25 lines pre flow)
+	// $012000-$019BFF pixel data
+	// $019D00-$019DC7 SCB data
+	// $019E00-$019FFF Clut data
+	// $900 bytes afer, (14 lines buffer on the bottom, which will wreck SCB+CLUT
+	//
+	printf("Allocate Bank $01 memory\n");
+	hndl = NewHandle(0x9600, userid(), 0xC003, (pointer) 0x011000);
+	if (toolerror())
+	{
+		printf("Unable to allocate backpage at 0x012000\n");
+		printf("Game can't run\n");
+		sys_sleep(5000);  // Wait 5 seconds
+		exit(1);
+
+	}
+	printf("SUCCESS\n");
+
+	// Allocate Bank E1 memory - Actual Video memory
+	printf("Allocate Bank $E1 memory\n");
+	hndl = NewHandle(0x8000, userid(), 0xC003, (pointer) 0xE12000);
+	if (toolerror())
+	{
+		printf("Unable to allocate display buffer at 0xE12000\n");
+		printf("Game can't run\n");
+		sys_sleep(5000);  // Wait 5 seconds
+		exit(1);
+	}
+	printf("SUCCESS\n");
+#endif
 #ifndef IIGS
   SDL_Surface *s;
   U8 *mask, tpix;
@@ -404,6 +453,24 @@ sysvid_toggleFullscreen(void)
   sysvid_update(&SCREENRECT);
 #endif
 }
+
+void sysvid_wait_vblank()
+{
+#ifdef IIGS
+	volatile const S8* VSTATUS = (S8*) 0xC019;
+
+	// While already in vblank wait
+	while ((*VSTATUS & 0x80) == 0)
+	{
+		// Wait for VBLANK to END
+	}
+	while ((*VSTATUS & 0x80) != 0)
+	{
+		// Wait for VBLANK to BEGIN
+	}
+#endif
+}
+
 
 /* eof */
 

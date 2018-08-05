@@ -99,7 +99,7 @@ extern void sysvid_zoom(S8);
 extern void sysvid_toggleFullscreen(void);
 extern void sysvid_setGamePalette(void);
 extern void sysvid_setPalette(img_color_t *, U16);
-
+extern void sysvid_wait_vblank();
 /*
  * events section
  */

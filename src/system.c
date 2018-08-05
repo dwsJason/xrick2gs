@@ -100,6 +100,14 @@ sys_gettime(void)
 void
 sys_sleep(int s)
 {
+#ifdef IIGS
+	// on GS we're going to work in ms, also we don't sleep, we just wait
+	while (s > 0)
+	{
+		sysvid_wait_vblank();
+		s -= 16; // Abouy 1/60th of a second
+	}
+#endif
 #ifndef IIGS
   SDL_Delay(s);
 #endif
@@ -121,8 +129,10 @@ sys_init(int argc, char **argv)
 		syssnd_init();
 #endif
 	atexit(sys_shutdown);
+#ifndef IIGS
 	signal(SIGINT, exit);
 	signal(SIGTERM, exit);
+#endif
 }
 
 /*
