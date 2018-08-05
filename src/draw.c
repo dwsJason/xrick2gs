@@ -695,16 +695,17 @@ draw_pic(U16 x, U16 y, U16 w, U16 h, U32 *pic)
 void
 draw_img(img_t *i)
 {
+#ifdef IIGS
+	LZ4_Unpack(sysvid_fb, (char*)i);
+#else
   U16 k;
 
   draw_setfb(0, 0);
   if (i->ncolors > 0)
     sysvid_setPalette(i->colors, i->ncolors);
-#ifndef IIGS
   for (k = 0; k < SYSVID_WIDTH * SYSVID_HEIGHT; k++)
     fb[k] = i->pixels[k];
 #endif
-
 }
 
 

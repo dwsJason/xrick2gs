@@ -169,6 +169,10 @@ extern void sysjoy_init(void);
 extern void sysjoy_shutdown(void);
 #endif
 
+#ifdef IIGS
+// GS Specific Stuff
+extern int LZ4_Unpack(char* pDest, char* pPackedSource);
+#endif
 
 #endif
 

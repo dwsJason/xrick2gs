@@ -46,6 +46,12 @@ rect_t SCREENRECT = {0, 0, SYSVID_WIDTH, SYSVID_HEIGHT, NULL}; /* whole fb */
 static SDL_Color palette[256];
 static SDL_Surface *screen;
 #endif
+
+#ifdef IIGS
+volatile char *VIDEO_REGISTER = (char*)0xC029;
+volatile char *SHADOW_REGISTER = (char*)0xC035;
+#endif
+
 static U32 videoFlags;
 
 static U8 zoom = SYSVID_ZOOM; /* actual zoom level */
@@ -244,6 +250,13 @@ sysvid_init(void)
 	//BlitFieldHndl   = NewHandle(0x10000, userid(), 0xC014, 0);
 	sysvid_fb = (U8*)0x12000;
 
+	// SHR ON
+	*VIDEO_REGISTER|=0xC0;
+
+	// ENABLE Shadowing of SHR
+	*SHADOW_REGISTER&=~0x08; // Shadow Enable
+
+
 #endif
 #ifndef IIGS
   SDL_Surface *s;
@@ -412,6 +425,12 @@ sysvid_clear(void)
 {
 #ifndef IIGS
   memset(sysvid_fb, 0, SYSVID_WIDTH * SYSVID_HEIGHT);
+#else
+  size_t length = SYSVID_WIDTH /2 * SYSVID_HEIGHT;
+  //printf("sysvid_clear: target = %08p\n", sysvid_fb);
+  //printf("sysvid_clear: length = %08p\n", length);
+  //sys_sleep(10000);
+  memset(sysvid_fb, 0, length);
 #endif
 }
 

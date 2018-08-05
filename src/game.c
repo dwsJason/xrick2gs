@@ -228,7 +228,7 @@ game_run(void)
 		tmx = tm; tm = sys_gettime(); tmx = tm - tmx;
 		if (tmx < game_period) sys_sleep(game_period - tmx);
 
-		printf("tmx=%x\n");
+//		printf("tmx=%x\n");
 
 		/* video */
 		/*DEBUG*//*game_rects=&draw_SCREENRECT;*//*DEBUG*/

@@ -20,14 +20,18 @@ typedef struct {
   U8 r, g, b, nothing;
 } img_color_t;
 
+#ifdef IIGS
+
+typedef void img_t;
+
+#else
 typedef struct {
   U16 w, h;
   U16 ncolors;
   img_color_t *colors;
   U8 *pixels;
 } img_t;
-
-//segment "screen";
+#endif
 
 extern img_t *IMG_SPLASH;
 

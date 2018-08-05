@@ -4013,7 +4013,11 @@ static img_t IMG_SPLASH_OBJECT = {
 };
 
 img_t *IMG_SPLASH = &IMG_SPLASH_OBJECT;
+
 #else
-img_t *IMG_SPLASH = 0;
+// On the GS it's a packed $C1
+extern U8 img_splash_lz4;
+extern U8 splash_lz4;
+img_t *IMG_SPLASH = &img_splash_lz4;
 #endif
 

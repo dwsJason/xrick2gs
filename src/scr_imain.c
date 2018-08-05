@@ -24,6 +24,7 @@
 #ifdef IIGS
 #pragma noroot
 segment "screen";
+extern img_t splash_lz4;
 #endif
 
 /*
@@ -76,6 +77,10 @@ screen_introMain(void)
 
 #ifdef GFXST
     draw_pic(0, 0, 0x140, 0xc8, pic_splash);
+#endif
+
+#ifdef GFXGS
+	draw_img(&splash_lz4);
 #endif
 
     seq = 2;

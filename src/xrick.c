@@ -18,10 +18,8 @@
 #include <SDL.h>
 #endif
 
-
-extern char splash_lz4;
-volatile char *VIDEO = (char*)0xC029;
-extern int LZ4_Unpack(char* pDest, char* pPackedSource);
+extern char img_splash_lz4;
+extern void* IMG_SPLASH;
 
 /*
  * main
@@ -31,12 +29,11 @@ main(int argc, char *argv[])
 {
 	printf("Hello from xrick IIgs\n");
 
-	printf("Unpacking Splash!\n");
-
-	LZ4_Unpack((char*)(0xE12000), &splash_lz4);
-
-	// SHR ON
-//	*VIDEO|=0xC0;
+//	printf("Unpacking Splash!\n");
+//	LZ4_Unpack((char*)(0xE12000), &img_splash_lz4);
+//	printf("%08x\n", &img_splash_lz4 );
+//	printf("%08x\n", IMG_SPLASH );
+//	sys_sleep(10000);
 
 	sys_init(argc, argv);
 	if (sysarg_args_data)
