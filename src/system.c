@@ -105,7 +105,7 @@ sys_sleep(int s)
 	while (s > 0)
 	{
 		sysvid_wait_vblank();
-		s -= 16; // Abouy 1/60th of a second
+		s -= 16; // About 1/60th of a second
 	}
 #endif
 #ifndef IIGS

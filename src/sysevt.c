@@ -225,6 +225,9 @@ processEvent()
 void
 sysevt_poll(void)
 {
+#ifdef IIGS
+	printf("sysevt_poll\n");
+#endif
 #ifndef IIGS
   while (SDL_PollEvent(&event))
     processEvent();
@@ -237,6 +240,9 @@ sysevt_poll(void)
 void
 sysevt_wait(void)
 {
+#ifdef IIGS
+	printf("sysevt_wait\n");
+#endif
 #ifndef IIGS
   SDL_WaitEvent(&event);
   processEvent();

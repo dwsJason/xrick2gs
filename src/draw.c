@@ -111,7 +111,11 @@ static U8 *fb;     /* frame buffer pointer */
 void
 draw_setfb(U16 x, U16 y)
 {
-  fb = sysvid_fb + x + y * SYSVID_WIDTH;
+#ifdef IIGS
+	fb = sysvid_fb + x + y * (SYSVID_WIDTH/2);
+#else
+	fb = sysvid_fb + x + y * SYSVID_WIDTH;
+#endif
 }
 
 
@@ -696,8 +700,11 @@ draw_img(img_t *i)
   draw_setfb(0, 0);
   if (i->ncolors > 0)
     sysvid_setPalette(i->colors, i->ncolors);
+#ifndef IIGS
   for (k = 0; k < SYSVID_WIDTH * SYSVID_HEIGHT; k++)
     fb[k] = i->pixels[k];
+#endif
+
 }
 
 

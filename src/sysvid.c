@@ -238,6 +238,12 @@ sysvid_init(void)
 		exit(1);
 	}
 	printf("SUCCESS\n");
+
+	// Allocate Some Direct Page memory
+	//directPage = NewHandle( 0x200, userid(), 0xC005, 0 );
+	//BlitFieldHndl   = NewHandle(0x10000, userid(), 0xC014, 0);
+	sysvid_fb = (U8*)0x12000;
+
 #endif
 #ifndef IIGS
   SDL_Surface *s;
@@ -459,6 +465,7 @@ void sysvid_wait_vblank()
 #ifdef IIGS
 	volatile const S8* VSTATUS = (S8*) 0xC019;
 
+	#if 1
 	// While already in vblank wait
 	while ((*VSTATUS & 0x80) == 0)
 	{
@@ -468,6 +475,17 @@ void sysvid_wait_vblank()
 	{
 		// Wait for VBLANK to BEGIN
 	}
+	#else
+	// While already in vblank wait
+	while (VSTATUS[0] >= 0)
+	{
+		// Wait for VBLANK to END
+	}
+	while (VSTATUS[0] < 0)
+	{
+		// Wait for VBLANK to BEGIN
+	}
+	#endif
 #endif
 }
 

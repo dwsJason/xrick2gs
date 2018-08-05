@@ -251,6 +251,35 @@ game_run(void)
 	freedata(); /* free cached data */
 }
 
+static char* game_state_strings[] =
+{
+#ifdef ENABLE_DEVTOOLS
+	"DEVTOOLS",
+#endif
+	"XRICK",
+	"INIT_GAME",
+	"INIT_BUFFER",
+	"INTRO_MAIN",
+	"INTRO_MAP",
+	"PAUSE_PRESSED1",
+	"PAUSE_PRESSED1B",
+	"PAUSED",
+	"PAUSE_PRESSED2",
+	"PLAY0",
+	"PLAY1",
+	"PLAY2",
+	"PLAY3",
+	"CHAIN_SUBMAP",
+	"CHAIN_MAP",
+	"CHAIN_END",
+	"SCROLL_UP",
+	"SCROLL_DOWN",
+	"RESTART",
+	"GAMEOVER",
+	"GETNAME",
+	"EXIT"
+};
+
 /*
  * Prepare frame
  *
@@ -262,6 +291,12 @@ static void
 frame(void)
 {
 	while (1) {
+
+		{
+			printf("game_state = %s\n", game_state_strings[game_state]);
+		}
+
+
 
 		switch (game_state) {
 
@@ -574,6 +609,8 @@ static void
 init(void)
 {
   U8 i;
+
+  printf("game.c: init(void);\n");
 
   E_RICK_STRST(0xff);
 
