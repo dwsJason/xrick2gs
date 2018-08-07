@@ -80,7 +80,7 @@ U32
 sys_gettime(void)
 {
 #ifdef IIGS
-	return 0;
+	return tick[0] * 16;
 #else
   static U32 ticks_base = 0;
   U32 ticks;

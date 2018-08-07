@@ -27,6 +27,7 @@
 #include "debug.h"
 
 #ifdef IIGS
+#include <Event.h>
 #include <GSOS.h>
 #include <Memory.h>
 #include <Orca.h>
@@ -197,6 +198,24 @@ sysvid_chkvm(void)
 #endif
 }
 
+#ifdef IIGS
+volatile unsigned long* tick;
+
+typedef struct
+{
+  void* pLink;
+  Word Count;
+  Word Sig;
+} taskHeader_t;
+
+taskHeader_t dummyTask = {
+	0,
+	0,
+	0xA55A
+};
+
+#endif
+
 /*
  * Initialise video
  */
@@ -205,6 +224,7 @@ sysvid_init(void)
 {
 #ifdef IIGS
 	handle hndl;   // "generic memory handle"
+	void *directPageHandle;
 
 //   PushLong  #0                   ;/* Ask Shadowing Screen ($8000 bytes from $01/2000)*/
 //           PushLong  #$8000
@@ -246,16 +266,43 @@ sysvid_init(void)
 	printf("SUCCESS\n");
 
 	// Allocate Some Direct Page memory
-	//directPage = NewHandle( 0x200, userid(), 0xC005, 0 );
+	printf("Allocate Direct Page space 512 bytes\n");
+	directPageHandle = NewHandle( 0x200, userid(), 0xC005, 0 );
+	if (toolerror())
+	{
+		printf("Unable to allocate 512 bytes Direct Page\n");
+		printf("Game can't run\n");
+		sys_sleep(5000);  // Wait 5 seconds
+		exit(1);
+	}
+	printf("SUCCESS\n");
+
 	//BlitFieldHndl   = NewHandle(0x10000, userid(), 0xC014, 0);
 	sysvid_fb = (U8*)0x12000;
 
 	// SHR ON
-	*VIDEO_REGISTER|=0xC0;
+	//*VIDEO_REGISTER|=0xC0;
 
 	// ENABLE Shadowing of SHR
 	*SHADOW_REGISTER&=~0x08; // Shadow Enable
 
+	printf("MiscTool Startup\n");
+	MTStartUp();	// MiscTool Startup, for the Heartbeat
+	#if 0
+	printf("Event Manager Startup\n");
+	EMStartUp((Word)*directPageHandle,
+			  (Word)0, // default 20
+			  (Integer)0,
+			  (Integer)320,
+			  (Integer)0,
+			  (Integer)200,
+			  (Word)userid());
+	#endif
+	//printf("SetHeartBeat\n");
+	SetHeartBeat((pointer)&dummyTask); // Force the Tick Timer On
+	DelHeartBeat((pointer)&dummyTask); // Clear the dummy task from the list
+	// Address of GetTick internal tick variable
+	tick = (unsigned long*)GetAddr(tickCnt);
 
 #endif
 #ifndef IIGS

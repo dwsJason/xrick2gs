@@ -293,7 +293,7 @@ frame(void)
 	while (1) {
 
 		{
-			printf("game_state = %s\n", game_state_strings[game_state]);
+			printf("%ld game_state = %s\n", *tick, game_state_strings[game_state]);
 		}
 
 

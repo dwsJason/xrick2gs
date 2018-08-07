@@ -172,6 +172,7 @@ extern void sysjoy_shutdown(void);
 #ifdef IIGS
 // GS Specific Stuff
 extern int LZ4_Unpack(char* pDest, char* pPackedSource);
+extern volatile unsigned long* tick;
 #endif
 
 #endif
