@@ -32,6 +32,7 @@
 #include <Memory.h>
 #include <Orca.h>
 #include <Misctool.h>
+#include <ADB.h>
 #endif
 
 #ifdef __MSVC__
@@ -288,6 +289,10 @@ sysvid_init(void)
 
 	printf("MiscTool Startup\n");
 	MTStartUp();	// MiscTool Startup, for the Heartbeat
+
+	printf("ADBTool Startup\n");
+	ADBStartUp();
+
 	#if 0
 	printf("Event Manager Startup\n");
 	EMStartUp((Word)*directPageHandle,
