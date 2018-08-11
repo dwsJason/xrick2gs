@@ -289,10 +289,23 @@ sysvid_init(void)
 
 	printf("MiscTool Startup\n");
 	MTStartUp();	// MiscTool Startup, for the Heartbeat
+	if (toolerror())
+	{
+		printf("Unable to Start MiscTool\n");
+		printf("Game can't run\n");
+		sys_sleep(5000);  // Wait 5 seconds
+		exit(1);
+	}
 
 	printf("ADBTool Startup\n");
 	ADBStartUp();
-
+	if (toolerror())
+	{
+		printf("Unable to Start ADBTool\n");
+		printf("Game can't run\n");
+		sys_sleep(5000);  // Wait 5 seconds
+		exit(1);
+	}
 	#if 0
 	printf("Event Manager Startup\n");
 	EMStartUp((Word)*directPageHandle,
@@ -303,12 +316,11 @@ sysvid_init(void)
 			  (Integer)200,
 			  (Word)userid());
 	#endif
-	//printf("SetHeartBeat\n");
+	printf("Enable Tick Timer\n");
 	SetHeartBeat((pointer)&dummyTask); // Force the Tick Timer On
 	DelHeartBeat((pointer)&dummyTask); // Clear the dummy task from the list
 	// Address of GetTick internal tick variable
 	tick = (unsigned long*)GetAddr(tickCnt);
-
 #endif
 #ifndef IIGS
   SDL_Surface *s;
