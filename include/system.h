@@ -173,6 +173,11 @@ extern void sysjoy_shutdown(void);
 // GS Specific Stuff
 extern int LZ4_Unpack(char* pDest, char* pPackedSource);
 extern volatile unsigned long* tick;
+
+// ADB Support Code
+extern char KeyArray[128];
+extern void RemoveKeyboardDriver();
+extern void AddKeyboardDriver();
 #endif
 
 #endif
