@@ -158,6 +158,12 @@ RAWDATA* CompileTiles(RAWDATA* pTilesData, int bank)
 
 	char temp_label[256];
 
+	for (int idx = 0; idx < 256; ++idx)
+	{
+		sprintf(temp_label,"    da tile%d_%d\n", bank, idx);
+		AddString(result, temp_label);
+	}
+
 	for (int tileNo = 0; tileNo < 256; ++tileNo)
 	{
 		sprintf(temp_label,"tile%d_%d\n", bank, tileNo);
