@@ -1,3 +1,13 @@
 obj/
 xrick.sys16
 bmp/
+*.vpj
+*.vpw
+*.vpwhist
+*.vtg
+bin/mrsprite/.vs/
+bin/mrsprite/Debug/
+bin/mrsprite/dep/
+bin/mrsprite/lst/
+*.lst
+*.d
