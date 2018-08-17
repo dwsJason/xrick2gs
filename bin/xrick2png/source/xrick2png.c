@@ -272,6 +272,109 @@ MYBMP* loadImage(img_t *pImage)
 	return pBitmap;
 }
 
+//
+// Attempt to generate something we can feed into Mr.Sprite, so that
+// I don't have to write a sprite compiler
+//
+MYBMP* toMrSprite(MYBMP* pBitmap, int tileWidth, int tileHeight, bool bTransparent)
+{
+	// Hi-Jack Color index 255 as the Lasso color       FF0000
+	// Hi-Jack Color index 254 as the transparent color 004000
+
+	int tile_count = pBitmap->height / tileHeight;
+
+	// Also print out the colors, that we'll give to Mr. Sprite
+	MYBMP *bmp = (MYBMP*)malloc(sizeof(MYBMP));
+
+	int newWidth  = tileWidth+2;
+	int newHeight = tileHeight+3;
+
+	bmp->width  = newWidth;
+	bmp->height = tile_count * (newHeight);
+	bmp->num_colors = 256;
+	bmp->palette = (unsigned char*)malloc(256*3);
+	// copy orignal palette
+	memcpy(bmp->palette, pBitmap->palette, 768);
+
+	// poke in special colors for Mr. Sprite
+	bmp->palette[ (254*3) + 0 ] = 0x40;
+	bmp->palette[ (254*3) + 1 ] = 0x00;
+	bmp->palette[ (254*3) + 2 ] = 0x40;
+
+	bmp->palette[ (255*3) + 0 ] = 0xFF;
+	bmp->palette[ (255*3) + 1 ] = 0xFF;
+	bmp->palette[ (255*3) + 2 ] = 0x00;
+
+	// allocate, and set transparent
+	bmp->map = (unsigned char*) malloc(bmp->width * bmp->height);
+	memset(bmp->map, 254, bmp->width * bmp->height);
+
+	// Copy Tile by Tile from source to dest
+	for (int idx = 0; idx < tile_count; ++idx)
+	{
+		unsigned char *pSrc = pBitmap->map + (idx * (tileWidth * tileHeight));
+		unsigned char *pDst = bmp->map + (idx * (newWidth * newHeight));
+
+		// Outline Top
+		memset(pDst, 0xFF, newWidth);
+
+		// position to the upper left corner
+		pDst += (newWidth + 1);
+
+		for (int y = 0; y < tileHeight; ++y)
+		{
+			// Left Side
+			pDst[-1] = 0xFF;
+			// Tile line
+			memcpy(pDst, pSrc, tileWidth);
+			// Right Side
+			pDst[tileWidth] = 0xFF;
+			pDst+=newWidth;
+			pSrc+=tileWidth;
+		}
+
+		// Outline bottom
+		memset(pDst-1, 0xFF, newWidth);
+	}
+
+	// Make Transparent Transparent
+	if (bTransparent)
+	{
+		for (int idx = 0; idx < (newWidth * newHeight * tile_count); ++idx)
+		{
+			if (0 == bmp->map[idx])
+			{
+				bmp->map[idx] = 254;
+			}
+		}
+	}
+
+	return bmp;
+}
+
+void printColor(unsigned char* pHex)
+{
+	printf("%02X%02X%02X", pHex[0], pHex[1], pHex[2]);
+}
+
+void mrSpriteColors(MYBMP* pBitmap, const char* pName)
+{
+	printf("%s MrSprite Colors\n", pName);
+
+	printColor(&pBitmap->palette[254*3]);
+	printf(" ");
+	printColor(&pBitmap->palette[255*3]);
+	printf(" ");
+
+	for (int idx = 0; idx < 16; ++idx)
+	{
+		printColor(&pBitmap->palette[idx*3]);
+		printf(" ");
+	}
+
+	printf("\n");
+}
+
 
 //
 // Parse command line options
@@ -320,14 +423,30 @@ int main(int argc, char **argv)
 	savePng(pBitmap, "sprites_data.png");
 	savePixelsGS(pBitmap, "sprites_data.gs");
 
-	pBitmap = loadPic((U32*)&tiles_data[0][0], 8, 8 * 0x100);
-	savePng(pBitmap, "tiles_data.png");
-	savePixelsGS(pBitmap, "tiles_data.gs");
+	pBitmap = toMrSprite(pBitmap, 32, 21, true);
+	savePng(pBitmap, "mr_sprites_data.png");
+	mrSpriteColors(pBitmap, "mr_sprites_data.png");
 
+
+	pBitmap = loadPic((U32*)&tiles_data[0][0], 8, 8 * 0x100);
+	savePng(pBitmap, "tiles_data0.png");
+	savePixelsGS(pBitmap, "tiles_data0.gs");
+
+	pBitmap = loadPic((U32*)&tiles_data[1][0], 8, 8 * 0x100);
+	savePng(pBitmap, "tiles_data1.png");
+	savePixelsGS(pBitmap, "tiles_data1.gs");
+
+	pBitmap = loadPic((U32*)&tiles_data[2][0], 8, 8 * 0x100);
+	savePng(pBitmap, "tiles_data2.png");
+	savePixelsGS(pBitmap, "tiles_data2.gs");
+
+//	pBitmap = toMrSprite(pBitmap, 8, 8, false);
+//	savePng(pBitmap, "mr_tiles_data.png");
+//	mrSpriteColors(pBitmap, "mr_tiles_data.png");
 
 	printf("\nxrick2png - Processing complete.\n");
 
-	exit(0);
+	return 0;
 
 } // main	
 
