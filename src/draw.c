@@ -111,8 +111,8 @@ static U8 *fb;     /* frame buffer pointer */
 void
 draw_setfb(U16 x, U16 y)
 {
-#ifdef IIGS
-	fb = sysvid_fb + x + y * (SYSVID_WIDTH/2);
+#ifdef GSGFX
+	fb = sysvid_fb + (x>>1) + (y * SYSVID_WIDTH);
 #else
 	fb = sysvid_fb + x + y * SYSVID_WIDTH;
 #endif
@@ -237,6 +237,15 @@ draw_tilesSubList()
 void
 draw_tile(U8 tileNumber)
 {
+#ifdef GFXGS
+	//$$JGA TODO convert to ASM
+
+	int tileNo = (draw_tilesBank*256)+tileNumber;
+
+	DrawTile((short)fb,tileNo);
+
+	fb += 4;  /* next tile */
+#else
   U8 i, k, *f;
 
 #ifdef GFXPC
@@ -274,10 +283,6 @@ draw_tile(U8 tileNumber)
 
   }
 
-#ifdef GFXGS
-// fix crash I hope
-  fb += 4;  /* next tile */
-#else
   fb += 8;  /* next tile */
 #endif
 }

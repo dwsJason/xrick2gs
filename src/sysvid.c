@@ -52,6 +52,7 @@ static SDL_Surface *screen;
 #ifdef IIGS
 volatile char *VIDEO_REGISTER = (char*)0xC029;
 volatile char *SHADOW_REGISTER = (char*)0xC035;
+extern U8 tiles_lz4;
 #endif
 
 static U32 videoFlags;
@@ -225,7 +226,8 @@ sysvid_init(void)
 {
 #ifdef IIGS
 	handle hndl;   // "generic memory handle"
-	void *directPageHandle;
+	void* directPageHandle;
+	void* tilesPageHandle;
 
 //   PushLong  #0                   ;/* Ask Shadowing Screen ($8000 bytes from $01/2000)*/
 //           PushLong  #$8000
@@ -279,10 +281,23 @@ sysvid_init(void)
 	printf("SUCCESS\n");
 
 	//BlitFieldHndl   = NewHandle(0x10000, userid(), 0xC014, 0);
+	printf("Allocate Bank for 8x8 Tiles\n");
+	tilesPageHandle = NewHandle(0x10000, userid(), 0xC014, 0); 
+	if (toolerror())
+	{
+		printf("Unable to allocate 64k Tiles Bank\n");
+		printf("Game can't run\n");
+		sys_sleep(5000);  // Wait 5 seconds
+		exit(1);
+	}
+	printf("SUCCESS\n");
+	SetTileBank(((U8*)*tilesPageHandle)[2]);
+	LZ4_Unpack((char*)*tilesPageHandle, &tiles_lz4);
+
 	sysvid_fb = (U8*)0x12000;
 
 	// SHR ON
-	*VIDEO_REGISTER|=0xC0;
+	//*VIDEO_REGISTER|=0xC0;
 
 	// ENABLE Shadowing of SHR
 	*SHADOW_REGISTER&=~0x08; // Shadow Enable

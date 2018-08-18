@@ -88,7 +88,11 @@ extern void sys_sleep(int);
  */
 #define SYSVID_ZOOM 2
 #define SYSVID_MAXZOOM 4
+#ifdef GS
+#define SYSVID_WIDTH 160
+#else
 #define SYSVID_WIDTH 320
+#endif
 #define SYSVID_HEIGHT 200
 
 extern void sysvid_init(void);
@@ -173,6 +177,10 @@ extern void sysjoy_shutdown(void);
 // GS Specific Stuff
 extern int LZ4_Unpack(char* pDest, char* pPackedSource);
 extern volatile unsigned long* tick;
+
+// GS Rendering Stuff
+extern void SetTileBank(short bank);
+extern void DrawTile(short offset, short tileNo);
 
 // ADB Support Code
 extern char KeyArray[128];
