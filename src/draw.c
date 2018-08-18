@@ -274,7 +274,12 @@ draw_tile(U8 tileNumber)
 
   }
 
+#ifdef GFXGS
+// fix crash I hope
+  fb += 4;  /* next tile */
+#else
   fb += 8;  /* next tile */
+#endif
 }
 
 /*

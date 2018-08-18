@@ -56,6 +56,8 @@ screen_introMain(void)
 #endif
   }
 
+  printf("screen_introMain %d\n", seq);
+
   switch (seq) {
   case 1:  /* dispay hall of fame */
     sysvid_clear();
@@ -124,9 +126,15 @@ screen_introMain(void)
 #ifdef GFXPC
     draw_filter = 0x5555;
 #endif
-    for (i = 0; i < 8; i++) {
+    for (i = 0; i < 8; i++)
+	{
+	  #ifdef IIGS
+      sprintf((char *)s, "%06ld@@@....@@@%s\n",
+	      game_hscores[i].score, game_hscores[i].name);
+      #else
       sprintf((char *)s, "%06d@@@....@@@%s",
 	      game_hscores[i].score, game_hscores[i].name);
+      #endif
       s[26] = '\377'; s[27] = '\377'; s[28] = '\376';
       draw_tllst = s;
       draw_tilesList();
