@@ -25,6 +25,7 @@
 #pragma noroot
 segment "screen";
 extern img_t splash_lz4;
+extern img_t pic_haf_lz4;
 #endif
 
 /*
@@ -119,6 +120,9 @@ screen_introMain(void)
 #endif
 #ifdef GFXST
     draw_pic(0, 0, 0x140, 0x20, pic_haf);
+#endif
+#ifdef GFXGS
+	draw_img(&pic_haf_lz4);
 #endif
 
     /* hall of fame content */

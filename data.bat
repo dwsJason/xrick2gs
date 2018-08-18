@@ -33,13 +33,19 @@ rem
 lz4 -c2 bmp\splash.SHR#C10000 data\splash.lz4
 lz4 -c2 bmp\img_splash16.SHR#C10000 data\img_splash16.lz4
 rem
+rem Hall of Fame
+rem
+lz4 -c2 data\pics\haf.gs data\pic_haf.lz4
+rem
 rem Convert the title page into an object file
 rem
 iix mkobj splash_lz4 data:splash.lz4 data:splash.a
 iix mkobj img_splash_lz4 data:img_splash16.lz4 data:img_splash.a
+iix mkobj pic_haf_lz4 data:pic_haf.lz4 data:pic_haf.a
 rem
 rem Create Static Linked Binary data library
 rem
 iix makelib -P data.lib +data\splash.a
 iix makelib -P data.lib +data\img_splash.a
+iix makelib -P data.lib +data\pic_haf.a
 
