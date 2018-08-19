@@ -171,11 +171,12 @@ SRMerge1 phx		; Save 2nd
 	jsr ProcessReset
 
 * Update the key states
-
+*	sta >$400
 	jsr PostIt
 	plx				; Get 2nd
 	pha				; save new #1
 	txa
+*	sta >$480
 	jsr PostIt
 	plx
 	pha
@@ -200,8 +201,8 @@ SRMerge1 phx		; Save 2nd
 	longi on
 	
 PostIt pha	; Save Key
-*	sep #$20
-*	longa off
+	sep #$20
+	longa off
 	cmp #$80 ; set/clear c
 	and #$7f ; keycode idx
 	tax
@@ -209,8 +210,8 @@ PostIt pha	; Save Key
 	rol	a	 ; key state
 	eor #$01 ; 0 for key up
 	sta KeyArray,x
-*	rep #$30
-*	longa on
+	rep #$30
+	longa on
 	pla
 	rts
 
