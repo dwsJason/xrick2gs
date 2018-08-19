@@ -18,17 +18,17 @@ lz4 -c2 data\pics\haf.gs data\pic_haf.lz4
 rem
 rem Convert the title page into an object file
 rem
-iix mkobj splash_lz4 data:splash.lz4 data:splash.a
-iix mkobj img_splash_lz4 data:img_splash16.lz4 data:img_splash.a
-iix mkobj pic_haf_lz4 data:pic_haf.lz4 data:pic_haf.a
-iix mkobj tiles_lz4 data:tiles.lz4 data:tiles.a
+iix mkobj splash_lz4 data:splash.lz4 data:splash.a screendata
+iix mkobj img_splash_lz4 data:img_splash16.lz4 data:img_splash.a screendata
+iix mkobj pic_haf_lz4 data:pic_haf.lz4 data:pic_haf.a screendata
+iix mkobj tiles_lz4 data:tiles.lz4 data:tiles.a tilesdata
 rem
 rem Packed Mr.Sprites into object files
 rem
-iix mkobj xrickspr_00 data:sprites:xrick00.lz4 data:xrick0.a
-iix mkobj xrickspr_01 data:sprites:xrick01.lz4 data:xrick1.a
-iix mkobj xrickspr_02 data:sprites:xrick02.lz4 data:xrick2.a
-iix mkobj xrickspr_03 data:sprites:xrick03.lz4 data:xrick3.a
+iix mkobj xrickspr_00 data:sprites:xrick00.lz4 data:xrick0.a sprdata0
+iix mkobj xrickspr_01 data:sprites:xrick01.lz4 data:xrick1.a sprdata1
+iix mkobj xrickspr_02 data:sprites:xrick02.lz4 data:xrick2.a sprdata2
+iix mkobj xrickspr_03 data:sprites:xrick03.lz4 data:xrick3.a sprdata3
 rem
 rem Create Static Linked Binary data library
 rem
