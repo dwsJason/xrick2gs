@@ -35,7 +35,7 @@ screen_gameover(void)
 {
 	static U8 seq = 0;
 	static U8 period = 0;
-#ifdef GFXST
+#if defined(GFXST) || defined(GFXGS)
 	static U32 tm = 0;
 #endif
 #ifdef ENABLE_SOUND
@@ -55,7 +55,7 @@ screen_gameover(void)
 
 	switch (seq) {
 	case 1:  /* display banner */
-#ifdef GFXST
+#if defined(GFXST) || defined(GFXGS)
 		sysvid_clear();
 		tm = sys_gettime();
 #endif
@@ -73,7 +73,7 @@ screen_gameover(void)
 	case 2:  /* wait for key pressed */
 		if (control_status & CONTROL_FIRE)
 			seq = 3;
-#ifdef GFXST
+#if (defined GFXST) || (defined GFXGS)
 		else if (sys_gettime() - tm > SCREEN_TIMEOUT)
 			seq = 4;
 #endif
