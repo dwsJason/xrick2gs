@@ -57,8 +57,6 @@ screen_introMain(void)
 #endif
   }
 
-  printf("screen_introMain %d\n", seq);
-
   switch (seq) {
   case 1:  /* dispay hall of fame */
     sysvid_clear();
