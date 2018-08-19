@@ -40,6 +40,18 @@ static SDL_Event event;
 #ifdef IIGS
 segment "system";
 #pragma noroot
+
+#define LARROW 0x3B
+#define RARROW 0x3C
+#define DARROW 0x3D
+#define UARROW 0x3E
+
+#define SPACEBAR 0x31
+
+#define ESC 0x35
+#define Z_KEY 0x07
+#define Q_KEY 0x0C
+
 #endif
 
 /*
@@ -48,6 +60,66 @@ segment "system";
 static void
 processEvent()
 {
+#ifdef IIGS
+#if 0
+	int x;
+
+	for (x = 0; x < 128; ++x)
+	{
+		if (KeyArray[ x ])
+		{
+			printf("Key %d\n", x);
+		}
+	}
+#endif
+#if 0
+	U8* pScreen = (U8*)0x400;
+	int idx;
+
+	while (1)
+	{
+		for (idx = 0; idx < 128; ++idx)
+		{
+			pScreen[idx] = KeyArray[idx];
+		}
+	}
+#endif
+
+	control_status = 0;
+
+	// ADB Keyboard Driver
+	if (KeyArray[ LARROW ])
+	{
+		control_status |= CONTROL_LEFT;
+	}
+	if (KeyArray[ RARROW ])
+	{
+		control_status |= CONTROL_RIGHT;
+	}
+	if (KeyArray[ DARROW ])
+	{
+		control_status |= CONTROL_DOWN;
+	}
+	if (KeyArray[ UARROW ])
+	{
+		control_status |= CONTROL_UP;
+	}
+	if (KeyArray[ SPACEBAR ])
+	{
+		control_status |= CONTROL_FIRE;
+	}
+	if (KeyArray[ ESC ])
+	{
+		control_status |= CONTROL_END;
+	}
+	if (KeyArray[ Q_KEY ])
+	{
+		control_status |= CONTROL_EXIT;
+	}
+
+
+#endif
+
 #ifndef IIGS
 	U16 key;
 #ifdef ENABLE_FOCUS
@@ -225,13 +297,10 @@ processEvent()
 void
 sysevt_poll(void)
 {
-#ifdef IIGS
-	printf("sysevt_poll\n");
-#endif
 #ifndef IIGS
   while (SDL_PollEvent(&event))
-    processEvent();
 #endif
+    processEvent();
 }
 
 /*

@@ -337,11 +337,10 @@ sysvid_init(void)
 	sysvid_fb = (U8*)0x12000;
 
 	// SHR ON
-	//*VIDEO_REGISTER|=0xC0;
+	*VIDEO_REGISTER|=0xC0;
 
 	// ENABLE Shadowing of SHR
 	*SHADOW_REGISTER&=~0x08; // Shadow Enable
-
 #endif
 #ifndef IIGS
   SDL_Surface *s;
