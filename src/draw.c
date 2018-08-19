@@ -240,7 +240,7 @@ draw_tile(U8 tileNumber)
 #ifdef GFXGS
 	//$$JGA TODO convert to ASM
 
-	int tileNo = (draw_tilesBank*256)+tileNumber;
+	int tileNo = (((int)draw_tilesBank)*256)+tileNumber;
 
 	//printf("fb=%04x tileNo=%04x\n", (int)fb, tileNo);
 	//sys_sleep(1000);  // Wait 1 second
@@ -554,7 +554,7 @@ draw_spriteBackground(U16 x, U16 y)
 #ifdef GFXPC
     draw_setfb(xs, ys + r * 8);
 #endif
-#ifdef GFXST
+#if defined(GFXST) || defined(GFXGS)
     draw_setfb(xs, 8 + ys + r * 8);
 #endif
     for (c = 0; c < cmax; c++) {  /* for each column */
@@ -580,7 +580,7 @@ draw_map(void)
 #ifdef GFXPC
     draw_setfb(0x20, (i * 8));
 #endif
-#ifdef GFXST
+#if defined(GFXST) || defined(GFXGS)
     draw_setfb(0x20, 8 + (i * 8));
 #endif
     for (j = 0; j < 0x20; j++)  /* 0x20 tiles per row */
@@ -660,7 +660,7 @@ draw_clearStatus(void)
 #ifdef GFXPC
   draw_tilesBank = map_tilesBank;
 #endif
-#ifdef GFXST
+#if defined(GFXST) || defined(GFXGS)
   draw_tilesBank = 0;
 #endif
   draw_setfb(DRAW_STATUS_SCORE_X, DRAW_STATUS_Y);
@@ -668,7 +668,7 @@ draw_clearStatus(void)
 #ifdef GFXPC
     draw_tile(map_map[MAP_ROW_SCRTOP + (DRAW_STATUS_Y / 8)][i]);
 #endif
-#ifdef GFXST
+#if defined(GFXST)||defined(GFXGS)
     draw_tile('@');
 #endif
   }

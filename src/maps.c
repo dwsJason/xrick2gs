@@ -105,7 +105,7 @@ map_init(void)
   draw_filter = 0xffff;
   map_tilesBank = (map_submaps[game_submap].page == 1) ? 3 : 2;
 #endif
-#ifdef GFXST
+#if defined(GFXST) || defined(GFXGS)
   map_tilesBank = (map_submaps[game_submap].page == 1) ? 2 : 1;
 #endif
   map_eflg_expand((map_submaps[game_submap].page == 1) ? 0x10 : 0x00);
