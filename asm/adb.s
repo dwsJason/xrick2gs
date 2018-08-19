@@ -10,18 +10,22 @@
 	longa on
 	longi on
 	
-	mcopy 13:AInclude:M16.MiscTool
-	mcopy 13:AInclude:M16.ADB
+	mcopy 2:AInclude:M16.MiscTool
+	mcopy 2:AInclude:M16.ADB
+
+setModes GEQU $0004
+clearModes GEQU $0005
+resetSys GEQU $0010
+keyCode GEQU $0011
 
 Dummy2 start ASMCODE
 	end
 	
 KeyArray start ASMCODE
 	ds 128
-	end
 
-RemoveKeyboardDriver start ASMCODE
-	using Globals
+RemoveKeyboardDriver entry
+
 	phb
 	phk
 	plb
@@ -43,10 +47,9 @@ RemoveKeyboardDriver start ASMCODE
 	
 	plb
 	rtl	
-	end
 	   
-AddKeyboardDriver start ASMCODE
-	using Globals
+AddKeyboardDriver entry
+
 	phb
 	phk
 	plb
@@ -103,9 +106,8 @@ clear stz KeyArray,x
 	rtl	; Back to C
 
 * end for the AddKeyboardDriver
-	end
 
-CallSendInfo start
+CallSendInfo entry
 	sta >ADBTemp
 	phx
 	pea ADBTemp|-16
@@ -117,13 +119,12 @@ CallSendInfo start
 	
 	rts
 ADBTemp ds 6
-	end
 
 *
 * SRQ Completion Routine
 *
-SRQCompRoutine start ASMCODE
-	using Globals
+SRQCompRoutine entry
+
 	longa off
 	longi off
 DataPtr equ 9
@@ -134,6 +135,10 @@ DataPtr equ 9
 	
 	lda [DataPtr]	;# bytes?
 	beq SRExit		;No data
+	
+	phb
+	phk
+	plb
 	
 	longa on
 	longi on
@@ -154,7 +159,8 @@ DataPtr equ 9
 	and	#$00ff		; Second Byte
 	bra SRMerge1
 
-SRExit pld
+SRExit clc
+	pld
 	rtl
 *
 * Handle Reset Key if need be
@@ -172,6 +178,7 @@ SRMerge1 phx		; Save 2nd
 	txa
 	jsr PostIt
 	plx
+	pha
 
 * Forward Keys to ADB
 
@@ -181,6 +188,8 @@ SRMerge1 phx		; Save 2nd
 	jsr PassADBKeyIfOk
 	
 	sep #$30
+	clc
+	plb
 	pld
 	rtl
 	
@@ -191,17 +200,17 @@ SRMerge1 phx		; Save 2nd
 	longi on
 	
 PostIt pha	; Save Key
-	sep #$10
-	longa off
+*	sep #$20
+*	longa off
 	cmp #$80 ; set/clear c
 	and #$7f ; keycode idx
 	tax
 	lda #$00
 	rol	a	 ; key state
 	eor #$01 ; 0 for key up
-	sta >KeyArray,x
-	rep #$30
-	longa on
+	sta KeyArray,x
+*	rep #$30
+*	longa on
 	pla
 	rts
 
@@ -215,7 +224,7 @@ KeyModTbl anop
 *
 * Pass Keys to ADB when appropriate
 *
-PassADBKeyIfOK cmp #$00E0	; Pfx Code?
+PassADBKeyIfOk cmp #$00E0	; Pfx Code?
 	bge PAExit
 	cmp #$0036				; Spec Case?
 	blt PASendADB
@@ -257,7 +266,7 @@ ProcessReset anop
 PRNoReset ldy #$00ff	; Zap Reset Key
 	tya
 	rts
-
+PRResetSystem anop
 ; 	Reset Hit
 	ldx #0
 	txa
@@ -266,19 +275,16 @@ PRNoReset ldy #$00ff	; Zap Reset Key
 
 PR  tya
 	rts
-	end
-   
+	
 *
 * Return the keyboard modifer register
 *
-
-GetModKeyReg start ASMCODE
+GetModKeyReg entry
 	sep #$20		;8 bit
 	lda >$00C025	;Get the register
 	rep	#$20		;16 bit
 	and	#$ff		;Fix Acc
 	rts				;Exit
-	end
    
 *
 * This code is a tail patch to BRam setup since the BRam setup
@@ -286,8 +292,7 @@ GetModKeyReg start ASMCODE
 * This is bad.
 *
 
-VecBRamSetup start ASMCODE
-	using Globals
+VecBRamSetup entry
 	
 	jsl >$000000		;Call the real code
 	php 				;Save mxc
@@ -298,9 +303,8 @@ VecBRamSetup start ASMCODE
 	jsr CallSendInfo	;Call ADB
 	plp					;Restore MX
 	rtl 				;Exit
-	end
 
-toBRamSetupVector start ASMCODE
+toBRamSetupVector entry
 	ds 4
 	end
    
