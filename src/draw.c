@@ -668,7 +668,7 @@ draw_clearStatus(void)
 #ifdef GFXPC
     draw_tile(map_map[MAP_ROW_SCRTOP + (DRAW_STATUS_Y / 8)][i]);
 #endif
-#if defined(GFXST)||defined(GFXGS)
+#if defined(GFXST) || defined(GFXGS)
     draw_tile('@');
 #endif
   }

@@ -97,7 +97,7 @@ screen_getname(void)
 	draw_tile('A' + i + j * 6);
       }
     draw_setfb(TOPLEFT_X, TOPLEFT_Y + 64);
-#ifdef GFXST
+#if defined(GFXST)||defined(GFXGS)
     draw_tilesListImm((U8 *)"Y@Z@.@@@\074\373\374\375\376");
 #endif
 #ifdef GFXPC
@@ -267,7 +267,7 @@ name_draw(void)
   for (i = p; i < 10; i++)
     draw_tile(TILE_CURSOR);
 
-#ifdef GFXST
+#if defined(GFXST)||defined(GFXGS)
   draw_setfb(NAMEPOS_X, NAMEPOS_Y + 8);
   for (i = 0; i < 10; i++)
     draw_tile('@');

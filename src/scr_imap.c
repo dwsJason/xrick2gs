@@ -71,7 +71,7 @@ screen_introMap(void)
     draw_tilesBank = 1;
     draw_filter = 0xAAAA;
 #endif
-#ifdef GFXST
+#if defined(GFXST)||defined(GFXGS)
     draw_tilesBank = 0;
 #endif
     draw_tllst = screen_imaptext[game_map];

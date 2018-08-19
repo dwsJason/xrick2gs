@@ -313,7 +313,7 @@ ent_addrect(S16 x, S16 y, U16 width, U16 height)
 
   /*sys_printf("-> %#04x,%#04x %#04x %#04x\n", x0, y0, w0, h0);*/
 
-#ifdef GFXST
+#if defined(GFXST) || defined(GFXGS)
   y0 += 8;
 #endif
 

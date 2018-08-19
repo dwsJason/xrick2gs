@@ -69,7 +69,7 @@ void e_bomb_init(U16 x, U16 y)
      * Atari ST dynamite sprites are not centered the
      * way IBM PC sprites were ... need to adjust things a little bit
      */
-#ifdef GFXST
+#if defined(GFXST) || defined(GFXGS)
     E_BOMB_ENT.x += 4;
     E_BOMB_ENT.y += 5;
 #endif
@@ -105,7 +105,7 @@ e_bomb_action(UNUSED(U8 e))
 		if ((e_bomb_ticker & 0x03) == 0x02)
 			syssnd_play(WAV_BOMBSHHT, 1);
 #endif
-#ifdef GFXST
+#if defined(GFXST)||defined(GFXGS)
 		/* ST bomb sprites sequence is longer */
 		if (e_bomb_ticker < 40)
 			E_BOMB_ENT.sprite = 0x99 + 19 - (e_bomb_ticker >> 1);
@@ -124,7 +124,7 @@ e_bomb_action(UNUSED(U8 e))
 #ifdef GFXPC
 		E_BOMB_ENT.sprite = 0x24 + 4 - (e_bomb_ticker >> 1);
 #endif
-#ifdef GFXST
+#if defined(GFXST)||defined(GFXGS)
 		/* See above: fixing alignment */
 		E_BOMB_ENT.x -= 4;
 		E_BOMB_ENT.y -= 5;
@@ -144,7 +144,7 @@ e_bomb_action(UNUSED(U8 e))
 #ifdef GFXPC
 		E_BOMB_ENT.sprite = 0x24 + 4 - (e_bomb_ticker >> 1);
 #endif
-#ifdef GFXST
+#if defined(GFXST)||defined(GFXGS)
 		E_BOMB_ENT.sprite = 0xa8 + 4 - (e_bomb_ticker >> 1);
 #endif
 		/* exploding, hence lethal */
