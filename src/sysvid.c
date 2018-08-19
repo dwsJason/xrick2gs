@@ -12,6 +12,7 @@
  */
 
 #ifdef IIGS
+segment "system";
 #pragma noroot
 #endif
 
@@ -38,8 +39,6 @@
 #ifdef __MSVC__
 #include <memory.h> /* memset */
 #endif
-
-segment "system";
 
 U8 *sysvid_fb; /* frame buffer */
 rect_t SCREENRECT = {0, 0, SYSVID_WIDTH, SYSVID_HEIGHT, NULL}; /* whole fb */
@@ -218,6 +217,53 @@ taskHeader_t dummyTask = {
 
 #endif
 
+#ifdef IIGS
+extern U8 xrickspr_00;
+extern U8 xrickspr_01;
+extern U8 xrickspr_02;
+extern U8 xrickspr_03;
+
+U8* compressedSprites[] =
+{
+	&xrickspr_00,
+	&xrickspr_01,
+	&xrickspr_02,
+	&xrickspr_03
+};
+
+void PrepareSprites()
+{
+	int idx;
+	U32* handles[4];
+
+	for (idx = 0; idx < 4; ++idx)
+	{
+		printf("Alloc Sprites %d\n",idx);
+		handles[idx] = (U32*)NewHandle(0x10000, userid(), 0xC014, 0); 
+		if (toolerror())
+		{
+			printf("Unable to allocate 64k Sprites Bank %d\n", idx);
+			printf("Game can't run\n");
+			sys_sleep(5000);  // Wait 5 seconds
+			exit(1);
+		}
+		printf("SUCCESS\n");
+	}
+
+	for (idx = 0; idx < 4; ++idx)
+	{
+		printf("Decompress Sprites %d\n", idx);
+		LZ4_Unpack((char*)*handles[idx], compressedSprites[idx]);
+	}
+
+	SetSpriteBanks( (*handles[0])>>16,
+					(*handles[1])>>16,
+					(*handles[2])>>16,
+					(*handles[3])>>16  );
+}
+#endif
+
+
 /*
  * Initialise video
  */
@@ -293,7 +339,10 @@ sysvid_init(void)
 	printf("SUCCESS\n");
 	SetTileBank((*tilesPageHandle)>>16);
 
+	printf("Decompressing Tiles\n");
 	LZ4_Unpack((char*)*tilesPageHandle, &tiles_lz4);
+
+	PrepareSprites();
 
 	printf("MiscTool Startup\n");
 	MTStartUp();	// MiscTool Startup, for the Heartbeat

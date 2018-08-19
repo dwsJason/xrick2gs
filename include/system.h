@@ -181,6 +181,7 @@ extern volatile unsigned long* tick;
 // GS Rendering Stuff
 extern void SetTileBank(short bank);
 extern void DrawTile(int offset, int tileNo);
+extern void SetSpriteBanks(short b0, short b1, short b2, short b3);
 
 // ADB Support Code
 extern char KeyArray[128];
