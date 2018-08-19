@@ -295,14 +295,6 @@ sysvid_init(void)
 
 	LZ4_Unpack((char*)*tilesPageHandle, &tiles_lz4);
 
-	sysvid_fb = (U8*)0x12000;
-
-	// SHR ON
-	*VIDEO_REGISTER|=0xC0;
-
-	// ENABLE Shadowing of SHR
-	*SHADOW_REGISTER&=~0x08; // Shadow Enable
-
 	printf("MiscTool Startup\n");
 	MTStartUp();	// MiscTool Startup, for the Heartbeat
 	if (toolerror())
@@ -322,6 +314,9 @@ sysvid_init(void)
 		sys_sleep(5000);  // Wait 5 seconds
 		exit(1);
 	}
+
+	//  Hook in the Keyboard Driver
+	AddKeyboardDriver();
 	#if 0
 	printf("Event Manager Startup\n");
 	EMStartUp((Word)*directPageHandle,
@@ -337,6 +332,16 @@ sysvid_init(void)
 	DelHeartBeat((pointer)&dummyTask); // Clear the dummy task from the list
 	// Address of GetTick internal tick variable
 	tick = (unsigned long*)GetAddr(tickCnt);
+
+	// Framebuffer
+	sysvid_fb = (U8*)0x12000;
+
+	// SHR ON
+	//*VIDEO_REGISTER|=0xC0;
+
+	// ENABLE Shadowing of SHR
+	*SHADOW_REGISTER&=~0x08; // Shadow Enable
+
 #endif
 #ifndef IIGS
   SDL_Surface *s;
