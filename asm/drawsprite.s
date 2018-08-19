@@ -9,13 +9,32 @@
 Dummy4 start ASMCODE
 	end
 *-------------------------------------------------------------------------------
-	
+*
+*void DrrawSprite(int offset, into SpriteNo);
+*	
 DrawSprite start ASMCODE
+
+iOffset equ 5
+iSpriteNo equ 7
+
 	PHB
 	PHK
 	PLB
+	
+	lda iOffset,s	; Screen Address
+	tay				; Y=Target Screen Address ($2000-$9D00)
+	
+	lda iSpriteNo,s
 	ASL	A	; A=Sprite Number ($0000-$01C1)
-	TAX		; Y=Target Screen Address ($2000-$9D00)
+	tax
+* Repair Stack
+    lda 3,s
+    sta iSpriteNo,s
+    lda 1,s
+    sta iSpriteNo-2,s
+	pla
+	pla
+* Dispatch bank specific
 	LDA	xrickNum,X	; Relative Sprite Number Table
 	JMP	(xrickBank,X)	; Bank Number Table
 
