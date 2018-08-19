@@ -329,11 +329,48 @@ draw_sprite(U8 nbr, U16 x, U16 y)
 void
 draw_sprite(U8 number, U16 x, U16 y)
 {
+	int frameNo = number;
+
+	if (y >= (200-21))
+		return;
+
+	frameNo<<=1;
+
+	if (x & 1)
+		frameNo|=1;
+
+	draw_setfb(x,y);
+	DrawSprite((int)fb, frameNo);
 }
 
 void
 draw_sprite2(U8 number, U16 x, U16 y, U8 front)
 {
+	S16 x0, y0;  /* clipped x, y */
+	U16 w, h;    /* width, height */
+	int frameNo = number;
+
+	x0 = x;
+	y0 = y;
+	w = 0x20;
+	h = 0x15;
+
+	if (draw_clipms(&x0, &y0, &w, &h))  /* return if not visible */
+	  return;
+
+	frameNo<<=1;
+
+	x0 -= DRAW_XYMAP_SCRLEFT;
+	y0 -= (DRAW_XYMAP_SCRTOP-8);
+
+	if (x0 & 1)
+		frameNo|=1;
+
+	if (y0 >= (200-21))
+		return;
+
+	draw_setfb(x0, y0);
+	DrawSprite((int)fb, frameNo);
 }
 #endif
 
