@@ -111,7 +111,7 @@ static U8 *fb;     /* frame buffer pointer */
 void
 draw_setfb(U16 x, U16 y)
 {
-#ifdef GSGFX
+#ifdef IIGS
 	fb = sysvid_fb + (x>>1) + (y * SYSVID_WIDTH);
 #else
 	fb = sysvid_fb + x + y * SYSVID_WIDTH;
@@ -242,7 +242,10 @@ draw_tile(U8 tileNumber)
 
 	int tileNo = (draw_tilesBank*256)+tileNumber;
 
-	DrawTile((short)fb,tileNo);
+	//printf("fb=%04x tileNo=%04x\n", (int)fb, tileNo);
+	//sys_sleep(1000);  // Wait 1 second
+
+	DrawTile(((int)fb),tileNo);
 
 	fb += 4;  /* next tile */
 #else

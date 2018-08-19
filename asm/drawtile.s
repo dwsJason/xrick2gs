@@ -19,7 +19,7 @@ iOffset equ 5
 iTileNo equ 7
 
 	phb
-
+		
 	lda iOffset,s
 	tay
 	lda iTileNo,s
@@ -28,20 +28,26 @@ iTileNo equ 7
 	
 	anop ; adjust the stack
     anop ; Copy the Return address
-    lda 1,s
-    sta iTileNo-2,s
     lda 3,s
     sta iTileNo,s
+    lda 1,s
+    sta iTileNo-2,s
+
 	pla
 	
 	lda #$0101
 	sta 1,s
 	plb
 	plb
-TILEBANK gequ *	
+TILEBANK2 entry	
+	lda >$880005,x	
+	sta >TILEBANK+1
+	
+TILEBANK entry	
 	jsl >$880000
 	
 	plb
+	
 	rtl
 
 *-------------------------------------------------------------------------------
@@ -53,6 +59,7 @@ iBank equ 4
 	sep #$30
 	lda iBank,s
 	sta >TILEBANK+3
+	sta >TILEBANK2+3
 	rep #$30
 	lda 2,s
 	sta iBank,s

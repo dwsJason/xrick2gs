@@ -226,8 +226,8 @@ sysvid_init(void)
 {
 #ifdef IIGS
 	handle hndl;   // "generic memory handle"
-	void* directPageHandle;
-	void* tilesPageHandle;
+	U32* directPageHandle;
+	U32* tilesPageHandle;
 
 //   PushLong  #0                   ;/* Ask Shadowing Screen ($8000 bytes from $01/2000)*/
 //           PushLong  #$8000
@@ -270,7 +270,7 @@ sysvid_init(void)
 
 	// Allocate Some Direct Page memory
 	printf("Allocate Direct Page space 512 bytes\n");
-	directPageHandle = NewHandle( 0x200, userid(), 0xC005, 0 );
+	directPageHandle = (U32*)NewHandle( 0x200, userid(), 0xC005, 0 );
 	if (toolerror())
 	{
 		printf("Unable to allocate 512 bytes Direct Page\n");
@@ -282,7 +282,7 @@ sysvid_init(void)
 
 	//BlitFieldHndl   = NewHandle(0x10000, userid(), 0xC014, 0);
 	printf("Allocate Bank for 8x8 Tiles\n");
-	tilesPageHandle = NewHandle(0x10000, userid(), 0xC014, 0); 
+	tilesPageHandle = (U32*)NewHandle(0x10000, userid(), 0xC014, 0); 
 	if (toolerror())
 	{
 		printf("Unable to allocate 64k Tiles Bank\n");
@@ -291,13 +291,14 @@ sysvid_init(void)
 		exit(1);
 	}
 	printf("SUCCESS\n");
-	SetTileBank(((U8*)*tilesPageHandle)[2]);
+	SetTileBank((*tilesPageHandle)>>16);
+
 	LZ4_Unpack((char*)*tilesPageHandle, &tiles_lz4);
 
 	sysvid_fb = (U8*)0x12000;
 
 	// SHR ON
-	//*VIDEO_REGISTER|=0xC0;
+	*VIDEO_REGISTER|=0xC0;
 
 	// ENABLE Shadowing of SHR
 	*SHADOW_REGISTER&=~0x08; // Shadow Enable
@@ -505,7 +506,7 @@ sysvid_clear(void)
 #ifndef IIGS
   memset(sysvid_fb, 0, SYSVID_WIDTH * SYSVID_HEIGHT);
 #else
-  size_t length = SYSVID_WIDTH /2 * SYSVID_HEIGHT;
+  size_t length = SYSVID_WIDTH * SYSVID_HEIGHT;
   //printf("sysvid_clear: target = %08p\n", sysvid_fb);
   //printf("sysvid_clear: length = %08p\n", length);
   //sys_sleep(10000);

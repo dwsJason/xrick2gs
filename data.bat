@@ -6,32 +6,11 @@ rem
 
 echo Y |del data.lib
 
-if exist "bmp" (
-	echo Y |del bmp\*
-	rmdir bmp
-)
-
-rem
-rem bmp directory if it doesn't exist
-rem 
-if not exist "bmp" (
-	mkdir bmp
-)
-
-rem
-rem convert all the pngs to bmp
-rem
-png2bmp -D bmp data\pics\*.png
-rem
-rem for now just convert the splash screen, to GS format
-rem
-b2s bmp\splash.bmp
-b2s bmp\img_splash16.bmp
 rem
 rem Compress the title page
 rem
-lz4 -c2 bmp\splash.SHR#C10000 data\splash.lz4
-lz4 -c2 bmp\img_splash16.SHR#C10000 data\img_splash16.lz4
+lz4 -c2 data\pics\splash.c1 data\splash.lz4
+lz4 -c2 data\pics\img_splash.c1 data\img_splash16.lz4
 rem
 rem Hall of Fame
 rem

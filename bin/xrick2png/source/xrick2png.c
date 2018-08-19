@@ -70,6 +70,67 @@ void savePixelsGS(MYBMP *pBitmap, const char* pFilename)
 }
 
 //
+//
+//
+void savePixelsGSc1(MYBMP *pBitmap, const char* pFilename)
+{
+	FILE* gsfile = fopen( pFilename, "wb" );
+
+	if (gsfile)
+	{
+		unsigned char* pPixels = pBitmap->map;
+
+		for (int y = 0; y < pBitmap->height; ++y)
+		{
+			for (int x = 0; x < pBitmap->width; x+=2)
+			{
+				unsigned char* pPixel = pPixels + (y*pBitmap->width) + x;
+
+				unsigned char GS_PIXEL = 0;
+				GS_PIXEL = (pPixel[0] << 4) | (pPixel[1] & 0xF);
+				putc(GS_PIXEL, gsfile);
+			}
+		}
+
+		for (int idx = 0; idx < 256; ++idx)
+		{
+			putc(0, gsfile);	// SCBs + Screen holes
+		}
+
+		for (int palnum = 0; palnum < 16; ++palnum)
+		{
+			for (int idx = 0; idx < 16; idx++)
+			{
+				u16 pixel = 0;
+
+				u16 red   = pBitmap->palette[ (idx * 3)+0 ];
+				u16 green = pBitmap->palette[ (idx * 3)+1 ];
+				u16 blue  = pBitmap->palette[ (idx * 3)+2 ];
+
+				red>>=4;
+				green>>=4;
+				blue>>=4;
+
+				pixel |= red << 8;
+				pixel |= green << 4;
+				pixel |= blue;
+
+				putc(pixel & 0xff, gsfile);
+				putc(pixel >> 8, gsfile);
+			}
+		}
+
+		fclose(gsfile);
+	}
+	else
+	{
+		fprintf(stderr,"\nERROR Unable to create output file: %s\n", pFilename);
+		exit(1);
+	}
+}
+
+
+//
 // Save the RawBMP Data as a PNG
 //
 void savePng(MYBMP *pBitmap, const char* pFilename)
@@ -412,6 +473,7 @@ int main(int argc, char **argv)
 
 	pBitmap = loadPic( pic_splash, 320, 200 );
 	savePng(pBitmap, "splash.png");
+	savePixelsGSc1(pBitmap, "splash.c1");
 
 	pBitmap = loadImage( IMG_SPLASH );
 	savePng(pBitmap, "img_splash.png");
