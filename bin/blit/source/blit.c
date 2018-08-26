@@ -86,7 +86,8 @@ void CompileBlockTRB(RAWDATA *result, int x, int width)
 		}
 	}
 
-	clocks += AddLine("","RTL"," ;%d cycles",clocks+6,6);
+//	clocks += AddLine("","RTL"," ;%d cycles",clocks+6,6);
+	clocks += AddLine("","JMP","BRET   ;%d cycles",clocks+3,3);
 }
 
 RAWDATA* CompileTRB()
@@ -118,6 +119,23 @@ RAWDATA* CompileTRB()
 	return result;
 }
 
+
+//A = ADC(A,delta,C);
+int ADC(int A, int delta, int* C)
+{
+	u32 uA = A &0xFFFF;
+	u32 uD = delta&0xFFFF;
+
+	int result = A + delta + *C;
+
+	u32 uResult = uA+uD+*C;
+
+	*C = (uResult>>16) & 1;
+
+	return result;
+}
+
+
 /*
     	lda #$2000
     	tcd
@@ -144,10 +162,14 @@ RAWDATA* CompileTRB()
 void CompileBlockPEI(RAWDATA *result, int x, int width)
 {
 	int clocks = 0;
+	int A = 0;  	 // What's in the accumulator
+	int C = 0;
 
-	clocks += AddLine("","TCD","       ; Set DP ",0,2);
-	clocks += AddLine("","ADC","#%d",((x+width)>>1)+1,3);
-	clocks += AddLine("","TCS","",0,2);
+	clocks += AddLine("","TCD","       ; Set DP $%04X",A,2);
+	clocks += AddLine("","ADC","#%d",((x+width)>>1)-1,3);
+	A+=((x+width)>>1)-1;
+	int S=A;
+	clocks += AddLine("","TCS","       ; Set S  $%04X",A,2);
 
 	int dp = 0;
 
@@ -155,32 +177,20 @@ void CompileBlockPEI(RAWDATA *result, int x, int width)
 	{
 		int p = y * 160;
 
-		//for (int xs = x; xs < (x+width) ; xs+=4)
 		for (int xs = 316; xs >= 0; xs-=4)
 		{
 			int xbyte = (xs>>1) + p;
-
-			#if 0
-			if ((0 == (xbyte&0xFF)) && y)
-			{
-				clocks += AddLine("","TDC","       ; Set DP ",0,2);
-				clocks += AddLine("","ADC","#$100",0,3);
-				clocks += AddLine("","TCD","       ; Set DP ",0,2);
-			}
-			#endif
 
 			if ((xs>=x)&&(xs<(x+width)))
 			{
 				if ((dp & 0xFF00) != (xbyte & 0xFF00))
 				{
-					int delta = (xbyte&0xFF00) - (dp & 0xFF00);
-					if (delta < 0)
-					{
-						delta--; // need a fudge because of carry
-					}
-					clocks += AddLine("", "TDC", "       ; Set DP ", 0, 2);
+					int delta = (xbyte&0xFF00) - (A+C); //(dp & 0xFF00);
+
+					A = ADC(A,delta,&C);
+
 					clocks += AddLine("","ADC","#%d",delta,3);
-					clocks += AddLine("","TCD","       ; Set DP ",0,2);
+					clocks += AddLine("","TCD","       ; Set DP $%04X",A,2);
 				}
 				clocks += AddLine("", "PEI", "$%02X", xbyte & 0xFF, 6);
 				dp = xbyte;
@@ -189,13 +199,18 @@ void CompileBlockPEI(RAWDATA *result, int x, int width)
 
 		if (y < 7)
 		{
-			clocks += AddLine("","TSC","       ;",0,2);
-			clocks += AddLine("","ADC","#%d",160+(width>>1),3);
-			clocks += AddLine("","TCS","       ; Set Stack ",0,2);
+			S+=160;
+			int delta = S - (A+C);
+
+			A = ADC(A,delta,&C);
+
+			clocks += AddLine("", "ADC", "#%d", delta, 3);
+			clocks += AddLine("","TCS","       ; Set S  $%04X",A,2);
 		}
 	}
 
-	clocks += AddLine("","RTL"," ;%d cycles",clocks+6,6);
+//	clocks += AddLine("","RTL"," ;%d cycles",clocks+6,6);
+	clocks += AddLine("","JMP","BRET   ;%d cycles",clocks+3,3);
 }
 
 RAWDATA* CompilePEI()
