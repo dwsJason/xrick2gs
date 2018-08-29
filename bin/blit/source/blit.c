@@ -159,7 +159,7 @@ int ADC(int A, int delta, int* C)
     	call with X
  
 */
-void CompileBlockPEI(RAWDATA *result, int x, int width)
+void CompileBlockPEI_fwd(RAWDATA *result, int x, int width)
 {
 	int clocks = 0;
 	int A = 0;  	 // What's in the accumulator
@@ -212,6 +212,61 @@ void CompileBlockPEI(RAWDATA *result, int x, int width)
 //	clocks += AddLine("","RTL"," ;%d cycles",clocks+6,6);
 	clocks += AddLine("","JMP","BRET   ;%d cycles",clocks+3,3);
 }
+
+void CompileBlockPEI(RAWDATA *result, int x, int width)
+{
+	int clocks = 0;
+	int A = 0x400;  	 // What's in the accumulator
+	int C = 0;
+
+	clocks += AddLine("","TCD","       ; Set DP $%04X",A,2);
+	clocks += AddLine("","ADC","#%d",(7*160)-(1024)+((x+width)>>1)-1,3);
+	A+=(7*160)-(1024)+((x+width)>>1)-1;
+	int S=A;
+	clocks += AddLine("","TCS","       ; Set S  $%04X",A,2);
+
+	int dp = 0x400;
+
+	for (int y = 7; y >= 0; --y)
+	{
+		int p = y * 160;
+
+		for (int xs = 316; xs >= 0; xs-=4)
+		{
+			int xbyte = (xs>>1) + p;
+
+			if ((xs>=x)&&(xs<(x+width)))
+			{
+				if ((dp & 0xFF00) != (xbyte & 0xFF00))
+				{
+					int delta = (xbyte&0xFF00) - (A+C); //(dp & 0xFF00);
+
+					A = ADC(A,delta,&C);
+
+					clocks += AddLine("","ADC","#%d",delta,3);
+					clocks += AddLine("","TCD","       ; Set DP $%04X",A,2);
+				}
+				clocks += AddLine("", "PEI", "$%02X", xbyte & 0xFF, 6);
+				dp = xbyte;
+			}
+		}
+
+		if (y > 0)
+		{
+			S-=160;
+			int delta = S - (A+C);
+
+			A = ADC(A,delta,&C);
+
+			clocks += AddLine("", "ADC", "#%d", delta, 3);
+			clocks += AddLine("","TCS","       ; Set S  $%04X",A,2);
+		}
+	}
+
+//	clocks += AddLine("","RTL"," ;%d cycles",clocks+6,6);
+	clocks += AddLine("","JMP","BRET   ;%d cycles",clocks+3,3);
+}
+
 
 RAWDATA* CompilePEI()
 {
