@@ -108,8 +108,8 @@ RAWDATA* CompileTRB()
 	{
 		for (int x = 0; x <= (screen_width - width); x+=pixel_step)
 		{
-			printf(temp_label,"blit%d_%d\n", x, width);
-			sprintf(temp_label,"blit%d_%d\n", x, width);
+			//printf(temp_label,"blit%d_%d\n", x, width);
+			sprintf(temp_label,"blit%d_%d ANOP\n", x, width);
 			AddString(result, temp_label);
 			CompileBlockTRB(result, x, width);
 		}
@@ -286,12 +286,41 @@ RAWDATA* CompilePEI()
 	{
 		for (int x = 0; x <= (screen_width - width); x+=pixel_step)
 		{
-			printf(temp_label,"blit%d_%d\n", x, width);
-			sprintf(temp_label,"blit%d_%d\n", x, width);
+			//printf(temp_label,"blit%d_%d\n", x, width);
+			sprintf(temp_label,"blit%d_%d ANOP\n", x, width);
 			AddString(result, temp_label);
-			CompileBlockPEI(result, x, width);
+			CompileBlockPEI_fwd(result, x, width);
 		}
 		width -= pixel_block;
+	}
+
+	return result;
+}
+
+RAWDATA* MakeTable()
+{
+	RAWDATA* result = (RAWDATA*)malloc(sizeof(RAWDATA));
+	memset(result, 0, sizeof(RAWDATA));
+
+	char* dca="    dc  a'";
+	char temp[256];
+
+	for (int pos = 0; pos < 320; pos += 8)
+	{
+		AddString(result,dca);
+		for (int size = 8; size <= 64; size += 8)
+		{
+			char* comma = (size==64) ? "'\n" : ",";
+			if ((pos + size)>320)
+			{
+				sprintf(temp,"blit_null%s", comma);
+			}
+			else
+			{
+				sprintf(temp,"blit%d_%d%s", pos, size, comma);
+			}
+			AddString(result, temp);
+		}
 	}
 
 	return result;
@@ -337,6 +366,9 @@ int main(int argc, char **argv)
 
 	RAWDATA* pBlitPEI = CompilePEI();
 	saveRaw(pBlitPEI, "pei.txt");
+
+	RAWDATA* pBlitTable = MakeTable();
+	saveRaw(pBlitTable, "tables.txt");
 
 	printf("\nblit - Processing complete.\n");
 
