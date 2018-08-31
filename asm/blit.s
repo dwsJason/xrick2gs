@@ -12,12 +12,141 @@ Dummy5 start BLITCODE
 	end
 
 *
-* void DrawTile(short offset, short tileNo)
+* void DrawRect(short x, short y, short width, short height)
 *
 
 BlitRect start BLITCODE
+
+inputX equ 5
+inputY equ 7
+inputW equ 9
+inputH equ 11
+
+stackFix equ 9
+
+	phb
+	phk
+	plb
 	
+* save off stack and dp registers for later	
+	
+	tsc
+	sta stack
+	
+	tdc
+	sta dp
+	
+* snap X, and Y to multiples of 8
+* snap W and H to multiples of 8
+   
+	clc
+	lda inputX,s
+	and #3
+	adc inputW,s
+	adc #7
+	lsr a
+	lsr a
+	lsr a
+	sta inputW,s
+	
+	clc
+	lda inputY,s
+	and #3
+	adc inputH,s
+	adc #7
+	lsr a
+	lsr a
+	lsr a
+	sta inputH,s
+	
+	lda inputY,s
+	and #~3
+	lsr a
+	lsr a
+	sta inputY,s
+	tay
+	
+	lda inputX,s
+	and #~3
+	tax
+	sta inputX,s	; maybe don't need this
+
+*	
+* Outter loop, once for each Y
+*
+YLOOP ANOP
+
+	lda inputX,s
+	sta tempX
+	
+	lda inputW,s
+	sta tempW
+		
+XLOOP ANOP ; Inner Loop, for each X Block
+	lda tempW ; width in tiles
+	cmp #9
+	blt LastBlock
+	sbc #8
+	sta tempW
+	
+	lda #8
+LastBlock ANOP	
+	asl a
+	adc tempX
+	tax	
+				
+* pei blitter changes A, S, D, and C
+* trb blitter requires C = 0, A = 0, changes S, D, and C
+
+	lda DPtable,y
+	jmp (dispatchTable-2,x) 
+	   
+BRET anop	; Blit Return
+
+	lda tempW
+	bne XLOOP
+	
+	lda inputH,s
+	dec a
+	bmi done
+	sta inputH,s
+	
+	iny 	; next direct page
+	iny	
+	
+	bra YLOOP 
+	
+done ANOP	
+
+* restore stack and dp
+
+	lda dp
+	tcd
+	
+	lda stack
+	tcs
+	
+* Patchup the Stack so we can return
+
+	lda 3,s
+	sta stackFix+2,s
+	lda 1,s
+	sta stackFix,s	
+
+	plb
 	rtl
+*-------------------------------------------------------------------------------
+tempX ds 2  ; inner X
+tempW ds 2  ; inner W	
+stack ds 2 	; stack register
+dp    ds 2  ; dp register
+	
+*-------------------------------------------------------------------------------
+DPtable ANOP  ; only first 25 entries are used
+	dc i'$2000,$2500,$2A00,$2F00,$3400,$3900,$3E00,$4300'
+	dc i'$4800,$4D00,$5200,$5700,$5C00,$6100,$6600,$6B00'
+	dc i'$7000,$7500,$7A00,$7F00,$8400,$8900,$8E00,$9300'
+	dc i'$9800,$9D00,$A200,$A700,$AC00,$B100,$B600,$BB00'
 *-------------------------------------------------------------------------------
 dispatchTable ANOP
     dc  a'blit0_8,blit0_16,blit0_24,blit0_32,blit0_40,blit0_48,blit0_56,blit0_64'
