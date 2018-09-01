@@ -110,7 +110,7 @@ e_them_t1_action2(U8 e, U8 type)
   U8 env0, env1;
 
   /* by default, try vertical move. calculate new y */
-  i = (ent_ents[e].y << 8) + ent_ents[e].offsy + ent_ents[e].ylow;
+  i = (((S32)ent_ents[e].y) << 8) + ((S32)ent_ents[e].offsy) + ((U32)ent_ents[e].ylow);
   y = i >> 8;
 
   /* deactivate if outside vertical boundaries */
@@ -294,7 +294,7 @@ e_them_z_action(U8 e)
     + ((ent_ents[e].x & 0x04) ? 0x07 : 0x06);
 
   /* calc new y */
-  i = (ent_ents[e].y << 8) + ent_ents[e].offsy + ent_ents[e].ylow;
+  i = (((S32)ent_ents[e].y) << 8) + ((S32)ent_ents[e].offsy) + ((U32)ent_ents[e].ylow);
 
   /* deactivate if out of vertical boundaries */
   if (ent_ents[e].y < 0 || ent_ents[e].y > 0x0140) {
