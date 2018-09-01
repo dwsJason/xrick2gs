@@ -42,7 +42,7 @@ static U8 scrawl;
 
 static U8 trigger = FALSE;
 
-static S8 offsx;
+static S16 offsx;
 static U8 ylow;
 static S16 offsy;
 
@@ -125,7 +125,7 @@ e_rick_z_action(void)
 	E_RICK_ENT.x += offsx;
 
 	/* y */
-	i = (E_RICK_ENT.y << 8) + offsy + ylow;
+	i = (((S32)E_RICK_ENT.y) << 8) + ((S32)offsy) + ((U32)ylow);
 	E_RICK_ENT.y = i >> 8;
 	offsy += 0x80;
 	ylow = i;
@@ -165,7 +165,7 @@ e_rick_action2(void)
 	*/
 	E_RICK_STRST(E_RICK_STJUMP);
 	/* calc y */
-	i = (E_RICK_ENT.y << 8) + offsy + ylow;
+	i = (((S32)E_RICK_ENT.y) << 8) + ((S32)offsy) + ((U32)ylow);
 	y = i >> 8;
 	/* test environment */
 	u_envtest(E_RICK_ENT.x, y, E_RICK_STTST(E_RICK_STCRAWL), &env0, &env1);
@@ -308,8 +308,8 @@ e_rick_action2(void)
       return;
 #ifdef ENABLE_CHEATS
     if (!game_cheat1)
-      game_bullets--;
 #endif
+      game_bullets--;
     /* initialize bullet */
     e_bullet_init(E_RICK_ENT.x, E_RICK_ENT.y);
     return;
@@ -327,8 +327,8 @@ e_rick_action2(void)
       return;
 #ifdef ENABLE_CHEATS
     if (!game_cheat1)
-      game_bombs--;
 #endif
+	game_bombs--;
     /* initialize bomb */
     e_bomb_init(E_RICK_ENT.x, E_RICK_ENT.y);
     return;
