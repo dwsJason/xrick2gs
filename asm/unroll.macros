@@ -1,0 +1,1 @@
+ MACRO&lab _pushpage&lab lcla &addr&addr   seta    254	lcla    &loop&loop   seta    128.ploop        pei     &addr&addr   seta &addr-2&loop   seta &loop-1	aif &loop,^ploop MEND macro&lab asl4&lab lcla &ct&ct  seta 4.top     asl a&ct  seta &ct-1     aif &ct>0,^top mend

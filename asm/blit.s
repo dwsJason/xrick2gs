@@ -8,8 +8,132 @@
  longa on
  longi on
 
+	mcopy asm:unroll.macros
+	 
 Dummy5 start BLITCODE
 	end
+
+PresentPalette start BLITCODE
+	phb
+	phk
+	plb
+	
+	tsc
+	sta stack
+	
+	tdc
+	sta dp
+	
+*---------------------
+
+	clc
+	lda #$9E00
+peiloop anop
+	tcd
+	adc #$00FF
+	tcs
+
+	_pushpage
+	
+	inc a
+	cmp #$A000
+	bcs done
+	jmp peiloop
+
+*---------------------
+done anop	
+	lda dp
+	tcd
+	
+	lda stack
+	tcs	
+
+	plb
+	rtl
+stack ds 2
+dp ds 2
+	end
+
+PresentSCB start BLITCODE
+	phb
+	phk
+	plb
+	
+	tsc
+	sta stack
+	
+	tdc
+	sta dp
+	
+*---------------------
+
+	lda #$9D00
+	tcd
+	lda #$9DFF
+	tcs
+
+	lcla &ct
+&ct seta 128
+.loop
+&ct seta &ct-1
+	pei &ct*2
+	aif &ct,^loop
+
+*---------------------
+	lda dp
+	tcd
+	
+	lda stack
+	tcs	
+
+	plb
+	rtl
+stack ds 2
+dp ds 2
+	end
+
+PresentFrameBuffer start BLITCODE
+
+	phb
+	phk
+	plb
+	
+	tsc
+	sta stack
+	
+	tdc
+	sta dp
+	
+*---------------------
+
+	clc
+	lda #$2000
+peiloop anop
+	tcd
+	adc #$00FF
+	tcs
+
+	_pushpage
+	
+	inc a
+	cmp #$9d00
+	bcs done
+	jmp peiloop
+
+*---------------------
+done anop	
+	lda dp
+	tcd
+	
+	lda stack
+	tcs	
+
+	plb
+	rtl
+stack ds 2
+dp ds 2
+	end
+	
 
 *
 * void DrawRect(short x, short y, short width, short height)
