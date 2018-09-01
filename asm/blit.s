@@ -25,6 +25,10 @@ PresentPalette start BLITCODE
 	sta dp
 	
 *---------------------
+	sei
+	_shadowON
+	_auxON
+*---------------------
 
 	clc
 	lda #$9E00
@@ -41,7 +45,14 @@ peiloop anop
 	jmp peiloop
 
 *---------------------
-done anop	
+done anop
+	
+*---------------------
+	_auxOFF
+	_shadowOFF
+	cli	
+*---------------------
+	
 	lda dp
 	tcd
 	
@@ -64,7 +75,10 @@ PresentSCB start BLITCODE
 	
 	tdc
 	sta dp
-	
+*---------------------
+	sei
+	_shadowON
+	_auxON	
 *---------------------
 
 	lda #$9D00
@@ -79,6 +93,10 @@ PresentSCB start BLITCODE
 	pei &ct*2
 	aif &ct,^loop
 
+*---------------------
+	_auxOFF
+	_shadowOFF
+	cli	 
 *---------------------
 	lda dp
 	tcd
@@ -100,12 +118,19 @@ PresentFrameBuffer start BLITCODE
 	
 	tsc
 	sta stack
+	tax
 	
 	tdc
 	sta dp
 	
 *---------------------
+	sei
+	_shadowON
+	_auxON
+*---------------------
 
+	ldy #5 ; re-enable interrupts every 5 pages
+	
 	clc
 	lda #$2000
 peiloop anop
@@ -118,10 +143,34 @@ peiloop anop
 	inc a
 	cmp #$9d00
 	bcs done
+	
+	dey
+	bpl nextpage
+	
+	tay
+	_auxOFF
+	txs
+	cli
+	sei
+*	_auxON
+	ora #$0030
+	sta >$00C068
+	
+	tya
+	ldy #5	
+
+nextpage anop
 	jmp peiloop
 
 *---------------------
-done anop	
+done anop
+	
+*---------------------
+	_auxOFF
+	_shadowOFF
+	cli
+*---------------------
+	
 	lda dp
 	tcd
 	
