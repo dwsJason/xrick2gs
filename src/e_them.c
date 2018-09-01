@@ -596,7 +596,7 @@ e_them_t3_action2(U8 e)
 	 * else switch to next step.
 	 */
 	ent_ents[e].step_count++;
-	x = ent_ents[e].x + ent_mvstep[ent_ents[e].step_no].dx;
+	x = ent_ents[e].x + ((S16)(ent_mvstep[ent_ents[e].step_no].dx));
 
 	/* check'n save */
 	if (x > 0 && x < 0xe8) {
