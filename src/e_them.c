@@ -608,7 +608,7 @@ e_them_t3_action2(U8 e)
 	    y += 0xff00;
 	  y += ent_ents[e].y;
 	  */
-	  y = ent_ents[e].y + ent_mvstep[ent_ents[e].step_no].dy;
+	  y = ent_ents[e].y + ((S16)(ent_mvstep[ent_ents[e].step_no].dy));
 	  if (y > 0 && y < 0x0140) {
 	    ent_ents[e].y = y;
 	    return;
