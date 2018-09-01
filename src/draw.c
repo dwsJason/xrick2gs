@@ -130,7 +130,7 @@ U8
 draw_clipms(S16 *x, S16 *y, U16 *width, U16 *height)
 {
   if (*x < 0) {
-    if (*x + *width < 0)
+    if (*x + ((S16)*width) < 0)
       return TRUE;
     else {
       *width += *x;
@@ -146,7 +146,7 @@ draw_clipms(S16 *x, S16 *y, U16 *width, U16 *height)
   }
 
   if (*y < DRAW_XYMAP_SCRTOP) {
-    if ((*y + *height) < DRAW_XYMAP_SCRTOP)
+    if ((*y + ((S16)*height)) < DRAW_XYMAP_SCRTOP)
       return TRUE;
     else {
       *height += *y - DRAW_XYMAP_SCRTOP;
@@ -156,7 +156,7 @@ draw_clipms(S16 *x, S16 *y, U16 *width, U16 *height)
   else {
     if (*y >= DRAW_XYMAP_HBTOP)
       return TRUE;
-    else if (*y + *height > DRAW_XYMAP_HBTOP)
+    else if (*y + ((S16)*height) > DRAW_XYMAP_HBTOP)
       *height = DRAW_XYMAP_HBTOP - *y;
   }
 
@@ -331,7 +331,10 @@ draw_sprite(U8 number, U16 x, U16 y)
 {
 	int frameNo = number;
 
-	if (y >= (200-21))
+	if (y >= (200-22))
+		return;
+
+	if (x >= 320)
 		return;
 
 	frameNo<<=1;
@@ -360,16 +363,20 @@ draw_sprite2(U8 number, U16 x, U16 y, U8 front)
 
 	frameNo<<=1;
 
-	x0 -= DRAW_XYMAP_SCRLEFT;
-	y0 -= (DRAW_XYMAP_SCRTOP-8);
+	x -= DRAW_XYMAP_SCRLEFT;
+	y -= (DRAW_XYMAP_SCRTOP-8);
 
-	if (x0 & 1)
+	if (x & 1)
 		frameNo|=1;
 
-	if (y0 >= (200-21))
+	if (x >= 320)
+	{
+		return;
+	}
+	if (y >= (200 - 24))
 		return;
 
-	draw_setfb(x0, y0);
+	draw_setfb(x, y);
 	DrawSprite((int)fb, frameNo);
 }
 #endif
