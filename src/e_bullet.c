@@ -26,7 +26,7 @@ segment "e";
 /*
  * public vars (for performance reasons)
  */
-S8 e_bullet_offsx;
+S16 e_bullet_offsx;
 S16 e_bullet_xc, e_bullet_yc;
 
 /*
