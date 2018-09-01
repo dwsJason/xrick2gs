@@ -185,7 +185,7 @@ dp ds 2
 	
 
 *
-* void DrawRect(short x, short y, short width, short height)
+* void BlitRect(short x, short y, short width, short height)
 *
 
 BlitRect start BLITCODE
@@ -221,6 +221,7 @@ stackFix equ 9
 	lsr a
 	lsr a
 	sta inputW,s
+	sta loopW
 	
 	clc
 	lda inputY,s
@@ -231,28 +232,43 @@ stackFix equ 9
 	lsr a
 	lsr a
 	sta inputH,s
+	sta loopH
 	
 	lda inputY,s
 	and #~3
 	lsr a
 	lsr a
 	sta inputY,s
+	sta loopY
 	tay
 	
 	lda inputX,s
 	and #~3
 	tax
 	sta inputX,s	; maybe don't need this
+	sta loopX
+	
+*---------------------------------------
+	sei
+	_shadowON
+	_auxON
+*---------------------------------------
+
+*
+* We're messing with the stack, and the DP
+* so operationally, we can't use these things
+* for variables, or for call returns
+*
 
 *	
 * Outter loop, once for each Y
 *
 YLOOP ANOP
 
-	lda inputX,s
+	lda loopX
 	sta tempX
 	
-	lda inputW,s
+	lda loopW
 	sta tempW
 		
 XLOOP ANOP ; Inner Loop, for each X Block
@@ -279,13 +295,14 @@ BRET anop	; Blit Return
 	lda tempW
 	bne XLOOP
 	
-	lda inputH,s
-	dec a
+	dec loopH
 	bmi done
-	sta inputH,s
 	
 	iny 	; next direct page
-	iny	
+	iny
+	
+* TODO, every 4 lines or so (or every so many clocks)
+* re-enable interrupts, for audio, and the heartbeat	
 	
 	bra YLOOP 
 	
@@ -299,6 +316,13 @@ done ANOP
 	lda stack
 	tcs
 	
+*---------------------------------------
+	_auxOFF
+	_shadowOFF
+	cli
+*---------------------------------------
+
+	
 * Patchup the Stack so we can return
 
 	lda 3,s
@@ -310,7 +334,12 @@ done ANOP
 	rtl
 *-------------------------------------------------------------------------------
 tempX ds 2  ; inner X
-tempW ds 2  ; inner W	
+tempW ds 2  ; inner W
+* Local bank copies of our stack variables
+loopX ds 2
+loopY ds 2
+loopW ds 2
+loopH ds 2	
 stack ds 2 	; stack register
 dp    ds 2  ; dp register
 	

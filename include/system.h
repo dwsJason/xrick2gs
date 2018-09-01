@@ -174,6 +174,9 @@ extern void sysjoy_shutdown(void);
 #endif
 
 #ifdef IIGS
+// GS Hardware Registers
+extern volatile char *VIDEO_REGISTER;
+
 // GS Specific Stuff
 extern int LZ4_Unpack(char* pDest, char* pPackedSource);
 extern volatile unsigned long* tick;
@@ -183,6 +186,12 @@ extern void SetTileBank(short bank);
 extern void DrawTile(int offset, int tileNo);
 extern void SetSpriteBanks(short b0, short b1, short b2, short b3);
 extern void DrawSprite(int offset, int SpriteNo);
+
+// Code for presenting backpage
+extern void PresentPalette(void);
+extern void PresentSCB(void);
+extern void PresentFrameBuffer(void);
+extern void BlitRect(short x, short y, short width, short height);
 
 // ADB Support Code
 extern char KeyArray[128];
