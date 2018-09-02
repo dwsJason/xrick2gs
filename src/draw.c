@@ -331,7 +331,7 @@ draw_sprite(U8 number, U16 x, U16 y)
 {
 	int frameNo = number;
 
-	if (y >= (200-22))
+	if (y >= (200-8))
 		return;
 
 	if (x >= 320)
@@ -363,7 +363,7 @@ draw_sprite2(U8 number, U16 x, U16 y, U8 front)
 
 	frameNo<<=1;
 
-	x -= DRAW_XYMAP_SCRLEFT;
+	x -= (DRAW_XYMAP_SCRLEFT-1);
 	y -= (DRAW_XYMAP_SCRTOP-8);
 
 	if (x & 1)
