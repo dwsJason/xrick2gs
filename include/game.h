@@ -28,7 +28,11 @@
 #define TRUE 1
 #define FALSE 0
 
+#ifdef IIGS
+#define GAME_PERIOD 72
+#else
 #define GAME_PERIOD 75
+#endif
 
 #define GAME_BOMBS_INIT 6
 #define GAME_BULLETS_INIT 6
