@@ -39,9 +39,21 @@ screen_xrick(void)
 	static U8 wait = 0;
 
 	if (seq == 0) {
+		#ifdef GFXGS
+		sysvid_clearPalette();
+		wait_vsync();
+		PresentPalette();
+		PresentSCB();
+		draw_img(IMG_SPLASH);
+		PresentFrameBuffer();
+		wait_vsync();
+		PresentPalette();
+		PresentSCB();
+		#else
 		sysvid_clear();
 		draw_img(IMG_SPLASH);
 		game_rects = &draw_SCREENRECT;
+		#endif
 		seq = 1;
 	}
 
@@ -69,6 +81,13 @@ screen_xrick(void)
 	if (seq == 99) {  /* we're done */
 		sysvid_clear();
 		sysvid_setGamePalette();
+		#ifdef GFXGS
+		sysvid_clearPalette();
+		wait_vsync();
+		PresentPalette();
+		PresentSCB();
+		PresentFrameBuffer();
+		#endif
 		seq = 0;
 		return SCREEN_DONE;
 	}

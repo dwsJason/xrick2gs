@@ -58,7 +58,7 @@ screen_introMain(void)
   }
 
   switch (seq) {
-  case 1:  /* dispay hall of fame */
+  case 1:  /* display hall of fame */
     sysvid_clear();
     tm = sys_gettime();
 
@@ -81,7 +81,11 @@ screen_introMain(void)
 #endif
 
 #ifdef GFXGS
+	sysvid_FadeOut();
 	draw_img(&splash_lz4);
+	PresentFrameBuffer();
+	PresentPalette();
+	sysvid_FadeIn();
 #endif
 
     seq = 2;
@@ -120,6 +124,8 @@ screen_introMain(void)
     draw_pic(0, 0, 0x140, 0x20, pic_haf);
 #endif
 #ifdef GFXGS
+	sysvid_FadeOut();
+	PresentFrameBuffer();
 	draw_img(&pic_haf_lz4);
 #endif
 
@@ -141,6 +147,10 @@ screen_introMain(void)
       draw_tllst = s;
       draw_tilesList();
     }
+#ifdef GFXGS
+	PresentFrameBuffer();
+	sysvid_FadeIn();
+#endif
 
     seq = 5;
     break;
@@ -169,6 +179,11 @@ screen_introMain(void)
 
   if (seq == 7) {  /* we're done */
     sysvid_clear();
+#ifdef GFXGS
+	sysvid_FadeOut();
+	PresentFrameBuffer();
+	sysvid_FadeIn();
+#endif
     seq = 0;
     seen = 0;
     first = FALSE;

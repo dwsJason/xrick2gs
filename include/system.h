@@ -99,6 +99,9 @@ extern void sysvid_init(void);
 extern void sysvid_shutdown(void);
 extern void sysvid_update(rect_t *);
 extern void sysvid_clear(void);
+extern void sysvid_clearPalette(void);
+extern void sysvid_FadeIn(void);
+extern void sysvid_FadeOut(void);
 extern void sysvid_zoom(S8);
 extern void sysvid_toggleFullscreen(void);
 extern void sysvid_setGamePalette(void);
@@ -191,7 +194,8 @@ extern void DrawSprite(int offset, int SpriteNo);
 extern void PresentPalette(void);
 extern void PresentSCB(void);
 extern void PresentFrameBuffer(void);
-extern void BlitRect(short x, short y, short width, short height);
+extern int BlitRect(U16 x, U16 y, U16 width, U16 height);
+extern void wait_vsync(void);
 
 // ADB Support Code
 extern char KeyArray[128];

@@ -94,7 +94,7 @@ rect_t draw_STATUSRECT = {
   DRAW_STATUS_LIVES_X + 6 * 8 - DRAW_STATUS_SCORE_X, 8,
   NULL
 };
-rect_t draw_SCREENRECT = { 0, 0, SYSVID_WIDTH, SYSVID_HEIGHT, NULL };
+rect_t draw_SCREENRECT = { 0, 0, 320, SYSVID_HEIGHT, NULL };
 
 
 /*
@@ -373,7 +373,7 @@ draw_sprite2(U8 number, U16 x, U16 y, U8 front)
 	{
 		return;
 	}
-	if (y >= (200 - 24))
+	if (y >= (200 - 8))
 		return;
 
 	draw_setfb(x, y);

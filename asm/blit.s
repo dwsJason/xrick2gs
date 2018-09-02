@@ -12,8 +12,9 @@
 	 
 Dummy5 start BLITCODE
 	end
-
+	
 PresentPalette start BLITCODE
+
 	phb
 	phk
 	plb
@@ -183,11 +184,9 @@ stack ds 2
 dp ds 2
 	end
 	
-
 *
 * void BlitRect(short x, short y, short width, short height)
 *
-
 BlitRect start BLITCODE
 
 inputX equ 5
@@ -209,6 +208,42 @@ stackFix equ 9
 	tdc
 	sta dp
 	
+*---------------------------------------
+
+	lda inputX,s
+	cmp #320
+	blt cont0
+	jmp done 	; X Position outside the screen, exit
+	
+cont0 anop	
+	lda inputY,s
+	cmp #200
+	blt cont1
+	jmp done 	; Y Position outside of the screen, exit
+	
+cont1 anop
+	lda inputX,s
+	adc inputW,s
+	cmp #320
+	blt cont2
+	
+	lda #320	; x+W outside of screen, clip to edge
+	sbc inputX,s
+	sta inputW,s
+	
+cont2 anop
+	lda inputY,s
+	adc inputH,s
+	cmp #200
+	blt clipdone
+	
+	lda #200  	; y+H outside of screen, clip to edge
+	sbc inputY,s
+	sta inputH,s
+
+clipdone anop
+*---------------------------------------
+	
 * snap X, and Y to multiples of 8
 * snap W and H to multiples of 8
    
@@ -222,6 +257,7 @@ stackFix equ 9
 	lsr a
 	sta inputW,s
 	sta loopW
+*	sta result
 	
 	clc
 	lda inputY,s
@@ -235,7 +271,7 @@ stackFix equ 9
 	sta loopH
 	
 	lda inputY,s
-	and #~3
+	and #$FFFC
 	lsr a
 	lsr a
 	sta inputY,s
@@ -243,7 +279,8 @@ stackFix equ 9
 	tay
 	
 	lda inputX,s
-	and #~3
+	and #$FFFC
+	asl a
 	tax
 	sta inputX,s	; maybe don't need this
 	sta loopX
@@ -273,24 +310,32 @@ YLOOP ANOP
 		
 XLOOP ANOP ; Inner Loop, for each X Block
 	lda tempW ; width in tiles
+	stz tempW
 	cmp #9
 	blt LastBlock
 	sbc #8
 	sta tempW
-	
 	lda #8
 LastBlock ANOP	
 	asl a
 	adc tempX
-	tax	
+	tax
+	
+; increment to next block
+	lda tempX
+	adc #16*8
+	sta tempX	
 				
 * pei blitter changes A, S, D, and C
 * trb blitter requires C = 0, A = 0, changes S, D, and C
 
 	lda DPtable,y
+	cmp #$9D00
+	bcs BRET
+	
 	jmp (dispatchTable-2,x) 
 	   
-BRET anop	; Blit Return
+BRET entry	; Blit Return
 
 	lda tempW
 	bne XLOOP
@@ -321,15 +366,23 @@ done ANOP
 	_shadowOFF
 	cli
 *---------------------------------------
-
 	
 * Patchup the Stack so we can return
 
+* Copy Return Address, and bank
 	lda 3,s
 	sta stackFix+2,s
 	lda 1,s
-	sta stackFix,s	
+	sta stackFix,s
+	
+* skip the arguments
+	clc
+	tsc
+	adc #8
+	tcs	
 
+	lda result
+	
 	plb
 	rtl
 *-------------------------------------------------------------------------------
@@ -342,6 +395,7 @@ loopW ds 2
 loopH ds 2	
 stack ds 2 	; stack register
 dp    ds 2  ; dp register
+result ds 2
 	
 *-------------------------------------------------------------------------------
 DPtable ANOP  ; only first 25 entries are used
@@ -393,7 +447,13 @@ dispatchTable ANOP
     dc  a'blit312_8,blit_null,blit_null,blit_null,blit_null,blit_null,blit_null,blit_null'
 
 *-------------------------------------------------------------------------------
-blit0_64 ANOP
+	end
+	
+blit_null start BLITCODE
+	jmp BRET
+	end
+	
+blit0_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #31
          TCS        ; Set S  $001F
@@ -548,7 +608,8 @@ blit0_64 ANOP
          PEI $62
          PEI $60
          JMP BRET   ;833 cycles
-blit8_64 ANOP
+		 end
+blit8_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #35
          TCS        ; Set S  $0023
@@ -707,7 +768,8 @@ blit8_64 ANOP
          PEI $66
          PEI $64
          JMP BRET   ;843 cycles
-blit16_64 ANOP
+		 end
+blit16_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #39
          TCS        ; Set S  $0027
@@ -866,7 +928,8 @@ blit16_64 ANOP
          PEI $6A
          PEI $68
          JMP BRET   ;843 cycles
-blit24_64 ANOP
+		 end
+blit24_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #43
          TCS        ; Set S  $002B
@@ -1025,7 +1088,8 @@ blit24_64 ANOP
          PEI $6E
          PEI $6C
          JMP BRET   ;843 cycles
-blit32_64 ANOP
+		 end
+blit32_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #47
          TCS        ; Set S  $002F
@@ -1184,7 +1248,8 @@ blit32_64 ANOP
          PEI $72
          PEI $70
          JMP BRET   ;843 cycles
-blit40_64 ANOP
+		 end
+blit40_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #51
          TCS        ; Set S  $0033
@@ -1343,7 +1408,8 @@ blit40_64 ANOP
          PEI $76
          PEI $74
          JMP BRET   ;843 cycles
-blit48_64 ANOP
+		 end
+blit48_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #55
          TCS        ; Set S  $0037
@@ -1502,7 +1568,8 @@ blit48_64 ANOP
          PEI $7A
          PEI $78
          JMP BRET   ;843 cycles
-blit56_64 ANOP
+		 end
+blit56_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #59
          TCS        ; Set S  $003B
@@ -1661,7 +1728,8 @@ blit56_64 ANOP
          PEI $7E
          PEI $7C
          JMP BRET   ;843 cycles
-blit64_64 ANOP
+		 end
+blit64_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #63
          TCS        ; Set S  $003F
@@ -1816,7 +1884,8 @@ blit64_64 ANOP
          PEI $82
          PEI $80
          JMP BRET   ;833 cycles
-blit72_64 ANOP
+		 end
+blit72_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #67
          TCS        ; Set S  $0043
@@ -1975,7 +2044,8 @@ blit72_64 ANOP
          PEI $86
          PEI $84
          JMP BRET   ;843 cycles
-blit80_64 ANOP
+		 end
+blit80_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #71
          TCS        ; Set S  $0047
@@ -2134,7 +2204,8 @@ blit80_64 ANOP
          PEI $8A
          PEI $88
          JMP BRET   ;843 cycles
-blit88_64 ANOP
+		 end
+blit88_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #75
          TCS        ; Set S  $004B
@@ -2293,7 +2364,8 @@ blit88_64 ANOP
          PEI $8E
          PEI $8C
          JMP BRET   ;843 cycles
-blit96_64 ANOP
+		 end
+blit96_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #79
          TCS        ; Set S  $004F
@@ -2452,7 +2524,8 @@ blit96_64 ANOP
          PEI $92
          PEI $90
          JMP BRET   ;843 cycles
-blit104_64 ANOP
+		 end
+blit104_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #83
          TCS        ; Set S  $0053
@@ -2611,7 +2684,8 @@ blit104_64 ANOP
          PEI $96
          PEI $94
          JMP BRET   ;843 cycles
-blit112_64 ANOP
+		 end
+blit112_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #87
          TCS        ; Set S  $0057
@@ -2770,7 +2844,8 @@ blit112_64 ANOP
          PEI $9A
          PEI $98
          JMP BRET   ;843 cycles
-blit120_64 ANOP
+		 end
+blit120_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #91
          TCS        ; Set S  $005B
@@ -2929,7 +3004,8 @@ blit120_64 ANOP
          PEI $9E
          PEI $9C
          JMP BRET   ;843 cycles
-blit128_64 ANOP
+		 end
+blit128_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #95
          TCS        ; Set S  $005F
@@ -3084,7 +3160,8 @@ blit128_64 ANOP
          PEI $A2
          PEI $A0
          JMP BRET   ;833 cycles
-blit136_64 ANOP
+		 end
+blit136_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #99
          TCS        ; Set S  $0063
@@ -3243,7 +3320,8 @@ blit136_64 ANOP
          PEI $A6
          PEI $A4
          JMP BRET   ;843 cycles
-blit144_64 ANOP
+		 end
+blit144_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #103
          TCS        ; Set S  $0067
@@ -3402,7 +3480,8 @@ blit144_64 ANOP
          PEI $AA
          PEI $A8
          JMP BRET   ;843 cycles
-blit152_64 ANOP
+		 end
+blit152_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #107
          TCS        ; Set S  $006B
@@ -3561,7 +3640,8 @@ blit152_64 ANOP
          PEI $AE
          PEI $AC
          JMP BRET   ;843 cycles
-blit160_64 ANOP
+		 end
+blit160_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #111
          TCS        ; Set S  $006F
@@ -3720,7 +3800,8 @@ blit160_64 ANOP
          PEI $B2
          PEI $B0
          JMP BRET   ;843 cycles
-blit168_64 ANOP
+		 end
+blit168_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #115
          TCS        ; Set S  $0073
@@ -3879,7 +3960,8 @@ blit168_64 ANOP
          PEI $B6
          PEI $B4
          JMP BRET   ;843 cycles
-blit176_64 ANOP
+		 end
+blit176_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #119
          TCS        ; Set S  $0077
@@ -4038,7 +4120,8 @@ blit176_64 ANOP
          PEI $BA
          PEI $B8
          JMP BRET   ;843 cycles
-blit184_64 ANOP
+		 end
+blit184_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #123
          TCS        ; Set S  $007B
@@ -4197,7 +4280,8 @@ blit184_64 ANOP
          PEI $BE
          PEI $BC
          JMP BRET   ;843 cycles
-blit192_64 ANOP
+		 end
+blit192_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #127
          TCS        ; Set S  $007F
@@ -4352,7 +4436,8 @@ blit192_64 ANOP
          PEI $C2
          PEI $C0
          JMP BRET   ;833 cycles
-blit200_64 ANOP
+		 end
+blit200_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #131
          TCS        ; Set S  $0083
@@ -4511,7 +4596,8 @@ blit200_64 ANOP
          PEI $C6
          PEI $C4
          JMP BRET   ;843 cycles
-blit208_64 ANOP
+		 end
+blit208_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #135
          TCS        ; Set S  $0087
@@ -4670,7 +4756,8 @@ blit208_64 ANOP
          PEI $CA
          PEI $C8
          JMP BRET   ;843 cycles
-blit216_64 ANOP
+		 end
+blit216_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #139
          TCS        ; Set S  $008B
@@ -4829,7 +4916,8 @@ blit216_64 ANOP
          PEI $CE
          PEI $CC
          JMP BRET   ;843 cycles
-blit224_64 ANOP
+		 end
+blit224_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #143
          TCS        ; Set S  $008F
@@ -4988,7 +5076,8 @@ blit224_64 ANOP
          PEI $D2
          PEI $D0
          JMP BRET   ;843 cycles
-blit232_64 ANOP
+		 end
+blit232_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #147
          TCS        ; Set S  $0093
@@ -5147,7 +5236,8 @@ blit232_64 ANOP
          PEI $D6
          PEI $D4
          JMP BRET   ;843 cycles
-blit240_64 ANOP
+		 end
+blit240_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #151
          TCS        ; Set S  $0097
@@ -5306,7 +5396,8 @@ blit240_64 ANOP
          PEI $DA
          PEI $D8
          JMP BRET   ;843 cycles
-blit248_64 ANOP
+		 end
+blit248_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #155
          TCS        ; Set S  $009B
@@ -5465,7 +5556,8 @@ blit248_64 ANOP
          PEI $DE
          PEI $DC
          JMP BRET   ;843 cycles
-blit256_64 ANOP
+		 end
+blit256_64 start BLITCODE
          TCD        ; Set DP $0000
          ADC #159
          TCS        ; Set S  $009F
@@ -5620,7 +5712,8 @@ blit256_64 ANOP
          PEI $E2
          PEI $E0
          JMP BRET   ;833 cycles
-blit0_56 ANOP
+		 end
+blit0_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #27
          TCS        ; Set S  $001B
@@ -5759,7 +5852,8 @@ blit0_56 ANOP
          PEI $62
          PEI $60
          JMP BRET   ;737 cycles
-blit8_56 ANOP
+		 end
+blit8_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #31
          TCS        ; Set S  $001F
@@ -5898,7 +5992,8 @@ blit8_56 ANOP
          PEI $66
          PEI $64
          JMP BRET   ;737 cycles
-blit16_56 ANOP
+		 end
+blit16_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #35
          TCS        ; Set S  $0023
@@ -6041,7 +6136,8 @@ blit16_56 ANOP
          PEI $6A
          PEI $68
          JMP BRET   ;747 cycles
-blit24_56 ANOP
+		 end
+blit24_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #39
          TCS        ; Set S  $0027
@@ -6184,7 +6280,8 @@ blit24_56 ANOP
          PEI $6E
          PEI $6C
          JMP BRET   ;747 cycles
-blit32_56 ANOP
+		 end
+blit32_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #43
          TCS        ; Set S  $002B
@@ -6327,7 +6424,8 @@ blit32_56 ANOP
          PEI $72
          PEI $70
          JMP BRET   ;747 cycles
-blit40_56 ANOP
+		 end
+blit40_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #47
          TCS        ; Set S  $002F
@@ -6470,7 +6568,8 @@ blit40_56 ANOP
          PEI $76
          PEI $74
          JMP BRET   ;747 cycles
-blit48_56 ANOP
+		 end
+blit48_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #51
          TCS        ; Set S  $0033
@@ -6613,7 +6712,8 @@ blit48_56 ANOP
          PEI $7A
          PEI $78
          JMP BRET   ;747 cycles
-blit56_56 ANOP
+		 end
+blit56_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #55
          TCS        ; Set S  $0037
@@ -6756,7 +6856,8 @@ blit56_56 ANOP
          PEI $7E
          PEI $7C
          JMP BRET   ;747 cycles
-blit64_56 ANOP
+		 end
+blit64_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #59
          TCS        ; Set S  $003B
@@ -6895,7 +6996,8 @@ blit64_56 ANOP
          PEI $82
          PEI $80
          JMP BRET   ;737 cycles
-blit72_56 ANOP
+		 end
+blit72_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #63
          TCS        ; Set S  $003F
@@ -7034,7 +7136,8 @@ blit72_56 ANOP
          PEI $86
          PEI $84
          JMP BRET   ;737 cycles
-blit80_56 ANOP
+		 end
+blit80_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #67
          TCS        ; Set S  $0043
@@ -7177,7 +7280,8 @@ blit80_56 ANOP
          PEI $8A
          PEI $88
          JMP BRET   ;747 cycles
-blit88_56 ANOP
+		 end
+blit88_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #71
          TCS        ; Set S  $0047
@@ -7320,7 +7424,8 @@ blit88_56 ANOP
          PEI $8E
          PEI $8C
          JMP BRET   ;747 cycles
-blit96_56 ANOP
+		 end
+blit96_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #75
          TCS        ; Set S  $004B
@@ -7463,7 +7568,8 @@ blit96_56 ANOP
          PEI $92
          PEI $90
          JMP BRET   ;747 cycles
-blit104_56 ANOP
+		 end
+blit104_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #79
          TCS        ; Set S  $004F
@@ -7606,7 +7712,8 @@ blit104_56 ANOP
          PEI $96
          PEI $94
          JMP BRET   ;747 cycles
-blit112_56 ANOP
+		 end
+blit112_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #83
          TCS        ; Set S  $0053
@@ -7749,7 +7856,8 @@ blit112_56 ANOP
          PEI $9A
          PEI $98
          JMP BRET   ;747 cycles
-blit120_56 ANOP
+		 end
+blit120_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #87
          TCS        ; Set S  $0057
@@ -7892,7 +8000,8 @@ blit120_56 ANOP
          PEI $9E
          PEI $9C
          JMP BRET   ;747 cycles
-blit128_56 ANOP
+		 end
+blit128_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #91
          TCS        ; Set S  $005B
@@ -8031,7 +8140,8 @@ blit128_56 ANOP
          PEI $A2
          PEI $A0
          JMP BRET   ;737 cycles
-blit136_56 ANOP
+		 end
+blit136_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #95
          TCS        ; Set S  $005F
@@ -8170,7 +8280,8 @@ blit136_56 ANOP
          PEI $A6
          PEI $A4
          JMP BRET   ;737 cycles
-blit144_56 ANOP
+		 end
+blit144_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #99
          TCS        ; Set S  $0063
@@ -8313,7 +8424,8 @@ blit144_56 ANOP
          PEI $AA
          PEI $A8
          JMP BRET   ;747 cycles
-blit152_56 ANOP
+		 end
+blit152_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #103
          TCS        ; Set S  $0067
@@ -8456,7 +8568,8 @@ blit152_56 ANOP
          PEI $AE
          PEI $AC
          JMP BRET   ;747 cycles
-blit160_56 ANOP
+		 end
+blit160_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #107
          TCS        ; Set S  $006B
@@ -8599,7 +8712,8 @@ blit160_56 ANOP
          PEI $B2
          PEI $B0
          JMP BRET   ;747 cycles
-blit168_56 ANOP
+		 end
+blit168_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #111
          TCS        ; Set S  $006F
@@ -8742,7 +8856,8 @@ blit168_56 ANOP
          PEI $B6
          PEI $B4
          JMP BRET   ;747 cycles
-blit176_56 ANOP
+		 end
+blit176_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #115
          TCS        ; Set S  $0073
@@ -8885,7 +9000,8 @@ blit176_56 ANOP
          PEI $BA
          PEI $B8
          JMP BRET   ;747 cycles
-blit184_56 ANOP
+		 end
+blit184_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #119
          TCS        ; Set S  $0077
@@ -9028,7 +9144,8 @@ blit184_56 ANOP
          PEI $BE
          PEI $BC
          JMP BRET   ;747 cycles
-blit192_56 ANOP
+		 end
+blit192_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #123
          TCS        ; Set S  $007B
@@ -9167,7 +9284,8 @@ blit192_56 ANOP
          PEI $C2
          PEI $C0
          JMP BRET   ;737 cycles
-blit200_56 ANOP
+		 end
+blit200_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #127
          TCS        ; Set S  $007F
@@ -9306,7 +9424,8 @@ blit200_56 ANOP
          PEI $C6
          PEI $C4
          JMP BRET   ;737 cycles
-blit208_56 ANOP
+		 end
+blit208_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #131
          TCS        ; Set S  $0083
@@ -9449,7 +9568,8 @@ blit208_56 ANOP
          PEI $CA
          PEI $C8
          JMP BRET   ;747 cycles
-blit216_56 ANOP
+		 end
+blit216_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #135
          TCS        ; Set S  $0087
@@ -9592,7 +9712,8 @@ blit216_56 ANOP
          PEI $CE
          PEI $CC
          JMP BRET   ;747 cycles
-blit224_56 ANOP
+		 end
+blit224_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #139
          TCS        ; Set S  $008B
@@ -9735,7 +9856,8 @@ blit224_56 ANOP
          PEI $D2
          PEI $D0
          JMP BRET   ;747 cycles
-blit232_56 ANOP
+		 end
+blit232_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #143
          TCS        ; Set S  $008F
@@ -9878,7 +10000,8 @@ blit232_56 ANOP
          PEI $D6
          PEI $D4
          JMP BRET   ;747 cycles
-blit240_56 ANOP
+		 end
+blit240_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #147
          TCS        ; Set S  $0093
@@ -10021,7 +10144,8 @@ blit240_56 ANOP
          PEI $DA
          PEI $D8
          JMP BRET   ;747 cycles
-blit248_56 ANOP
+		 end
+blit248_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #151
          TCS        ; Set S  $0097
@@ -10164,7 +10288,8 @@ blit248_56 ANOP
          PEI $DE
          PEI $DC
          JMP BRET   ;747 cycles
-blit256_56 ANOP
+		 end
+blit256_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #155
          TCS        ; Set S  $009B
@@ -10303,7 +10428,8 @@ blit256_56 ANOP
          PEI $E2
          PEI $E0
          JMP BRET   ;737 cycles
-blit264_56 ANOP
+		 end
+blit264_56 start BLITCODE
          TCD        ; Set DP $0000
          ADC #159
          TCS        ; Set S  $009F
@@ -10442,7 +10568,8 @@ blit264_56 ANOP
          PEI $E6
          PEI $E4
          JMP BRET   ;737 cycles
-blit0_48 ANOP
+		 end
+blit0_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #23
          TCS        ; Set S  $0017
@@ -10565,7 +10692,8 @@ blit0_48 ANOP
          PEI $62
          PEI $60
          JMP BRET   ;641 cycles
-blit8_48 ANOP
+		 end
+blit8_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #27
          TCS        ; Set S  $001B
@@ -10688,7 +10816,8 @@ blit8_48 ANOP
          PEI $66
          PEI $64
          JMP BRET   ;641 cycles
-blit16_48 ANOP
+		 end
+blit16_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #31
          TCS        ; Set S  $001F
@@ -10811,7 +10940,8 @@ blit16_48 ANOP
          PEI $6A
          PEI $68
          JMP BRET   ;641 cycles
-blit24_48 ANOP
+		 end
+blit24_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #35
          TCS        ; Set S  $0023
@@ -10938,7 +11068,8 @@ blit24_48 ANOP
          PEI $6E
          PEI $6C
          JMP BRET   ;651 cycles
-blit32_48 ANOP
+		 end
+blit32_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #39
          TCS        ; Set S  $0027
@@ -11065,7 +11196,8 @@ blit32_48 ANOP
          PEI $72
          PEI $70
          JMP BRET   ;651 cycles
-blit40_48 ANOP
+		 end
+blit40_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #43
          TCS        ; Set S  $002B
@@ -11192,7 +11324,8 @@ blit40_48 ANOP
          PEI $76
          PEI $74
          JMP BRET   ;651 cycles
-blit48_48 ANOP
+		 end
+blit48_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #47
          TCS        ; Set S  $002F
@@ -11319,7 +11452,8 @@ blit48_48 ANOP
          PEI $7A
          PEI $78
          JMP BRET   ;651 cycles
-blit56_48 ANOP
+		 end
+blit56_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #51
          TCS        ; Set S  $0033
@@ -11446,7 +11580,8 @@ blit56_48 ANOP
          PEI $7E
          PEI $7C
          JMP BRET   ;651 cycles
-blit64_48 ANOP
+		 end
+blit64_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #55
          TCS        ; Set S  $0037
@@ -11569,7 +11704,8 @@ blit64_48 ANOP
          PEI $82
          PEI $80
          JMP BRET   ;641 cycles
-blit72_48 ANOP
+		 end
+blit72_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #59
          TCS        ; Set S  $003B
@@ -11692,7 +11828,8 @@ blit72_48 ANOP
          PEI $86
          PEI $84
          JMP BRET   ;641 cycles
-blit80_48 ANOP
+		 end
+blit80_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #63
          TCS        ; Set S  $003F
@@ -11815,7 +11952,8 @@ blit80_48 ANOP
          PEI $8A
          PEI $88
          JMP BRET   ;641 cycles
-blit88_48 ANOP
+		 end
+blit88_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #67
          TCS        ; Set S  $0043
@@ -11942,7 +12080,8 @@ blit88_48 ANOP
          PEI $8E
          PEI $8C
          JMP BRET   ;651 cycles
-blit96_48 ANOP
+		 end
+blit96_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #71
          TCS        ; Set S  $0047
@@ -12069,7 +12208,8 @@ blit96_48 ANOP
          PEI $92
          PEI $90
          JMP BRET   ;651 cycles
-blit104_48 ANOP
+		 end
+blit104_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #75
          TCS        ; Set S  $004B
@@ -12196,7 +12336,8 @@ blit104_48 ANOP
          PEI $96
          PEI $94
          JMP BRET   ;651 cycles
-blit112_48 ANOP
+		 end
+blit112_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #79
          TCS        ; Set S  $004F
@@ -12323,7 +12464,8 @@ blit112_48 ANOP
          PEI $9A
          PEI $98
          JMP BRET   ;651 cycles
-blit120_48 ANOP
+		 end
+blit120_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #83
          TCS        ; Set S  $0053
@@ -12450,7 +12592,8 @@ blit120_48 ANOP
          PEI $9E
          PEI $9C
          JMP BRET   ;651 cycles
-blit128_48 ANOP
+		 end
+blit128_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #87
          TCS        ; Set S  $0057
@@ -12573,7 +12716,8 @@ blit128_48 ANOP
          PEI $A2
          PEI $A0
          JMP BRET   ;641 cycles
-blit136_48 ANOP
+		 end
+blit136_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #91
          TCS        ; Set S  $005B
@@ -12696,7 +12840,8 @@ blit136_48 ANOP
          PEI $A6
          PEI $A4
          JMP BRET   ;641 cycles
-blit144_48 ANOP
+		 end
+blit144_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #95
          TCS        ; Set S  $005F
@@ -12819,7 +12964,8 @@ blit144_48 ANOP
          PEI $AA
          PEI $A8
          JMP BRET   ;641 cycles
-blit152_48 ANOP
+		 end
+blit152_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #99
          TCS        ; Set S  $0063
@@ -12946,7 +13092,8 @@ blit152_48 ANOP
          PEI $AE
          PEI $AC
          JMP BRET   ;651 cycles
-blit160_48 ANOP
+		 end
+blit160_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #103
          TCS        ; Set S  $0067
@@ -13073,7 +13220,8 @@ blit160_48 ANOP
          PEI $B2
          PEI $B0
          JMP BRET   ;651 cycles
-blit168_48 ANOP
+		 end
+blit168_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #107
          TCS        ; Set S  $006B
@@ -13200,7 +13348,8 @@ blit168_48 ANOP
          PEI $B6
          PEI $B4
          JMP BRET   ;651 cycles
-blit176_48 ANOP
+		 end
+blit176_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #111
          TCS        ; Set S  $006F
@@ -13327,7 +13476,8 @@ blit176_48 ANOP
          PEI $BA
          PEI $B8
          JMP BRET   ;651 cycles
-blit184_48 ANOP
+		 end
+blit184_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #115
          TCS        ; Set S  $0073
@@ -13454,7 +13604,8 @@ blit184_48 ANOP
          PEI $BE
          PEI $BC
          JMP BRET   ;651 cycles
-blit192_48 ANOP
+		 end
+blit192_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #119
          TCS        ; Set S  $0077
@@ -13577,7 +13728,8 @@ blit192_48 ANOP
          PEI $C2
          PEI $C0
          JMP BRET   ;641 cycles
-blit200_48 ANOP
+		 end
+blit200_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #123
          TCS        ; Set S  $007B
@@ -13700,7 +13852,8 @@ blit200_48 ANOP
          PEI $C6
          PEI $C4
          JMP BRET   ;641 cycles
-blit208_48 ANOP
+		 end
+blit208_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #127
          TCS        ; Set S  $007F
@@ -13823,7 +13976,8 @@ blit208_48 ANOP
          PEI $CA
          PEI $C8
          JMP BRET   ;641 cycles
-blit216_48 ANOP
+		 end
+blit216_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #131
          TCS        ; Set S  $0083
@@ -13950,7 +14104,8 @@ blit216_48 ANOP
          PEI $CE
          PEI $CC
          JMP BRET   ;651 cycles
-blit224_48 ANOP
+		 end
+blit224_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #135
          TCS        ; Set S  $0087
@@ -14077,7 +14232,8 @@ blit224_48 ANOP
          PEI $D2
          PEI $D0
          JMP BRET   ;651 cycles
-blit232_48 ANOP
+		 end
+blit232_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #139
          TCS        ; Set S  $008B
@@ -14204,7 +14360,8 @@ blit232_48 ANOP
          PEI $D6
          PEI $D4
          JMP BRET   ;651 cycles
-blit240_48 ANOP
+		 end
+blit240_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #143
          TCS        ; Set S  $008F
@@ -14331,7 +14488,8 @@ blit240_48 ANOP
          PEI $DA
          PEI $D8
          JMP BRET   ;651 cycles
-blit248_48 ANOP
+		 end
+blit248_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #147
          TCS        ; Set S  $0093
@@ -14458,7 +14616,8 @@ blit248_48 ANOP
          PEI $DE
          PEI $DC
          JMP BRET   ;651 cycles
-blit256_48 ANOP
+		 end
+blit256_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #151
          TCS        ; Set S  $0097
@@ -14581,7 +14740,8 @@ blit256_48 ANOP
          PEI $E2
          PEI $E0
          JMP BRET   ;641 cycles
-blit264_48 ANOP
+		 end
+blit264_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #155
          TCS        ; Set S  $009B
@@ -14704,7 +14864,8 @@ blit264_48 ANOP
          PEI $E6
          PEI $E4
          JMP BRET   ;641 cycles
-blit272_48 ANOP
+		 end
+blit272_48 start BLITCODE
          TCD        ; Set DP $0000
          ADC #159
          TCS        ; Set S  $009F
@@ -14827,7 +14988,8 @@ blit272_48 ANOP
          PEI $EA
          PEI $E8
          JMP BRET   ;641 cycles
-blit0_40 ANOP
+		 end
+blit0_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #19
          TCS        ; Set S  $0013
@@ -14934,7 +15096,8 @@ blit0_40 ANOP
          PEI $62
          PEI $60
          JMP BRET   ;545 cycles
-blit8_40 ANOP
+		 end
+blit8_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #23
          TCS        ; Set S  $0017
@@ -15041,7 +15204,8 @@ blit8_40 ANOP
          PEI $66
          PEI $64
          JMP BRET   ;545 cycles
-blit16_40 ANOP
+		 end
+blit16_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #27
          TCS        ; Set S  $001B
@@ -15148,7 +15312,8 @@ blit16_40 ANOP
          PEI $6A
          PEI $68
          JMP BRET   ;545 cycles
-blit24_40 ANOP
+		 end
+blit24_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #31
          TCS        ; Set S  $001F
@@ -15255,7 +15420,8 @@ blit24_40 ANOP
          PEI $6E
          PEI $6C
          JMP BRET   ;545 cycles
-blit32_40 ANOP
+		 end
+blit32_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #35
          TCS        ; Set S  $0023
@@ -15366,7 +15532,8 @@ blit32_40 ANOP
          PEI $72
          PEI $70
          JMP BRET   ;555 cycles
-blit40_40 ANOP
+		 end
+blit40_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #39
          TCS        ; Set S  $0027
@@ -15477,7 +15644,8 @@ blit40_40 ANOP
          PEI $76
          PEI $74
          JMP BRET   ;555 cycles
-blit48_40 ANOP
+		 end
+blit48_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #43
          TCS        ; Set S  $002B
@@ -15588,7 +15756,8 @@ blit48_40 ANOP
          PEI $7A
          PEI $78
          JMP BRET   ;555 cycles
-blit56_40 ANOP
+		 end
+blit56_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #47
          TCS        ; Set S  $002F
@@ -15699,7 +15868,8 @@ blit56_40 ANOP
          PEI $7E
          PEI $7C
          JMP BRET   ;555 cycles
-blit64_40 ANOP
+		 end
+blit64_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #51
          TCS        ; Set S  $0033
@@ -15806,7 +15976,8 @@ blit64_40 ANOP
          PEI $82
          PEI $80
          JMP BRET   ;545 cycles
-blit72_40 ANOP
+		 end
+blit72_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #55
          TCS        ; Set S  $0037
@@ -15913,7 +16084,8 @@ blit72_40 ANOP
          PEI $86
          PEI $84
          JMP BRET   ;545 cycles
-blit80_40 ANOP
+		 end
+blit80_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #59
          TCS        ; Set S  $003B
@@ -16020,7 +16192,8 @@ blit80_40 ANOP
          PEI $8A
          PEI $88
          JMP BRET   ;545 cycles
-blit88_40 ANOP
+		 end
+blit88_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #63
          TCS        ; Set S  $003F
@@ -16127,7 +16300,8 @@ blit88_40 ANOP
          PEI $8E
          PEI $8C
          JMP BRET   ;545 cycles
-blit96_40 ANOP
+		 end
+blit96_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #67
          TCS        ; Set S  $0043
@@ -16238,7 +16412,8 @@ blit96_40 ANOP
          PEI $92
          PEI $90
          JMP BRET   ;555 cycles
-blit104_40 ANOP
+		 end
+blit104_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #71
          TCS        ; Set S  $0047
@@ -16349,7 +16524,8 @@ blit104_40 ANOP
          PEI $96
          PEI $94
          JMP BRET   ;555 cycles
-blit112_40 ANOP
+		 end
+blit112_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #75
          TCS        ; Set S  $004B
@@ -16460,7 +16636,8 @@ blit112_40 ANOP
          PEI $9A
          PEI $98
          JMP BRET   ;555 cycles
-blit120_40 ANOP
+		 end
+blit120_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #79
          TCS        ; Set S  $004F
@@ -16571,7 +16748,8 @@ blit120_40 ANOP
          PEI $9E
          PEI $9C
          JMP BRET   ;555 cycles
-blit128_40 ANOP
+		 end
+blit128_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #83
          TCS        ; Set S  $0053
@@ -16678,7 +16856,8 @@ blit128_40 ANOP
          PEI $A2
          PEI $A0
          JMP BRET   ;545 cycles
-blit136_40 ANOP
+		 end
+blit136_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #87
          TCS        ; Set S  $0057
@@ -16785,7 +16964,8 @@ blit136_40 ANOP
          PEI $A6
          PEI $A4
          JMP BRET   ;545 cycles
-blit144_40 ANOP
+		 end
+blit144_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #91
          TCS        ; Set S  $005B
@@ -16892,7 +17072,8 @@ blit144_40 ANOP
          PEI $AA
          PEI $A8
          JMP BRET   ;545 cycles
-blit152_40 ANOP
+		 end
+blit152_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #95
          TCS        ; Set S  $005F
@@ -16999,7 +17180,8 @@ blit152_40 ANOP
          PEI $AE
          PEI $AC
          JMP BRET   ;545 cycles
-blit160_40 ANOP
+		 end
+blit160_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #99
          TCS        ; Set S  $0063
@@ -17110,7 +17292,8 @@ blit160_40 ANOP
          PEI $B2
          PEI $B0
          JMP BRET   ;555 cycles
-blit168_40 ANOP
+		 end
+blit168_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #103
          TCS        ; Set S  $0067
@@ -17221,7 +17404,8 @@ blit168_40 ANOP
          PEI $B6
          PEI $B4
          JMP BRET   ;555 cycles
-blit176_40 ANOP
+		 end
+blit176_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #107
          TCS        ; Set S  $006B
@@ -17332,7 +17516,8 @@ blit176_40 ANOP
          PEI $BA
          PEI $B8
          JMP BRET   ;555 cycles
-blit184_40 ANOP
+		 end
+blit184_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #111
          TCS        ; Set S  $006F
@@ -17443,7 +17628,8 @@ blit184_40 ANOP
          PEI $BE
          PEI $BC
          JMP BRET   ;555 cycles
-blit192_40 ANOP
+		 end
+blit192_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #115
          TCS        ; Set S  $0073
@@ -17550,7 +17736,8 @@ blit192_40 ANOP
          PEI $C2
          PEI $C0
          JMP BRET   ;545 cycles
-blit200_40 ANOP
+		 end
+blit200_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #119
          TCS        ; Set S  $0077
@@ -17657,7 +17844,8 @@ blit200_40 ANOP
          PEI $C6
          PEI $C4
          JMP BRET   ;545 cycles
-blit208_40 ANOP
+		 end
+blit208_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #123
          TCS        ; Set S  $007B
@@ -17764,7 +17952,8 @@ blit208_40 ANOP
          PEI $CA
          PEI $C8
          JMP BRET   ;545 cycles
-blit216_40 ANOP
+		 end
+blit216_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #127
          TCS        ; Set S  $007F
@@ -17871,7 +18060,8 @@ blit216_40 ANOP
          PEI $CE
          PEI $CC
          JMP BRET   ;545 cycles
-blit224_40 ANOP
+		 end
+blit224_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #131
          TCS        ; Set S  $0083
@@ -17982,7 +18172,8 @@ blit224_40 ANOP
          PEI $D2
          PEI $D0
          JMP BRET   ;555 cycles
-blit232_40 ANOP
+		 end
+blit232_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #135
          TCS        ; Set S  $0087
@@ -18093,7 +18284,8 @@ blit232_40 ANOP
          PEI $D6
          PEI $D4
          JMP BRET   ;555 cycles
-blit240_40 ANOP
+		 end
+blit240_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #139
          TCS        ; Set S  $008B
@@ -18204,7 +18396,8 @@ blit240_40 ANOP
          PEI $DA
          PEI $D8
          JMP BRET   ;555 cycles
-blit248_40 ANOP
+		 end
+blit248_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #143
          TCS        ; Set S  $008F
@@ -18315,7 +18508,8 @@ blit248_40 ANOP
          PEI $DE
          PEI $DC
          JMP BRET   ;555 cycles
-blit256_40 ANOP
+		 end
+blit256_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #147
          TCS        ; Set S  $0093
@@ -18422,7 +18616,8 @@ blit256_40 ANOP
          PEI $E2
          PEI $E0
          JMP BRET   ;545 cycles
-blit264_40 ANOP
+		 end
+blit264_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #151
          TCS        ; Set S  $0097
@@ -18529,7 +18724,8 @@ blit264_40 ANOP
          PEI $E6
          PEI $E4
          JMP BRET   ;545 cycles
-blit272_40 ANOP
+		 end
+blit272_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #155
          TCS        ; Set S  $009B
@@ -18636,7 +18832,8 @@ blit272_40 ANOP
          PEI $EA
          PEI $E8
          JMP BRET   ;545 cycles
-blit280_40 ANOP
+		 end
+blit280_40 start BLITCODE
          TCD        ; Set DP $0000
          ADC #159
          TCS        ; Set S  $009F
@@ -18743,7 +18940,8 @@ blit280_40 ANOP
          PEI $EE
          PEI $EC
          JMP BRET   ;545 cycles
-blit0_32 ANOP
+		 end
+blit0_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #15
          TCS        ; Set S  $000F
@@ -18834,7 +19032,8 @@ blit0_32 ANOP
          PEI $62
          PEI $60
          JMP BRET   ;449 cycles
-blit8_32 ANOP
+		 end
+blit8_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #19
          TCS        ; Set S  $0013
@@ -18925,7 +19124,8 @@ blit8_32 ANOP
          PEI $66
          PEI $64
          JMP BRET   ;449 cycles
-blit16_32 ANOP
+		 end
+blit16_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #23
          TCS        ; Set S  $0017
@@ -19016,7 +19216,8 @@ blit16_32 ANOP
          PEI $6A
          PEI $68
          JMP BRET   ;449 cycles
-blit24_32 ANOP
+		 end
+blit24_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #27
          TCS        ; Set S  $001B
@@ -19107,7 +19308,8 @@ blit24_32 ANOP
          PEI $6E
          PEI $6C
          JMP BRET   ;449 cycles
-blit32_32 ANOP
+		 end
+blit32_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #31
          TCS        ; Set S  $001F
@@ -19198,7 +19400,8 @@ blit32_32 ANOP
          PEI $72
          PEI $70
          JMP BRET   ;449 cycles
-blit40_32 ANOP
+		 end
+blit40_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #35
          TCS        ; Set S  $0023
@@ -19293,7 +19496,8 @@ blit40_32 ANOP
          PEI $76
          PEI $74
          JMP BRET   ;459 cycles
-blit48_32 ANOP
+		 end
+blit48_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #39
          TCS        ; Set S  $0027
@@ -19388,7 +19592,8 @@ blit48_32 ANOP
          PEI $7A
          PEI $78
          JMP BRET   ;459 cycles
-blit56_32 ANOP
+		 end
+blit56_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #43
          TCS        ; Set S  $002B
@@ -19483,7 +19688,8 @@ blit56_32 ANOP
          PEI $7E
          PEI $7C
          JMP BRET   ;459 cycles
-blit64_32 ANOP
+		 end
+blit64_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #47
          TCS        ; Set S  $002F
@@ -19574,7 +19780,8 @@ blit64_32 ANOP
          PEI $82
          PEI $80
          JMP BRET   ;449 cycles
-blit72_32 ANOP
+		 end
+blit72_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #51
          TCS        ; Set S  $0033
@@ -19665,7 +19872,8 @@ blit72_32 ANOP
          PEI $86
          PEI $84
          JMP BRET   ;449 cycles
-blit80_32 ANOP
+		 end
+blit80_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #55
          TCS        ; Set S  $0037
@@ -19756,7 +19964,8 @@ blit80_32 ANOP
          PEI $8A
          PEI $88
          JMP BRET   ;449 cycles
-blit88_32 ANOP
+		 end
+blit88_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #59
          TCS        ; Set S  $003B
@@ -19847,7 +20056,8 @@ blit88_32 ANOP
          PEI $8E
          PEI $8C
          JMP BRET   ;449 cycles
-blit96_32 ANOP
+		 end
+blit96_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #63
          TCS        ; Set S  $003F
@@ -19938,7 +20148,8 @@ blit96_32 ANOP
          PEI $92
          PEI $90
          JMP BRET   ;449 cycles
-blit104_32 ANOP
+		 end
+blit104_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #67
          TCS        ; Set S  $0043
@@ -20033,7 +20244,8 @@ blit104_32 ANOP
          PEI $96
          PEI $94
          JMP BRET   ;459 cycles
-blit112_32 ANOP
+		 end
+blit112_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #71
          TCS        ; Set S  $0047
@@ -20128,7 +20340,8 @@ blit112_32 ANOP
          PEI $9A
          PEI $98
          JMP BRET   ;459 cycles
-blit120_32 ANOP
+		 end
+blit120_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #75
          TCS        ; Set S  $004B
@@ -20223,7 +20436,8 @@ blit120_32 ANOP
          PEI $9E
          PEI $9C
          JMP BRET   ;459 cycles
-blit128_32 ANOP
+		 end
+blit128_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #79
          TCS        ; Set S  $004F
@@ -20314,7 +20528,8 @@ blit128_32 ANOP
          PEI $A2
          PEI $A0
          JMP BRET   ;449 cycles
-blit136_32 ANOP
+		 end
+blit136_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #83
          TCS        ; Set S  $0053
@@ -20405,7 +20620,8 @@ blit136_32 ANOP
          PEI $A6
          PEI $A4
          JMP BRET   ;449 cycles
-blit144_32 ANOP
+		 end
+blit144_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #87
          TCS        ; Set S  $0057
@@ -20496,7 +20712,8 @@ blit144_32 ANOP
          PEI $AA
          PEI $A8
          JMP BRET   ;449 cycles
-blit152_32 ANOP
+		 end
+blit152_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #91
          TCS        ; Set S  $005B
@@ -20587,7 +20804,8 @@ blit152_32 ANOP
          PEI $AE
          PEI $AC
          JMP BRET   ;449 cycles
-blit160_32 ANOP
+		 end
+blit160_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #95
          TCS        ; Set S  $005F
@@ -20678,7 +20896,8 @@ blit160_32 ANOP
          PEI $B2
          PEI $B0
          JMP BRET   ;449 cycles
-blit168_32 ANOP
+		 end
+blit168_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #99
          TCS        ; Set S  $0063
@@ -20773,7 +20992,8 @@ blit168_32 ANOP
          PEI $B6
          PEI $B4
          JMP BRET   ;459 cycles
-blit176_32 ANOP
+		 end
+blit176_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #103
          TCS        ; Set S  $0067
@@ -20868,7 +21088,8 @@ blit176_32 ANOP
          PEI $BA
          PEI $B8
          JMP BRET   ;459 cycles
-blit184_32 ANOP
+		 end
+blit184_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #107
          TCS        ; Set S  $006B
@@ -20963,7 +21184,8 @@ blit184_32 ANOP
          PEI $BE
          PEI $BC
          JMP BRET   ;459 cycles
-blit192_32 ANOP
+		 end
+blit192_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #111
          TCS        ; Set S  $006F
@@ -21054,7 +21276,8 @@ blit192_32 ANOP
          PEI $C2
          PEI $C0
          JMP BRET   ;449 cycles
-blit200_32 ANOP
+		 end
+blit200_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #115
          TCS        ; Set S  $0073
@@ -21145,7 +21368,8 @@ blit200_32 ANOP
          PEI $C6
          PEI $C4
          JMP BRET   ;449 cycles
-blit208_32 ANOP
+		 end
+blit208_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #119
          TCS        ; Set S  $0077
@@ -21236,7 +21460,8 @@ blit208_32 ANOP
          PEI $CA
          PEI $C8
          JMP BRET   ;449 cycles
-blit216_32 ANOP
+		 end
+blit216_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #123
          TCS        ; Set S  $007B
@@ -21327,7 +21552,8 @@ blit216_32 ANOP
          PEI $CE
          PEI $CC
          JMP BRET   ;449 cycles
-blit224_32 ANOP
+		 end
+blit224_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #127
          TCS        ; Set S  $007F
@@ -21418,7 +21644,8 @@ blit224_32 ANOP
          PEI $D2
          PEI $D0
          JMP BRET   ;449 cycles
-blit232_32 ANOP
+		 end
+blit232_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #131
          TCS        ; Set S  $0083
@@ -21513,7 +21740,8 @@ blit232_32 ANOP
          PEI $D6
          PEI $D4
          JMP BRET   ;459 cycles
-blit240_32 ANOP
+		 end
+blit240_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #135
          TCS        ; Set S  $0087
@@ -21608,7 +21836,8 @@ blit240_32 ANOP
          PEI $DA
          PEI $D8
          JMP BRET   ;459 cycles
-blit248_32 ANOP
+		 end
+blit248_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #139
          TCS        ; Set S  $008B
@@ -21703,7 +21932,8 @@ blit248_32 ANOP
          PEI $DE
          PEI $DC
          JMP BRET   ;459 cycles
-blit256_32 ANOP
+		 end
+blit256_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #143
          TCS        ; Set S  $008F
@@ -21794,7 +22024,8 @@ blit256_32 ANOP
          PEI $E2
          PEI $E0
          JMP BRET   ;449 cycles
-blit264_32 ANOP
+		 end
+blit264_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #147
          TCS        ; Set S  $0093
@@ -21885,7 +22116,8 @@ blit264_32 ANOP
          PEI $E6
          PEI $E4
          JMP BRET   ;449 cycles
-blit272_32 ANOP
+		 end
+blit272_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #151
          TCS        ; Set S  $0097
@@ -21976,7 +22208,8 @@ blit272_32 ANOP
          PEI $EA
          PEI $E8
          JMP BRET   ;449 cycles
-blit280_32 ANOP
+		 end
+blit280_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #155
          TCS        ; Set S  $009B
@@ -22067,7 +22300,8 @@ blit280_32 ANOP
          PEI $EE
          PEI $EC
          JMP BRET   ;449 cycles
-blit288_32 ANOP
+		 end
+blit288_32 start BLITCODE
          TCD        ; Set DP $0000
          ADC #159
          TCS        ; Set S  $009F
@@ -22158,7 +22392,8 @@ blit288_32 ANOP
          PEI $F2
          PEI $F0
          JMP BRET   ;449 cycles
-blit0_24 ANOP
+		 end
+blit0_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #11
          TCS        ; Set S  $000B
@@ -22233,7 +22468,8 @@ blit0_24 ANOP
          PEI $62
          PEI $60
          JMP BRET   ;353 cycles
-blit8_24 ANOP
+		 end
+blit8_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #15
          TCS        ; Set S  $000F
@@ -22308,7 +22544,8 @@ blit8_24 ANOP
          PEI $66
          PEI $64
          JMP BRET   ;353 cycles
-blit16_24 ANOP
+		 end
+blit16_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #19
          TCS        ; Set S  $0013
@@ -22383,7 +22620,8 @@ blit16_24 ANOP
          PEI $6A
          PEI $68
          JMP BRET   ;353 cycles
-blit24_24 ANOP
+		 end
+blit24_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #23
          TCS        ; Set S  $0017
@@ -22458,7 +22696,8 @@ blit24_24 ANOP
          PEI $6E
          PEI $6C
          JMP BRET   ;353 cycles
-blit32_24 ANOP
+		 end
+blit32_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #27
          TCS        ; Set S  $001B
@@ -22533,7 +22772,8 @@ blit32_24 ANOP
          PEI $72
          PEI $70
          JMP BRET   ;353 cycles
-blit40_24 ANOP
+		 end
+blit40_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #31
          TCS        ; Set S  $001F
@@ -22608,7 +22848,8 @@ blit40_24 ANOP
          PEI $76
          PEI $74
          JMP BRET   ;353 cycles
-blit48_24 ANOP
+		 end
+blit48_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #35
          TCS        ; Set S  $0023
@@ -22687,7 +22928,8 @@ blit48_24 ANOP
          PEI $7A
          PEI $78
          JMP BRET   ;363 cycles
-blit56_24 ANOP
+		 end
+blit56_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #39
          TCS        ; Set S  $0027
@@ -22766,7 +23008,8 @@ blit56_24 ANOP
          PEI $7E
          PEI $7C
          JMP BRET   ;363 cycles
-blit64_24 ANOP
+		 end
+blit64_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #43
          TCS        ; Set S  $002B
@@ -22841,7 +23084,8 @@ blit64_24 ANOP
          PEI $82
          PEI $80
          JMP BRET   ;353 cycles
-blit72_24 ANOP
+		 end
+blit72_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #47
          TCS        ; Set S  $002F
@@ -22916,7 +23160,8 @@ blit72_24 ANOP
          PEI $86
          PEI $84
          JMP BRET   ;353 cycles
-blit80_24 ANOP
+		 end
+blit80_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #51
          TCS        ; Set S  $0033
@@ -22991,7 +23236,8 @@ blit80_24 ANOP
          PEI $8A
          PEI $88
          JMP BRET   ;353 cycles
-blit88_24 ANOP
+		 end
+blit88_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #55
          TCS        ; Set S  $0037
@@ -23066,7 +23312,8 @@ blit88_24 ANOP
          PEI $8E
          PEI $8C
          JMP BRET   ;353 cycles
-blit96_24 ANOP
+		 end
+blit96_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #59
          TCS        ; Set S  $003B
@@ -23141,7 +23388,8 @@ blit96_24 ANOP
          PEI $92
          PEI $90
          JMP BRET   ;353 cycles
-blit104_24 ANOP
+		 end
+blit104_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #63
          TCS        ; Set S  $003F
@@ -23216,7 +23464,8 @@ blit104_24 ANOP
          PEI $96
          PEI $94
          JMP BRET   ;353 cycles
-blit112_24 ANOP
+		 end
+blit112_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #67
          TCS        ; Set S  $0043
@@ -23295,7 +23544,8 @@ blit112_24 ANOP
          PEI $9A
          PEI $98
          JMP BRET   ;363 cycles
-blit120_24 ANOP
+		 end
+blit120_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #71
          TCS        ; Set S  $0047
@@ -23374,7 +23624,8 @@ blit120_24 ANOP
          PEI $9E
          PEI $9C
          JMP BRET   ;363 cycles
-blit128_24 ANOP
+		 end
+blit128_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #75
          TCS        ; Set S  $004B
@@ -23449,7 +23700,8 @@ blit128_24 ANOP
          PEI $A2
          PEI $A0
          JMP BRET   ;353 cycles
-blit136_24 ANOP
+		 end
+blit136_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #79
          TCS        ; Set S  $004F
@@ -23524,7 +23776,8 @@ blit136_24 ANOP
          PEI $A6
          PEI $A4
          JMP BRET   ;353 cycles
-blit144_24 ANOP
+		 end
+blit144_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #83
          TCS        ; Set S  $0053
@@ -23599,7 +23852,8 @@ blit144_24 ANOP
          PEI $AA
          PEI $A8
          JMP BRET   ;353 cycles
-blit152_24 ANOP
+		 end
+blit152_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #87
          TCS        ; Set S  $0057
@@ -23674,7 +23928,8 @@ blit152_24 ANOP
          PEI $AE
          PEI $AC
          JMP BRET   ;353 cycles
-blit160_24 ANOP
+		 end
+blit160_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #91
          TCS        ; Set S  $005B
@@ -23749,7 +24004,8 @@ blit160_24 ANOP
          PEI $B2
          PEI $B0
          JMP BRET   ;353 cycles
-blit168_24 ANOP
+		 end
+blit168_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #95
          TCS        ; Set S  $005F
@@ -23824,7 +24080,8 @@ blit168_24 ANOP
          PEI $B6
          PEI $B4
          JMP BRET   ;353 cycles
-blit176_24 ANOP
+		 end
+blit176_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #99
          TCS        ; Set S  $0063
@@ -23903,7 +24160,8 @@ blit176_24 ANOP
          PEI $BA
          PEI $B8
          JMP BRET   ;363 cycles
-blit184_24 ANOP
+		 end
+blit184_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #103
          TCS        ; Set S  $0067
@@ -23982,7 +24240,8 @@ blit184_24 ANOP
          PEI $BE
          PEI $BC
          JMP BRET   ;363 cycles
-blit192_24 ANOP
+		 end
+blit192_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #107
          TCS        ; Set S  $006B
@@ -24057,7 +24316,8 @@ blit192_24 ANOP
          PEI $C2
          PEI $C0
          JMP BRET   ;353 cycles
-blit200_24 ANOP
+		 end
+blit200_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #111
          TCS        ; Set S  $006F
@@ -24132,7 +24392,8 @@ blit200_24 ANOP
          PEI $C6
          PEI $C4
          JMP BRET   ;353 cycles
-blit208_24 ANOP
+		 end
+blit208_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #115
          TCS        ; Set S  $0073
@@ -24207,7 +24468,8 @@ blit208_24 ANOP
          PEI $CA
          PEI $C8
          JMP BRET   ;353 cycles
-blit216_24 ANOP
+		 end
+blit216_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #119
          TCS        ; Set S  $0077
@@ -24282,7 +24544,8 @@ blit216_24 ANOP
          PEI $CE
          PEI $CC
          JMP BRET   ;353 cycles
-blit224_24 ANOP
+		 end
+blit224_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #123
          TCS        ; Set S  $007B
@@ -24357,7 +24620,8 @@ blit224_24 ANOP
          PEI $D2
          PEI $D0
          JMP BRET   ;353 cycles
-blit232_24 ANOP
+		 end
+blit232_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #127
          TCS        ; Set S  $007F
@@ -24432,7 +24696,8 @@ blit232_24 ANOP
          PEI $D6
          PEI $D4
          JMP BRET   ;353 cycles
-blit240_24 ANOP
+		 end
+blit240_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #131
          TCS        ; Set S  $0083
@@ -24511,7 +24776,8 @@ blit240_24 ANOP
          PEI $DA
          PEI $D8
          JMP BRET   ;363 cycles
-blit248_24 ANOP
+		 end
+blit248_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #135
          TCS        ; Set S  $0087
@@ -24590,7 +24856,8 @@ blit248_24 ANOP
          PEI $DE
          PEI $DC
          JMP BRET   ;363 cycles
-blit256_24 ANOP
+		 end
+blit256_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #139
          TCS        ; Set S  $008B
@@ -24665,7 +24932,8 @@ blit256_24 ANOP
          PEI $E2
          PEI $E0
          JMP BRET   ;353 cycles
-blit264_24 ANOP
+		 end
+blit264_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #143
          TCS        ; Set S  $008F
@@ -24740,7 +25008,8 @@ blit264_24 ANOP
          PEI $E6
          PEI $E4
          JMP BRET   ;353 cycles
-blit272_24 ANOP
+		 end
+blit272_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #147
          TCS        ; Set S  $0093
@@ -24815,7 +25084,8 @@ blit272_24 ANOP
          PEI $EA
          PEI $E8
          JMP BRET   ;353 cycles
-blit280_24 ANOP
+		 end
+blit280_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #151
          TCS        ; Set S  $0097
@@ -24890,7 +25160,8 @@ blit280_24 ANOP
          PEI $EE
          PEI $EC
          JMP BRET   ;353 cycles
-blit288_24 ANOP
+		 end
+blit288_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #155
          TCS        ; Set S  $009B
@@ -24965,7 +25236,8 @@ blit288_24 ANOP
          PEI $F2
          PEI $F0
          JMP BRET   ;353 cycles
-blit296_24 ANOP
+		 end
+blit296_24 start BLITCODE
          TCD        ; Set DP $0000
          ADC #159
          TCS        ; Set S  $009F
@@ -25040,7 +25312,8 @@ blit296_24 ANOP
          PEI $F6
          PEI $F4
          JMP BRET   ;353 cycles
-blit0_16 ANOP
+		 end
+blit0_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #7
          TCS        ; Set S  $0007
@@ -25099,7 +25372,8 @@ blit0_16 ANOP
          PEI $62
          PEI $60
          JMP BRET   ;257 cycles
-blit8_16 ANOP
+		 end
+blit8_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #11
          TCS        ; Set S  $000B
@@ -25158,7 +25432,8 @@ blit8_16 ANOP
          PEI $66
          PEI $64
          JMP BRET   ;257 cycles
-blit16_16 ANOP
+		 end
+blit16_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #15
          TCS        ; Set S  $000F
@@ -25217,7 +25492,8 @@ blit16_16 ANOP
          PEI $6A
          PEI $68
          JMP BRET   ;257 cycles
-blit24_16 ANOP
+		 end
+blit24_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #19
          TCS        ; Set S  $0013
@@ -25276,7 +25552,8 @@ blit24_16 ANOP
          PEI $6E
          PEI $6C
          JMP BRET   ;257 cycles
-blit32_16 ANOP
+		 end
+blit32_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #23
          TCS        ; Set S  $0017
@@ -25335,7 +25612,8 @@ blit32_16 ANOP
          PEI $72
          PEI $70
          JMP BRET   ;257 cycles
-blit40_16 ANOP
+		 end
+blit40_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #27
          TCS        ; Set S  $001B
@@ -25394,7 +25672,8 @@ blit40_16 ANOP
          PEI $76
          PEI $74
          JMP BRET   ;257 cycles
-blit48_16 ANOP
+		 end
+blit48_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #31
          TCS        ; Set S  $001F
@@ -25453,7 +25732,8 @@ blit48_16 ANOP
          PEI $7A
          PEI $78
          JMP BRET   ;257 cycles
-blit56_16 ANOP
+		 end
+blit56_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #35
          TCS        ; Set S  $0023
@@ -25516,7 +25796,8 @@ blit56_16 ANOP
          PEI $7E
          PEI $7C
          JMP BRET   ;267 cycles
-blit64_16 ANOP
+		 end
+blit64_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #39
          TCS        ; Set S  $0027
@@ -25575,7 +25856,8 @@ blit64_16 ANOP
          PEI $82
          PEI $80
          JMP BRET   ;257 cycles
-blit72_16 ANOP
+		 end
+blit72_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #43
          TCS        ; Set S  $002B
@@ -25634,7 +25916,8 @@ blit72_16 ANOP
          PEI $86
          PEI $84
          JMP BRET   ;257 cycles
-blit80_16 ANOP
+		 end
+blit80_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #47
          TCS        ; Set S  $002F
@@ -25693,7 +25976,8 @@ blit80_16 ANOP
          PEI $8A
          PEI $88
          JMP BRET   ;257 cycles
-blit88_16 ANOP
+		 end
+blit88_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #51
          TCS        ; Set S  $0033
@@ -25752,7 +26036,8 @@ blit88_16 ANOP
          PEI $8E
          PEI $8C
          JMP BRET   ;257 cycles
-blit96_16 ANOP
+		 end
+blit96_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #55
          TCS        ; Set S  $0037
@@ -25811,7 +26096,8 @@ blit96_16 ANOP
          PEI $92
          PEI $90
          JMP BRET   ;257 cycles
-blit104_16 ANOP
+		 end
+blit104_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #59
          TCS        ; Set S  $003B
@@ -25870,7 +26156,8 @@ blit104_16 ANOP
          PEI $96
          PEI $94
          JMP BRET   ;257 cycles
-blit112_16 ANOP
+		 end
+blit112_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #63
          TCS        ; Set S  $003F
@@ -25929,7 +26216,8 @@ blit112_16 ANOP
          PEI $9A
          PEI $98
          JMP BRET   ;257 cycles
-blit120_16 ANOP
+		 end
+blit120_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #67
          TCS        ; Set S  $0043
@@ -25992,7 +26280,8 @@ blit120_16 ANOP
          PEI $9E
          PEI $9C
          JMP BRET   ;267 cycles
-blit128_16 ANOP
+		 end
+blit128_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #71
          TCS        ; Set S  $0047
@@ -26051,7 +26340,8 @@ blit128_16 ANOP
          PEI $A2
          PEI $A0
          JMP BRET   ;257 cycles
-blit136_16 ANOP
+		 end
+blit136_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #75
          TCS        ; Set S  $004B
@@ -26110,7 +26400,8 @@ blit136_16 ANOP
          PEI $A6
          PEI $A4
          JMP BRET   ;257 cycles
-blit144_16 ANOP
+		 end
+blit144_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #79
          TCS        ; Set S  $004F
@@ -26169,7 +26460,8 @@ blit144_16 ANOP
          PEI $AA
          PEI $A8
          JMP BRET   ;257 cycles
-blit152_16 ANOP
+		 end
+blit152_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #83
          TCS        ; Set S  $0053
@@ -26228,7 +26520,8 @@ blit152_16 ANOP
          PEI $AE
          PEI $AC
          JMP BRET   ;257 cycles
-blit160_16 ANOP
+		 end
+blit160_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #87
          TCS        ; Set S  $0057
@@ -26287,7 +26580,8 @@ blit160_16 ANOP
          PEI $B2
          PEI $B0
          JMP BRET   ;257 cycles
-blit168_16 ANOP
+		 end
+blit168_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #91
          TCS        ; Set S  $005B
@@ -26346,7 +26640,8 @@ blit168_16 ANOP
          PEI $B6
          PEI $B4
          JMP BRET   ;257 cycles
-blit176_16 ANOP
+		 end
+blit176_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #95
          TCS        ; Set S  $005F
@@ -26405,7 +26700,8 @@ blit176_16 ANOP
          PEI $BA
          PEI $B8
          JMP BRET   ;257 cycles
-blit184_16 ANOP
+		 end
+blit184_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #99
          TCS        ; Set S  $0063
@@ -26468,7 +26764,8 @@ blit184_16 ANOP
          PEI $BE
          PEI $BC
          JMP BRET   ;267 cycles
-blit192_16 ANOP
+		 end
+blit192_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #103
          TCS        ; Set S  $0067
@@ -26527,7 +26824,8 @@ blit192_16 ANOP
          PEI $C2
          PEI $C0
          JMP BRET   ;257 cycles
-blit200_16 ANOP
+		 end
+blit200_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #107
          TCS        ; Set S  $006B
@@ -26586,7 +26884,8 @@ blit200_16 ANOP
          PEI $C6
          PEI $C4
          JMP BRET   ;257 cycles
-blit208_16 ANOP
+		 end
+blit208_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #111
          TCS        ; Set S  $006F
@@ -26645,7 +26944,8 @@ blit208_16 ANOP
          PEI $CA
          PEI $C8
          JMP BRET   ;257 cycles
-blit216_16 ANOP
+		 end
+blit216_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #115
          TCS        ; Set S  $0073
@@ -26704,7 +27004,8 @@ blit216_16 ANOP
          PEI $CE
          PEI $CC
          JMP BRET   ;257 cycles
-blit224_16 ANOP
+		 end
+blit224_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #119
          TCS        ; Set S  $0077
@@ -26763,7 +27064,8 @@ blit224_16 ANOP
          PEI $D2
          PEI $D0
          JMP BRET   ;257 cycles
-blit232_16 ANOP
+		 end
+blit232_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #123
          TCS        ; Set S  $007B
@@ -26822,7 +27124,8 @@ blit232_16 ANOP
          PEI $D6
          PEI $D4
          JMP BRET   ;257 cycles
-blit240_16 ANOP
+		 end
+blit240_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #127
          TCS        ; Set S  $007F
@@ -26881,7 +27184,8 @@ blit240_16 ANOP
          PEI $DA
          PEI $D8
          JMP BRET   ;257 cycles
-blit248_16 ANOP
+		 end
+blit248_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #131
          TCS        ; Set S  $0083
@@ -26944,7 +27248,8 @@ blit248_16 ANOP
          PEI $DE
          PEI $DC
          JMP BRET   ;267 cycles
-blit256_16 ANOP
+		 end
+blit256_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #135
          TCS        ; Set S  $0087
@@ -27003,7 +27308,8 @@ blit256_16 ANOP
          PEI $E2
          PEI $E0
          JMP BRET   ;257 cycles
-blit264_16 ANOP
+		 end
+blit264_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #139
          TCS        ; Set S  $008B
@@ -27062,7 +27368,8 @@ blit264_16 ANOP
          PEI $E6
          PEI $E4
          JMP BRET   ;257 cycles
-blit272_16 ANOP
+		 end
+blit272_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #143
          TCS        ; Set S  $008F
@@ -27121,7 +27428,8 @@ blit272_16 ANOP
          PEI $EA
          PEI $E8
          JMP BRET   ;257 cycles
-blit280_16 ANOP
+		 end
+blit280_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #147
          TCS        ; Set S  $0093
@@ -27180,7 +27488,8 @@ blit280_16 ANOP
          PEI $EE
          PEI $EC
          JMP BRET   ;257 cycles
-blit288_16 ANOP
+		 end
+blit288_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #151
          TCS        ; Set S  $0097
@@ -27239,7 +27548,8 @@ blit288_16 ANOP
          PEI $F2
          PEI $F0
          JMP BRET   ;257 cycles
-blit296_16 ANOP
+		 end
+blit296_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #155
          TCS        ; Set S  $009B
@@ -27298,7 +27608,8 @@ blit296_16 ANOP
          PEI $F6
          PEI $F4
          JMP BRET   ;257 cycles
-blit304_16 ANOP
+		 end
+blit304_16 start BLITCODE
          TCD        ; Set DP $0000
          ADC #159
          TCS        ; Set S  $009F
@@ -27357,7 +27668,8 @@ blit304_16 ANOP
          PEI $FA
          PEI $F8
          JMP BRET   ;257 cycles
-blit0_8 ANOP
+		 end
+blit0_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #3
          TCS        ; Set S  $0003
@@ -27400,7 +27712,8 @@ blit0_8 ANOP
          PEI $62
          PEI $60
          JMP BRET   ;161 cycles
-blit8_8 ANOP
+		 end
+blit8_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #7
          TCS        ; Set S  $0007
@@ -27443,7 +27756,8 @@ blit8_8 ANOP
          PEI $66
          PEI $64
          JMP BRET   ;161 cycles
-blit16_8 ANOP
+		 end
+blit16_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #11
          TCS        ; Set S  $000B
@@ -27486,7 +27800,8 @@ blit16_8 ANOP
          PEI $6A
          PEI $68
          JMP BRET   ;161 cycles
-blit24_8 ANOP
+		 end
+blit24_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #15
          TCS        ; Set S  $000F
@@ -27529,7 +27844,8 @@ blit24_8 ANOP
          PEI $6E
          PEI $6C
          JMP BRET   ;161 cycles
-blit32_8 ANOP
+		 end
+blit32_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #19
          TCS        ; Set S  $0013
@@ -27572,7 +27888,8 @@ blit32_8 ANOP
          PEI $72
          PEI $70
          JMP BRET   ;161 cycles
-blit40_8 ANOP
+		 end
+blit40_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #23
          TCS        ; Set S  $0017
@@ -27615,7 +27932,8 @@ blit40_8 ANOP
          PEI $76
          PEI $74
          JMP BRET   ;161 cycles
-blit48_8 ANOP
+		 end
+blit48_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #27
          TCS        ; Set S  $001B
@@ -27658,7 +27976,8 @@ blit48_8 ANOP
          PEI $7A
          PEI $78
          JMP BRET   ;161 cycles
-blit56_8 ANOP
+		 end
+blit56_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #31
          TCS        ; Set S  $001F
@@ -27701,7 +28020,8 @@ blit56_8 ANOP
          PEI $7E
          PEI $7C
          JMP BRET   ;161 cycles
-blit64_8 ANOP
+		 end
+blit64_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #35
          TCS        ; Set S  $0023
@@ -27744,7 +28064,8 @@ blit64_8 ANOP
          PEI $82
          PEI $80
          JMP BRET   ;161 cycles
-blit72_8 ANOP
+		 end
+blit72_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #39
          TCS        ; Set S  $0027
@@ -27787,7 +28108,8 @@ blit72_8 ANOP
          PEI $86
          PEI $84
          JMP BRET   ;161 cycles
-blit80_8 ANOP
+		 end
+blit80_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #43
          TCS        ; Set S  $002B
@@ -27830,7 +28152,8 @@ blit80_8 ANOP
          PEI $8A
          PEI $88
          JMP BRET   ;161 cycles
-blit88_8 ANOP
+		 end
+blit88_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #47
          TCS        ; Set S  $002F
@@ -27873,7 +28196,8 @@ blit88_8 ANOP
          PEI $8E
          PEI $8C
          JMP BRET   ;161 cycles
-blit96_8 ANOP
+		 end
+blit96_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #51
          TCS        ; Set S  $0033
@@ -27916,7 +28240,8 @@ blit96_8 ANOP
          PEI $92
          PEI $90
          JMP BRET   ;161 cycles
-blit104_8 ANOP
+		 end
+blit104_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #55
          TCS        ; Set S  $0037
@@ -27959,7 +28284,8 @@ blit104_8 ANOP
          PEI $96
          PEI $94
          JMP BRET   ;161 cycles
-blit112_8 ANOP
+		 end
+blit112_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #59
          TCS        ; Set S  $003B
@@ -28002,7 +28328,8 @@ blit112_8 ANOP
          PEI $9A
          PEI $98
          JMP BRET   ;161 cycles
-blit120_8 ANOP
+		 end
+blit120_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #63
          TCS        ; Set S  $003F
@@ -28045,7 +28372,8 @@ blit120_8 ANOP
          PEI $9E
          PEI $9C
          JMP BRET   ;161 cycles
-blit128_8 ANOP
+		 end
+blit128_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #67
          TCS        ; Set S  $0043
@@ -28088,7 +28416,8 @@ blit128_8 ANOP
          PEI $A2
          PEI $A0
          JMP BRET   ;161 cycles
-blit136_8 ANOP
+		 end
+blit136_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #71
          TCS        ; Set S  $0047
@@ -28131,7 +28460,8 @@ blit136_8 ANOP
          PEI $A6
          PEI $A4
          JMP BRET   ;161 cycles
-blit144_8 ANOP
+		 end
+blit144_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #75
          TCS        ; Set S  $004B
@@ -28174,7 +28504,8 @@ blit144_8 ANOP
          PEI $AA
          PEI $A8
          JMP BRET   ;161 cycles
-blit152_8 ANOP
+		 end
+blit152_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #79
          TCS        ; Set S  $004F
@@ -28217,7 +28548,8 @@ blit152_8 ANOP
          PEI $AE
          PEI $AC
          JMP BRET   ;161 cycles
-blit160_8 ANOP
+		 end
+blit160_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #83
          TCS        ; Set S  $0053
@@ -28260,7 +28592,8 @@ blit160_8 ANOP
          PEI $B2
          PEI $B0
          JMP BRET   ;161 cycles
-blit168_8 ANOP
+		 end
+blit168_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #87
          TCS        ; Set S  $0057
@@ -28303,7 +28636,8 @@ blit168_8 ANOP
          PEI $B6
          PEI $B4
          JMP BRET   ;161 cycles
-blit176_8 ANOP
+		 end
+blit176_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #91
          TCS        ; Set S  $005B
@@ -28346,7 +28680,8 @@ blit176_8 ANOP
          PEI $BA
          PEI $B8
          JMP BRET   ;161 cycles
-blit184_8 ANOP
+		 end
+blit184_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #95
          TCS        ; Set S  $005F
@@ -28389,7 +28724,8 @@ blit184_8 ANOP
          PEI $BE
          PEI $BC
          JMP BRET   ;161 cycles
-blit192_8 ANOP
+		 end
+blit192_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #99
          TCS        ; Set S  $0063
@@ -28432,7 +28768,8 @@ blit192_8 ANOP
          PEI $C2
          PEI $C0
          JMP BRET   ;161 cycles
-blit200_8 ANOP
+		 end
+blit200_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #103
          TCS        ; Set S  $0067
@@ -28475,7 +28812,8 @@ blit200_8 ANOP
          PEI $C6
          PEI $C4
          JMP BRET   ;161 cycles
-blit208_8 ANOP
+		 end
+blit208_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #107
          TCS        ; Set S  $006B
@@ -28518,7 +28856,8 @@ blit208_8 ANOP
          PEI $CA
          PEI $C8
          JMP BRET   ;161 cycles
-blit216_8 ANOP
+		 end
+blit216_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #111
          TCS        ; Set S  $006F
@@ -28561,7 +28900,8 @@ blit216_8 ANOP
          PEI $CE
          PEI $CC
          JMP BRET   ;161 cycles
-blit224_8 ANOP
+		 end
+blit224_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #115
          TCS        ; Set S  $0073
@@ -28604,7 +28944,8 @@ blit224_8 ANOP
          PEI $D2
          PEI $D0
          JMP BRET   ;161 cycles
-blit232_8 ANOP
+		 end
+blit232_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #119
          TCS        ; Set S  $0077
@@ -28647,7 +28988,8 @@ blit232_8 ANOP
          PEI $D6
          PEI $D4
          JMP BRET   ;161 cycles
-blit240_8 ANOP
+		 end
+blit240_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #123
          TCS        ; Set S  $007B
@@ -28690,7 +29032,8 @@ blit240_8 ANOP
          PEI $DA
          PEI $D8
          JMP BRET   ;161 cycles
-blit248_8 ANOP
+		 end
+blit248_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #127
          TCS        ; Set S  $007F
@@ -28733,7 +29076,8 @@ blit248_8 ANOP
          PEI $DE
          PEI $DC
          JMP BRET   ;161 cycles
-blit256_8 ANOP
+		 end
+blit256_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #131
          TCS        ; Set S  $0083
@@ -28776,7 +29120,8 @@ blit256_8 ANOP
          PEI $E2
          PEI $E0
          JMP BRET   ;161 cycles
-blit264_8 ANOP
+		 end
+blit264_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #135
          TCS        ; Set S  $0087
@@ -28819,7 +29164,8 @@ blit264_8 ANOP
          PEI $E6
          PEI $E4
          JMP BRET   ;161 cycles
-blit272_8 ANOP
+		 end
+blit272_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #139
          TCS        ; Set S  $008B
@@ -28862,7 +29208,8 @@ blit272_8 ANOP
          PEI $EA
          PEI $E8
          JMP BRET   ;161 cycles
-blit280_8 ANOP
+		 end
+blit280_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #143
          TCS        ; Set S  $008F
@@ -28905,7 +29252,8 @@ blit280_8 ANOP
          PEI $EE
          PEI $EC
          JMP BRET   ;161 cycles
-blit288_8 ANOP
+		 end
+blit288_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #147
          TCS        ; Set S  $0093
@@ -28948,7 +29296,8 @@ blit288_8 ANOP
          PEI $F2
          PEI $F0
          JMP BRET   ;161 cycles
-blit296_8 ANOP
+		 end
+blit296_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #151
          TCS        ; Set S  $0097
@@ -28991,7 +29340,8 @@ blit296_8 ANOP
          PEI $F6
          PEI $F4
          JMP BRET   ;161 cycles
-blit304_8 ANOP
+		 end
+blit304_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #155
          TCS        ; Set S  $009B
@@ -29034,7 +29384,8 @@ blit304_8 ANOP
          PEI $FA
          PEI $F8
          JMP BRET   ;161 cycles
-blit312_8 ANOP
+		 end
+blit312_8 start BLITCODE
          TCD        ; Set DP $0000
          ADC #159
          TCS        ; Set S  $009F
@@ -29077,7 +29428,6 @@ blit312_8 ANOP
          PEI $FE
          PEI $FC
          JMP BRET   ;161 cycles
-	  
+		 end
 *-------------------------------------------------------------------------------
-    end  	;; END BLITCODE
 	

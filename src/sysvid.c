@@ -41,7 +41,8 @@ segment "system";
 #endif
 
 U8 *sysvid_fb; /* frame buffer */
-rect_t SCREENRECT = {0, 0, SYSVID_WIDTH, SYSVID_HEIGHT, NULL}; /* whole fb */
+
+rect_t SCREENRECT = {0, 0, 320, SYSVID_HEIGHT, NULL}; /* whole fb */
 
 #ifndef IIGS
 static SDL_Color palette[256];
@@ -390,6 +391,9 @@ sysvid_init(void)
 
 	// ENABLE Shadowing of SHR
 	*SHADOW_REGISTER&=~0x08; // Shadow Enable
+	// DISABLE Shadowing of SHR
+	*SHADOW_REGISTER|=0x08; // Shadow Disable
+
 #endif
 #ifndef IIGS
   SDL_Surface *s;
@@ -486,6 +490,23 @@ sysvid_shutdown(void)
 void
 sysvid_update(rect_t *rects)
 {
+#ifdef IIGS
+	int result;
+	//PresentFrameBuffer();
+	while (rects)
+	{
+		#if 0
+		printf("%d,%d,%d,%d\n",
+			   rects->x,
+			   rects->y,
+			   rects->width,
+			   rects->height
+		);
+		#endif
+		result = BlitRect(rects->x, rects->y, rects->width, rects->height);
+		rects = rects->next;
+	}
+#endif
 #ifndef IIGS
   static SDL_Rect area;
   U16 x, y, xz, yz;
@@ -560,10 +581,51 @@ sysvid_clear(void)
   memset(sysvid_fb, 0, SYSVID_WIDTH * SYSVID_HEIGHT);
 #else
   size_t length = SYSVID_WIDTH * SYSVID_HEIGHT;
-  //printf("sysvid_clear: target = %08p\n", sysvid_fb);
-  //printf("sysvid_clear: length = %08p\n", length);
-  //sys_sleep(10000);
   memset(sysvid_fb, 0, length);
+#endif
+}
+
+void sysvid_clearPalette(void)
+{
+#ifdef IIGS
+	size_t offset = SYSVID_WIDTH * SYSVID_HEIGHT;
+	size_t length = 768;
+	U8* ptr = sysvid_fb + offset;
+	memset(ptr, 0, length);
+#endif
+}
+
+void sysvid_FadeIn()
+{
+#ifdef IIGS
+	size_t offset = SYSVID_WIDTH * SYSVID_HEIGHT;
+	size_t length = 200;
+	U8* ptr = sysvid_fb + offset;
+	int idx;
+
+	for (idx = 0;idx<16; ++idx)
+	{
+		memset(ptr, idx, length);
+		wait_vsync();
+		PresentSCB();
+	}
+#endif
+}
+
+void sysvid_FadeOut()
+{
+#ifdef IIGS
+	size_t offset = SYSVID_WIDTH * SYSVID_HEIGHT;
+	size_t length = 200;
+	U8* ptr = sysvid_fb + offset;
+	int idx;
+
+	for (idx = 15;idx>=0; --idx)
+	{
+		memset(ptr, idx, length);
+		wait_vsync();
+		PresentSCB();
+	}
 #endif
 }
 

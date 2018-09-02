@@ -43,9 +43,12 @@ TILEBANK2 entry
 	lda >$880005,x	
 	sta >TILEBANK+1
 	
+	cpy #$9D00-(7*160)
+	bge skip
+
 TILEBANK entry	
 	jsl >$880000
-	
+skip anop   
 	plb
 	
 	rtl
@@ -70,3 +73,27 @@ iBank equ 4
 
 *-------------------------------------------------------------------------------
 	end
+	
+
+*-------------------------------------------------------------------------------
+wait_vsync start BLITCODE
+	
+	php
+	sep #$30
+  
+*	while VBLANK, wait here  
+invbl anop
+	lda >$00c019
+	bpl invbl
+	
+*	while !VBLANK, loop here
+vbl anop
+	lda >$00c019
+	bmi vbl
+	
+	plp
+	rtl
+*-------------------------------------------------------------------------------
+	end
+*-------------------------------------------------------------------------------
+
