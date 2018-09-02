@@ -111,6 +111,24 @@ void savePixelsGSc1(MYBMP *pBitmap, const char* pFilename)
 				green>>=4;
 				blue>>=4;
 
+				{
+					// Generate a ramp of colors, so SCB = 0, is black
+					// SCB = 15 is faded in
+					float scale = palnum / 15.0f;
+
+					if (palnum < 15)
+					{
+						float fr = scale * red;
+						float fg = scale * green;
+						float fb = scale * blue;
+
+						red   = fr;
+						green = fg;
+						blue  = fb;
+					}
+				}
+
+
 				pixel |= red << 8;
 				pixel |= green << 4;
 				pixel |= blue;
