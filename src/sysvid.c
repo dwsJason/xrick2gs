@@ -34,6 +34,7 @@ segment "system";
 #include <Orca.h>
 #include <Misctool.h>
 #include <ADB.h>
+#include <loader.h>
 #endif
 
 #ifdef __MSVC__
@@ -262,6 +263,55 @@ void PrepareSprites()
 					(*handles[2])>>16,
 					(*handles[3])>>16  );
 }
+
+struct LoadSegRec {
+   Word userID;
+   Pointer startAddr;
+   Word LoadFileNo;
+   Word LoadSegNo;
+   Word LoadSegKind;
+   };
+typedef struct LoadSegRec LoadSegRec;
+
+//
+//  Summarize the LoadSegments
+//
+void GetLoadSegments()
+{
+	long* outData = (long*)0x011000; // hard coded address, so kegs can shit this out
+	int idx;
+static LoadSegRec result;
+
+	outData[0] = 16;	// first value, the number of segments
+
+	printf("$%08p GetLoadSegments\n", (Pointer)&GetLoadSegments);
+	printf("$%04X userid\n", userid());
+
+	for (idx = 1; idx < 255; ++idx)
+	{
+		// userid, loadfilenum, segnum, outptr
+		memset(&result, 0, sizeof(LoadSegRec));
+		GetLoadSegInfo(0,1,idx, (Pointer)&result);
+
+		if (toolerror())
+		{
+			printf("toolerror = $%04X\n", toolerror());
+			break;
+		}
+		else
+		{
+			Pointer pMem = *(Pointer*)result.startAddr;
+			printf("Seg:%d userid=$%04X ptr=%08p\n", idx, result.userID, pMem);
+			outData[idx] = (long)pMem;
+		}
+
+		//printf("Seg:%d $%08p\n", idx, *(Pointer)result.startAddr);
+	}
+
+	//sys_sleep(30000);  // Wait 30 seconds
+
+}
+
 #endif
 
 
@@ -302,6 +352,8 @@ sysvid_init(void)
 
 	}
 	printf("SUCCESS\n");
+
+	GetLoadSegments();
 
 	// Allocate Bank E1 memory - Actual Video memory
 	printf("Allocate Bank $E1 memory\n");
