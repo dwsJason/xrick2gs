@@ -25,9 +25,9 @@ extern U8 e_bomb_ticker;
 extern U8 e_bomb_xc;
 extern U16 e_bomb_yc;
 
-extern U8 e_bomb_hit(U8);
+extern U8 e_bomb_hit(ent_t* pEnt);
 extern void e_bomb_init(U16, U16);
-extern void e_bomb_action(U8);
+extern void e_bomb_action(ent_t* pEnt);
 
 #endif
 

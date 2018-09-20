@@ -62,17 +62,17 @@ static U16 save_x, save_y;
  * ret: TRUE/intersect, FALSE/not.
  */
 U8
-e_rick_boxtest(U8 e)
+e_rick_boxtest(ent_t* pEnt)
 {
 	/*
 	 * rick: x+0x05 to x+0x11, y+[0x08 if rick's crawling] to y+0x14
 	 * entity: x to x+w, y to y+h
 	 */
 
-	if (E_RICK_ENT.x + 0x11 < ent_ents[e].x ||
-		E_RICK_ENT.x + 0x05 > ent_ents[e].x + ent_ents[e].w ||
-		E_RICK_ENT.y + 0x14 < ent_ents[e].y ||
-		E_RICK_ENT.y + (E_RICK_STTST(E_RICK_STCRAWL) ? 0x08 : 0x00) > ent_ents[e].y + ent_ents[e].h - 1)
+	if (E_RICK_ENT.x + 0x11 < pEnt->x ||
+		E_RICK_ENT.x + 0x05 > pEnt->x + pEnt->w ||
+		E_RICK_ENT.y + 0x14 < pEnt->y ||
+		E_RICK_ENT.y + (E_RICK_STTST(E_RICK_STCRAWL) ? 0x08 : 0x00) > pEnt->y + pEnt->h - 1)
 		return FALSE;
 	else
 		return TRUE;
@@ -449,7 +449,7 @@ e_rick_action2(void)
  *
  * ASM 12CA
  */
-void e_rick_action(UNUSED(U8 e))
+void e_rick_action(UNUSED(ent_t* pEnt))
 {
 	static U8 stopped = FALSE; /* is this the most elegant way? */
 

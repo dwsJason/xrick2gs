@@ -293,7 +293,7 @@ frame(void)
 	while (1) {
 
 		{
-			printf("%ld game_state = %s\n", *tick, game_state_strings[game_state]);
+//			printf("%ld game_state = %s\n", *tick, game_state_strings[game_state]);
 		}
 
 
@@ -609,8 +609,6 @@ static void
 init(void)
 {
   U8 i;
-
-  printf("game.c: init(void);\n");
 
   E_RICK_STRST(0xff);
 

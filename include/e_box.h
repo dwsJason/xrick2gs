@@ -16,7 +16,7 @@
 
 #include "system.h"
 
-extern void e_box_action(U8);
+extern void e_box_action(ent_t*);
 
 #endif
 

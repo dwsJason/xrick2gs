@@ -36,9 +36,9 @@ extern S16 e_rick_stop_x, e_rick_stop_y;
 
 extern void e_rick_save(void);
 extern void e_rick_restore(void);
-extern void e_rick_action(U8);
+extern void e_rick_action(ent_t*);
 extern void e_rick_gozombie(void);
-extern U8 e_rick_boxtest(U8);
+extern U8 e_rick_boxtest(ent_t*);
 
 #endif
 

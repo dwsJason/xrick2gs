@@ -14,10 +14,12 @@
 #ifndef _UTIL_H
 #define _UTIL_H
 
+#include "ents.h"
+
 extern void u_envtest(S16, S16, U8, U8 *, U8 *);
-extern U8 u_boxtest(U8, U8);
-extern U8 u_fboxtest(U8, S16, S16);
-extern U8 u_trigbox(U8, S16, S16);
+extern U8 u_boxtest(ent_t*, ent_t*);
+extern U8 u_fboxtest(ent_t*, S16, S16);
+extern U8 u_trigbox(ent_t* pEnt, S16, S16);
 
 #endif
 

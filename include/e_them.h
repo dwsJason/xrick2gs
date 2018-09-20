@@ -18,11 +18,11 @@
 
 extern U32 e_them_rndseed;
 
-extern void e_them_t1a_action(U8);
-extern void e_them_t1b_action(U8);
-extern void e_them_t2_action(U8);
-extern void e_them_t3_action(U8);
-extern void e_them_z_action(U8);
+extern void e_them_t1a_action(ent_t*);
+extern void e_them_t1b_action(ent_t*);
+extern void e_them_t2_action(ent_t*);
+extern void e_them_t3_action(ent_t*);
+extern void e_them_z_action(ent_t*);
 
 #endif
 

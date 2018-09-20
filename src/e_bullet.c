@@ -58,7 +58,7 @@ e_bullet_init(U16 x, U16 y)
  * ASM 1883, 0F97
  */
 void
-e_bullet_action(UNUSED(U8 e))
+e_bullet_action(UNUSED(ent_t* pEnt))
 {
   /* move bullet */
   E_BULLET_ENT.x += e_bullet_offsx;

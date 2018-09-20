@@ -23,7 +23,7 @@ extern S16 e_bullet_offsx;
 extern S16 e_bullet_xc, e_bullet_yc;
 
 extern void e_bullet_init(U16, U16);
-extern void e_bullet_action(U8);
+extern void e_bullet_action(ent_t*);
 
 #endif
 

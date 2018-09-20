@@ -42,7 +42,7 @@ segment "e";
 /*
  * Prototypes
  */
-static void explode(U8);
+static void explode(ent_t*);
 
 /*
  * Entity action
@@ -50,49 +50,49 @@ static void explode(U8);
  * ASM 245A
  */
 void
-e_box_action(U8 e)
+e_box_action(ent_t* pEnt)
 {
 	static U8 sp[] = {0x24, 0x25, 0x26, 0x27, 0x28};  /* explosion sprites sequence */
 
-	if (ent_ents[e].n & ENT_LETHAL) {
+	if (pEnt->n & ENT_LETHAL) {
 		/*
 		 * box is lethal i.e. exploding
 		 * play sprites sequence then stop
 		 */
-		ent_ents[e].sprite = sp[ent_ents[e].cnt >> 1];
-		if (--ent_ents[e].cnt == 0) {
-			ent_ents[e].n = 0;
-			map_marks[ent_ents[e].mark].ent |= MAP_MARK_NACT;
+		pEnt->sprite = sp[pEnt->cnt >> 1];
+		if (--pEnt->cnt == 0) {
+			pEnt->n = 0;
+			map_marks[pEnt->mark].ent |= MAP_MARK_NACT;
 		}
 	} else {
 		/*
 		 * not lethal: check to see if triggered
 		 */
-		if (e_rick_boxtest(e)) {
+		if (e_rick_boxtest(pEnt)) {
 			/* rick: collect bombs or bullets and stop */
 #ifdef ENABLE_SOUND
 			syssnd_play(WAV_BOX, 1);
 #endif
-			if (ent_ents[e].n == 0x10)
+			if (pEnt->n == 0x10)
 				game_bombs = GAME_BOMBS_INIT;
 			else  /* 0x11 */
 				game_bullets = GAME_BULLETS_INIT;
-			ent_ents[e].n = 0;
-			map_marks[ent_ents[e].mark].ent |= MAP_MARK_NACT;
+			pEnt->n = 0;
+			map_marks[pEnt->mark].ent |= MAP_MARK_NACT;
 		}
 		else if (E_RICK_STTST(E_RICK_STSTOP) &&
-				u_fboxtest(e, e_rick_stop_x, e_rick_stop_y)) {
+				u_fboxtest(pEnt, e_rick_stop_x, e_rick_stop_y)) {
 			/* rick's stick: explode */
-			explode(e);
+			explode(pEnt);
 		}
-		else if (E_BULLET_ENT.n && u_fboxtest(e, e_bullet_xc, e_bullet_yc)) {
+		else if (E_BULLET_ENT.n && u_fboxtest(pEnt, e_bullet_xc, e_bullet_yc)) {
 			/* bullet: explode (and stop bullet) */
 			E_BULLET_ENT.n = 0;
-			explode(e);
+			explode(pEnt);
 		}
-		else if (e_bomb_lethal && e_bomb_hit(e)) {
+		else if (e_bomb_lethal && e_bomb_hit(pEnt)) {
 			/* bomb: explode */
-			explode(e);
+			explode(pEnt);
 		}
 	}
 }
@@ -101,10 +101,10 @@ e_box_action(U8 e)
 /*
  * Explode when
  */
-static void explode(U8 e)
+static void explode(ent_t* pEnt)
 {
-	ent_ents[e].cnt = SEQ_INIT;
-	ent_ents[e].n |= ENT_LETHAL;
+	pEnt->cnt = SEQ_INIT;
+	pEnt->n |= ENT_LETHAL;
 #ifdef ENABLE_SOUND
 	syssnd_play(WAV_EXPLODE, 1);
 #endif

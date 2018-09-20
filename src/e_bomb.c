@@ -41,15 +41,15 @@ U8 e_bomb_ticker;
  * ASM 11CD
  * returns: TRUE/hit, FALSE/not
  */
-U8 e_bomb_hit(U8 e)
+U8 e_bomb_hit(ent_t *pEnt)
 {
-	if (ent_ents[e].x > (E_BOMB_ENT.x >= 0xE0 ? 0xFF : E_BOMB_ENT.x + 0x20))
+	if (pEnt->x > (E_BOMB_ENT.x >= 0xE0 ? 0xFF : E_BOMB_ENT.x + 0x20))
 			return FALSE;
-	if (ent_ents[e].x + ent_ents[e].w < (E_BOMB_ENT.x > 0x04 ? E_BOMB_ENT.x - 0x04 : 0))
+	if (pEnt->x + pEnt->w < (E_BOMB_ENT.x > 0x04 ? E_BOMB_ENT.x - 0x04 : 0))
 			return FALSE;
-	if (ent_ents[e].y > (E_BOMB_ENT.y + 0x1D))
+	if (pEnt->y > (E_BOMB_ENT.y + 0x1D))
 			return FALSE;
-	if (ent_ents[e].y + ent_ents[e].h < (E_BOMB_ENT.y > 0x0004 ? E_BOMB_ENT.y - 0x0004 : 0))
+	if (pEnt->y + pEnt->h < (E_BOMB_ENT.y > 0x0004 ? E_BOMB_ENT.y - 0x0004 : 0))
 			return FALSE;
 	return TRUE;
 }
@@ -83,7 +83,7 @@ void e_bomb_init(U16 x, U16 y)
  * ASM 18CA
  */
 void
-e_bomb_action(UNUSED(U8 e))
+e_bomb_action(UNUSED(ent_t* pEnt))
 {
 	/* tick */
 	e_bomb_ticker--;
@@ -133,7 +133,7 @@ e_bomb_action(UNUSED(U8 e))
 		e_bomb_xc = E_BOMB_ENT.x + 0x0C;
 		e_bomb_yc = E_BOMB_ENT.y + 0x000A;
 		e_bomb_lethal = TRUE;
-		if (e_bomb_hit(E_RICK_NO))
+		if (e_bomb_hit(&ent_ents[E_RICK_NO]))
 			e_rick_gozombie();
 	}
 	else
@@ -148,7 +148,7 @@ e_bomb_action(UNUSED(U8 e))
 		E_BOMB_ENT.sprite = 0xa8 + 4 - (e_bomb_ticker >> 1);
 #endif
 		/* exploding, hence lethal */
-		if (e_bomb_hit(E_RICK_NO))
+		if (e_bomb_hit(&ent_ents[E_RICK_NO]))
 			e_rick_gozombie();
 	}
 }

@@ -36,12 +36,12 @@
  * ret: TRUE/(x,y) is within e's space, FALSE/not.
  */
 U8
-u_fboxtest(U8 e, S16 x, S16 y)
+u_fboxtest(ent_t* pEnt, S16 x, S16 y)
 {
-  if (ent_ents[e].x >= x ||
-      ent_ents[e].x + ent_ents[e].w < x ||
-      ent_ents[e].y >= y ||
-      ent_ents[e].y + ent_ents[e].h < y)
+  if (pEnt->x >= x ||
+      pEnt->x + pEnt->w < x ||
+      pEnt->y >= y ||
+      pEnt->y + pEnt->h < y)
     return FALSE;
   else
     return TRUE;
@@ -60,20 +60,20 @@ u_fboxtest(U8 e, S16 x, S16 y)
  * ret: TRUE/intersect, FALSE/not.
  */
 U8
-u_boxtest(U8 e1, U8 e2)
+u_boxtest(ent_t* pEnt1, ent_t* pEnt2)
 {
   /* rick is special (may be crawling) */
-  if (e1 == E_RICK_NO)
-    return e_rick_boxtest(e2);
+  if (pEnt1 == &ent_ents[E_RICK_NO])
+    return e_rick_boxtest(pEnt2);
 
   /*
    * entity 1: x+0x05 to x+0x011, y to y+0x14
    * entity 2: x to x+ .w, y to y+ .h
    */
-  if (ent_ents[e1].x + 0x11 < ent_ents[e2].x ||
-      ent_ents[e1].x + 0x05 > ent_ents[e2].x + ent_ents[e2].w ||
-      ent_ents[e1].y + 0x14 < ent_ents[e2].y ||
-      ent_ents[e1].y > ent_ents[e2].y + ent_ents[e2].h - 1)
+  if (pEnt1->x + 0x11 < pEnt2->x ||
+      pEnt1->x + 0x05 > pEnt2->x + pEnt2->w ||
+      pEnt1->y + 0x14 < pEnt2->y ||
+      pEnt1->y > pEnt2->y + pEnt2->h - 1)
     return FALSE;
   else
     return TRUE;
@@ -175,7 +175,7 @@ u_envtest(S16 x, S16 y, U8 crawl, U8 *rc0, U8 *rc1)
    */
   if (!(*rc1 & MAP_EFLG_LETHAL)
       && ent_ents[0].n
-      && u_boxtest(ENT_ENTSNUM, 0)) {
+      && u_boxtest(&ent_ents[ENT_ENTSNUM], &ent_ents[0])) {
     *rc1 |= MAP_EFLG_SOLID;
   }
 
@@ -193,17 +193,19 @@ u_envtest(S16 x, S16 y, U8 crawl, U8 *rc0, U8 *rc1)
  * return: FALSE if not in box, TRUE if in box.
  */
 U8
-u_trigbox(U8 e, S16 x, S16 y)
+u_trigbox(ent_t* pEnt, S16 x, S16 y)
 {
   U16 xmax, ymax;
 
-  xmax = ent_ents[e].trig_x + (ent_entdata[ent_ents[e].n & 0x7F].trig_w << 3);
-  ymax = ent_ents[e].trig_y + (ent_entdata[ent_ents[e].n & 0x7F].trig_h << 3);
+  //printf("u_trigbox e=%d x=%d y=%d ", e, x, y);
+
+  xmax = pEnt->trig_x + (ent_entdata[pEnt->n & 0x7F].trig_w << 3);
+  ymax = pEnt->trig_y + (ent_entdata[pEnt->n & 0x7F].trig_h << 3);
 
   if (xmax > 0xFF) xmax = 0xFF;
 
-  if (x <= ent_ents[e].trig_x || x > xmax ||
-      y <= ent_ents[e].trig_y || y > ymax)
+  if (x <= pEnt->trig_x || x > xmax ||
+      y <= pEnt->trig_y || y > ymax)
     return FALSE;
   else
     return TRUE;
