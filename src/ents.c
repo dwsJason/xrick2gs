@@ -343,6 +343,8 @@ ent_draw(void)
 #endif
   S16 dx, dy;
 
+  ent_t *pEnt;
+
   draw_tilesBank = map_tilesBank;
 
   /* reset rectangles list */
@@ -354,89 +356,91 @@ ent_draw(void)
   /*
    * background loop : erase all entities that were visible
    */
-  for (i = 0; ent_ents[i].n != 0xff; i++) {
+  for (pEnt=ent_ents; pEnt->n != 0xff; ++pEnt)
+  {
 #ifdef ENABLE_CHEATS
-    if (ent_ents[i].prev_n && (ch3 || ent_ents[i].prev_s))
+    if (pEnt->prev_n && (ch3 || pEnt->prev_s))
 #else
-    if (ent_ents[i].prev_n && ent_ents[i].prev_s)
+    if (pEnt->prev_n && pEnt->prev_s)
 #endif
       /* if entity was active, then erase it (redraw the map) */
-      draw_spriteBackground(ent_ents[i].prev_x, ent_ents[i].prev_y);
+      draw_spriteBackground(pEnt->prev_x, pEnt->prev_y);
   }
 
   /*
    * foreground loop : draw all entities that are visible
    */
-  for (i = 0; ent_ents[i].n != 0xff; i++) {
+  for (pEnt=ent_ents; pEnt->n != 0xff; ++pEnt) {
     /*
      * If entity is active now, draw the sprite. If entity was
      * not active before, add a rectangle for the sprite.
      */
 #ifdef ENABLE_CHEATS
-    if (ent_ents[i].n && (game_cheat3 || ent_ents[i].sprite))
+    if (pEnt->n && (game_cheat3 || pEnt->sprite))
 #else
-    if (ent_ents[i].n && ent_ents[i].sprite)
+    if (pEnt->n && pEnt->sprite)
 #endif
       /* If entitiy is active, draw the sprite. */
-      draw_sprite2(ent_ents[i].sprite,
-		   ent_ents[i].x, ent_ents[i].y,
-		   ent_ents[i].front);
+      draw_sprite2(pEnt->sprite,
+		   pEnt->x, pEnt->y,
+		   pEnt->front);
   }
 
   /*
    * rectangles loop : figure out which parts of the screen have been
    * impacted and need to be refreshed, then save state
    */
-  for (i = 0; ent_ents[i].n != 0xff; i++) {
+  for (pEnt=ent_ents; pEnt->n != 0xff; ++pEnt) {
 #ifdef ENABLE_CHEATS
-    if (ent_ents[i].prev_n && (ch3 || ent_ents[i].prev_s)) {
+    if (pEnt->prev_n && (ch3 || pEnt->prev_s)) {
 #else
-    if (ent_ents[i].prev_n && ent_ents[i].prev_s) {
+    if (pEnt->prev_n && pEnt->prev_s) {
 #endif
       /* (1) if entity was active and has been drawn ... */
 #ifdef ENABLE_CHEATS
-      if (ent_ents[i].n && (game_cheat3 || ent_ents[i].sprite)) {
+      if (pEnt->n && (game_cheat3 || pEnt->sprite)) {
 #else
-      if (ent_ents[i].n && ent_ents[i].sprite) {
+      if (pEnt->n && pEnt->sprite) {
 #endif
 	/* (1.1) ... and is still active now and still needs to be drawn, */
 	/*       then check if rectangles intersect */
-	dx = abs(ent_ents[i].x - ent_ents[i].prev_x);
-	dy = abs(ent_ents[i].y - ent_ents[i].prev_y);
+	dx = abs(pEnt->x - pEnt->prev_x);
+	dy = abs(pEnt->y - pEnt->prev_y);
+
 	if (dx < 0x20 && dy < 0x16) {
 	  /* (1.1.1) if they do, then create one rectangle */
-	  ent_addrect((ent_ents[i].prev_x < ent_ents[i].x)
-		      ? ent_ents[i].prev_x : ent_ents[i].x,
-		      (ent_ents[i].prev_y < ent_ents[i].y)
-		      ? ent_ents[i].prev_y : ent_ents[i].y,
+	  ent_addrect((pEnt->prev_x < pEnt->x)
+		      ? pEnt->prev_x : pEnt->x,
+		      (pEnt->prev_y < pEnt->y)
+		      ? pEnt->prev_y : pEnt->y,
 		      dx + 0x20, dy + 0x15);
 	}
 	else {
 	  /* (1.1.2) else, create two rectangles */
-	  ent_addrect(ent_ents[i].x, ent_ents[i].y, 0x20, 0x15);
-	  ent_addrect(ent_ents[i].prev_x, ent_ents[i].prev_y, 0x20, 0x15);
+	  ent_addrect(pEnt->x, pEnt->y, 0x20, 0x15);
+	  ent_addrect(pEnt->prev_x, pEnt->prev_y, 0x20, 0x15);
 	}
       }
       else
 	/* (1.2) ... and is not active anymore or does not need to be drawn */
 	/*       then create one single rectangle */
-	ent_addrect(ent_ents[i].prev_x, ent_ents[i].prev_y, 0x20, 0x15);
+	ent_addrect(pEnt->prev_x, pEnt->prev_y, 0x20, 0x15);
     }
 #ifdef ENABLE_CHEATS
-    else if (ent_ents[i].n && (game_cheat3 || ent_ents[i].sprite)) {
+    else if (pEnt->n && (game_cheat3 || pEnt->sprite)) {
 #else
-    else if (ent_ents[i].n && ent_ents[i].sprite) {
+    else if (pEnt->n && pEnt->sprite) {
 #endif
       /* (2) if entity is active and needs to be drawn, */
       /*     then create one rectangle */
-      ent_addrect(ent_ents[i].x, ent_ents[i].y, 0x20, 0x15);
+      ent_addrect(pEnt->x, pEnt->y, 0x20, 0x15);
     }
 
     /* save state */
-    ent_ents[i].prev_x = ent_ents[i].x;
-    ent_ents[i].prev_y = ent_ents[i].y;
-    ent_ents[i].prev_n = ent_ents[i].n;
-    ent_ents[i].prev_s = ent_ents[i].sprite;
+    pEnt->prev_x = pEnt->x;
+	pEnt->prev_y = pEnt->y;
+	pEnt->prev_n = pEnt->n;
+	pEnt->prev_s = pEnt->sprite;
   }
 
 #ifdef ENABLE_CHEATS
