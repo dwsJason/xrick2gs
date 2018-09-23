@@ -48,7 +48,7 @@
 U8 map_map[0x2C][0x20];
 U8 map_eflg[0x100];
 U8 map_frow;
-U8 map_tilesBank;
+U16 map_tilesBank;
 
 
 /*
@@ -105,8 +105,11 @@ map_init(void)
   draw_filter = 0xffff;
   map_tilesBank = (map_submaps[game_submap].page == 1) ? 3 : 2;
 #endif
-#if defined(GFXST) || defined(GFXGS)
+#ifdef GFXST
   map_tilesBank = (map_submaps[game_submap].page == 1) ? 2 : 1;
+#endif
+#ifdef GFXGS
+  map_tilesBank = (map_submaps[game_submap].page == 1) ? 0x200 : 0x100;
 #endif
   map_eflg_expand((map_submaps[game_submap].page == 1) ? 0x10 : 0x00);
   map_expand();

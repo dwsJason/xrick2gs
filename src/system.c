@@ -80,7 +80,7 @@ U32
 sys_gettime(void)
 {
 #ifdef IIGS
-	return tick[0] * 16;
+	return tick[0] << 4;
 #else
   static U32 ticks_base = 0;
   U32 ticks;
@@ -102,7 +102,7 @@ sys_sleep(int s)
 {
 #ifdef IIGS
 	// on GS we're going to work in ms, also we don't sleep, we just wait
-	while (s > 0)
+	while (s > 8)
 	{
 		sysvid_wait_vblank();
 		s -= 16; // About 1/60th of a second

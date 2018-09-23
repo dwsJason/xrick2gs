@@ -5,9 +5,47 @@
  case on
  longa on
  longi on
-
+ 
 Dummy3 start ASMCODE
 	end
+
+*
+* void draw_tile(U8 tileNumber)
+*
+draw_tile start ASM_CODE
+iTileNo equ 5
+
+	phb
+	lda iTileNo,s
+	ora |draw_tilesBank
+	asl A
+	tax
+	
+	lda |fb
+	tay
+	adc #4
+	sta |fb
+	
+	lda 3,s
+	sta iTileNo,s
+	lda 1,s
+	sta iTileNo-2,s
+	
+	lda #$0101
+	sta 1,s
+	plb
+	plb
+TILEBANK3 entry
+	lda >$880005,x
+	sta >TILEBANK4+1
+TILEBANK4 entry
+	jsl >$880000
+
+	plb
+	rtl
+*-------------------------------------------------------------------------------
+    end
+	
 
 *
 * void DrawTile(short offset, short tileNo)
@@ -63,6 +101,8 @@ iBank equ 4
 	lda iBank,s
 	sta >TILEBANK+3
 	sta >TILEBANK2+3
+	sta >TILEBANK3+3
+	sta >TILEBANK4+3
 	rep #$30
 	lda 2,s
 	sta iBank,s

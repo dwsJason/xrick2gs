@@ -186,7 +186,7 @@ extern volatile unsigned long* tick;
 
 // GS Rendering Stuff
 extern void SetTileBank(short bank);
-extern void DrawTile(int offset, int tileNo);
+extern void DrawTile(int offset, U16 tileNo);
 extern void SetSpriteBanks(short b0, short b1, short b2, short b3);
 extern void DrawSprite(int offset, int SpriteNo);
 

@@ -29,7 +29,7 @@ extern U8 *draw_tllst;
 #ifdef GFXPC
 extern U16 draw_filter;
 #endif
-extern U8 draw_tilesBank;
+extern U16 draw_tilesBank;
 extern rect_t draw_STATUSRECT;
 extern rect_t draw_SCREENRECT;
 

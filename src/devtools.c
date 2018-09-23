@@ -64,7 +64,11 @@ devtools_run(void)
       draw_setfb(64, 30 + i * 0x0a);
       draw_tile((i<10?0x30:'A'-10) + i);
     }
+	#ifdef GFXGS
+    draw_tilesBank = pos << 8;
+	#else
     draw_tilesBank = pos;
+	#endif
     for (i = 0; i < 0x10; i++)
       for (j = 0; j < 0x10; j++) {
 	draw_setfb(80 + j * 0x0a, 30 + i * 0x0a);
@@ -172,7 +176,11 @@ devtools_run(void)
     draw_setfb(4, 4);
     draw_tilesBank = 0;
     draw_tilesListImm(s);
+	#ifdef GFXGS
+    draw_tilesBank = pos2<<8;
+	#else
     draw_tilesBank = pos2;
+	#endif
     for (l = 0; l < 8; l++)
       for (k = 0; k < 4; k++)
 	for (i = 0; i < 4; i++)

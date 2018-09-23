@@ -138,7 +138,7 @@ extern U8 map_frow;
 /*
  * tiles offset
  */
-extern U8 map_tilesBank;
+extern U16 map_tilesBank;
 
 extern void map_expand(void);
 extern void map_init(void);

@@ -88,7 +88,7 @@ U8 *draw_tllst;    /* pointer to tiles list */
 #ifdef GFXPC
 U16 draw_filter;   /* CGA colors filter */
 #endif
-U8 draw_tilesBank; /* tile number offset */
+U16 draw_tilesBank; /* tile number offset */
 rect_t draw_STATUSRECT = {
   DRAW_STATUS_SCORE_X, DRAW_STATUS_Y,
   DRAW_STATUS_LIVES_X + 6 * 8 - DRAW_STATUS_SCORE_X, 8,
@@ -100,7 +100,7 @@ rect_t draw_SCREENRECT = { 0, 0, 320, SYSVID_HEIGHT, NULL };
 /*
  * private vars
  */
-static U8 *fb;     /* frame buffer pointer */
+U8 *fb;     /* frame buffer pointer */
 
 
 /*
@@ -234,13 +234,14 @@ draw_tilesSubList()
  * draw_filter: CGA colors filter
  * fb: CHANGED (see above)
  */
+#ifndef GFXGS
 void
 draw_tile(U8 tileNumber)
 {
 #ifdef GFXGS
 	//$$JGA TODO convert to ASM
 
-	int tileNo = (((int)draw_tilesBank)*256)+tileNumber;
+	U16 tileNo = draw_tilesBank | tileNumber;
 
 	//printf("fb=%04x tileNo=%04x\n", (int)fb, tileNo);
 	//sys_sleep(1000);  // Wait 1 second
@@ -289,6 +290,7 @@ draw_tile(U8 tileNumber)
   fb += 8;  /* next tile */
 #endif
 }
+#endif
 
 /*
  * Draw a sprite
