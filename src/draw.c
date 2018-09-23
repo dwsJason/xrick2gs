@@ -615,6 +615,7 @@ draw_spriteBackground(U16 x, U16 y)
  *
  * ASM 0af5, 0a54
  */
+#ifndef GFXGS
 void
 draw_map(void)
 {
@@ -633,6 +634,7 @@ draw_map(void)
       draw_tile(map_map[i + 8][j]);
   }
 }
+#endif
 
 
 /*

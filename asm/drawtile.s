@@ -8,6 +8,61 @@
  
 Dummy3 start ASMCODE
 	end
+*
+* void draw_map(void)
+*
+draw_map start ASM_CODE
+	phb
+	
+	lda |map_tilesBank
+	sta |draw_tilesBank
+	
+	pha	
+
+	pea $0101
+	plb
+	plb
+	
+	ldy #$2010+(160*8)
+	ldx #8*32
+loop ANOP	
+	lda	>map_map,x
+	and #$00FF
+	ora 1,s
+	asl A
+	phx
+	tax
+TILEBANK5 entry
+	lda >$880005,x
+	sta >TILEBANK6+1
+TILEBANK6 entry
+	jsl >$880000
+	tya
+	adc #4
+	tay
+	plx
+	inx
+	txa
+	
+	and	#$1f
+	bne continue
+	
+	tya
+	adc #160*8-(32*4)
+	tay
+	
+continue ANOP	
+
+	cpx #(8*32)+(32*24)
+	blt loop
+	
+	pla
+	
+	plb
+	rtl
+*-------------------------------------------------------------------------------
+    end
+
 
 *
 * void draw_tile(U8 tileNumber)
@@ -103,6 +158,8 @@ iBank equ 4
 	sta >TILEBANK2+3
 	sta >TILEBANK3+3
 	sta >TILEBANK4+3
+	sta >TILEBANK5+3
+	sta >TILEBANK6+3
 	rep #$30
 	lda 2,s
 	sta iBank,s
