@@ -29,6 +29,8 @@ static U8 period;
 segment "screen";
 #endif
 
+rect_t scroll_SCREENRECT = { 32, 8, 256, SYSVID_HEIGHT-8, NULL };
+
 /*
  * Scroll up
  *
@@ -37,6 +39,9 @@ U8
 scroll_up(void)
 {
   U8 i, j;
+  ent_t *pEnt;
+  U8* pSrc;
+  U8* pDst;
   static U8 n = 0;
 
   /* last call: restore */
@@ -53,21 +58,27 @@ scroll_up(void)
   }
 
   /* translate map */
+  pDst = &map_map[MAP_ROW_SCRTOP][0];
+  pSrc = pDst+32;
+
   for (i = MAP_ROW_SCRTOP; i < MAP_ROW_HBBOT; i++)
-    for (j = 0x00; j < 0x20; j++)
-      map_map[i][j] = map_map[i + 1][j];
+  {
+	  memcpy(pDst, pSrc, (size_t)32);
+	  pDst = pSrc;
+	  pSrc += 32;
+  }
 
   /* translate entities */
-  for (i = 0; ent_ents[i].n != 0xFF; i++) {
-    if (ent_ents[i].n) {
-      ent_ents[i].ysave -= 8;
-      ent_ents[i].trig_y -= 8;
-      ent_ents[i].y -= 8;
-      if (ent_ents[i].y & 0x8000) {  /* map coord. from 0x0000 to 0x0140 */
+  for (pEnt = ent_ents; pEnt->n != 0xFF; ++pEnt) {
+    if (pEnt->n) {
+      pEnt->ysave -= 8;
+      pEnt->trig_y -= 8;
+      pEnt->y -= 8;
+      if (pEnt->y & 0x8000) {  /* map coord. from 0x0000 to 0x0140 */
 	IFDEBUG_SCROLLER(
 	  sys_printf("xrick/scroller: entity %#04X is gone\n", i);
 	  );
-	ent_ents[i].n = 0;
+	pEnt->n = 0;
       }
     }
   }
@@ -75,7 +86,7 @@ scroll_up(void)
   /* display */
   draw_map();
   ent_draw();
-  draw_drawStatus();
+//  draw_drawStatus();
   map_frow++;
 
   /* loop */
@@ -87,12 +98,12 @@ scroll_up(void)
     map_expand();
 
     /* display */
-    draw_map();
+    //draw_map();
     ent_draw();
-    draw_drawStatus();
+//    draw_drawStatus();
   }
 
-  game_rects = &draw_SCREENRECT;
+  game_rects = &scroll_SCREENRECT;
 
   return SCROLL_RUNNING;
 }
@@ -105,6 +116,9 @@ U8
 scroll_down(void)
 {
   U8 i, j;
+  ent_t *pEnt;
+  U8* pSrc;
+  U8* pDst;
   static U8 n = 0;
 
   /* last call: restore */
@@ -121,21 +135,26 @@ scroll_down(void)
   }
 
   /* translate map */
+  pDst = &map_map[MAP_ROW_SCRBOT][0];
+  pSrc = pDst+32;
   for (i = MAP_ROW_SCRBOT; i > MAP_ROW_HTTOP; i--)
-    for (j = 0x00; j < 0x20; j++)
-      map_map[i][j] = map_map[i - 1][j];
+  {
+	  memcpy(pDst, pSrc, (size_t)32);
+	  pDst = pSrc;
+	  pSrc -= 32;
+  }
 
   /* translate entities */
-  for (i = 0; ent_ents[i].n != 0xFF; i++) {
-    if (ent_ents[i].n) {
-      ent_ents[i].ysave += 8;
-      ent_ents[i].trig_y += 8;
-      ent_ents[i].y += 8;
-      if (ent_ents[i].y > 0x0140) {  /* map coord. from 0x0000 to 0x0140 */
+  for (pEnt = ent_ents; pEnt->n != 0xFF; ++pEnt) {
+    if (pEnt->n) {
+      pEnt->ysave += 8;
+      pEnt->trig_y += 8;
+      pEnt->y += 8;
+      if (pEnt->y > 0x0140) {  /* map coord. from 0x0000 to 0x0140 */
 	IFDEBUG_SCROLLER(
 	  sys_printf("xrick/scroller: entity %#04X is gone\n", i);
 	  );
-	ent_ents[i].n = 0;
+	pEnt->n = 0;
       }
     }
   }
@@ -143,7 +162,7 @@ scroll_down(void)
   /* display */
   draw_map();
   ent_draw();
-  draw_drawStatus();
+//  draw_drawStatus();
   map_frow--;
 
   /* loop */
@@ -155,12 +174,12 @@ scroll_down(void)
     map_expand();
 
     /* display */
-    draw_map();
+    //draw_map();
     ent_draw();
-    draw_drawStatus();
+//    draw_drawStatus();
   }
 
-  game_rects = &draw_SCREENRECT;
+  game_rects = &scroll_SCREENRECT;
 
   return SCROLL_RUNNING;
 }
