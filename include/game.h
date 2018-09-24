@@ -29,7 +29,7 @@
 #define FALSE 0
 
 #ifdef IIGS
-#define GAME_PERIOD 72
+#define GAME_PERIOD 64
 #else
 #define GAME_PERIOD 75
 #endif
