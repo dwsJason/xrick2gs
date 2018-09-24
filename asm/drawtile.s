@@ -9,6 +9,60 @@
 Dummy3 start ASMCODE
 	end
 *
+* u8 draw_tilesSubList
+*
+draw_tilesSubList start ASM_CODE
+	phb
+	
+	lda |draw_tilesBank
+	pha
+	
+	ldy	|fb
+	
+	lda |draw_tllst
+	sta |LOAD+1
+	lda |draw_tllst+1
+	sta |LOAD+2
+		
+
+	pea $0101
+	plb
+	plb
+	
+	ldx	#0
+ 
+LOAD lda >$880000,x
+	and #$00FF
+	cmp #$00FE
+	bge done
+	ora 1,s
+	asl A
+	phx
+	tax
+TILEBANK7 entry
+	lda >$880005,x
+	sta >TILEBANK8+1
+TILEBANK8 entry
+	jsl $880000
+	tya
+	adc #4
+	tay
+	plx
+	inx
+	bra LOAD
+done ANOP
+	sta 1,s
+	txa
+	adc >draw_tllst	; c=1, depending on adding the +1
+	sta >draw_tllst
+	
+	pla	   
+	plb
+	sty |fb
+	rtl
+*-------------------------------------------------------------------------------
+	end
+*
 * void draw_map(void)
 *
 draw_map start ASM_CODE
@@ -160,6 +214,8 @@ iBank equ 4
 	sta >TILEBANK4+3
 	sta >TILEBANK5+3
 	sta >TILEBANK6+3
+	sta >TILEBANK7+3
+	sta >TILEBANK8+3
 	rep #$30
 	lda 2,s
 	sta iBank,s

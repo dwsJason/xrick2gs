@@ -210,6 +210,7 @@ draw_tilesListImm(U8 *list)
  * draw_tllst: CHANGED points to the element following 0xfe/0xff end code
  * returns: end code (0xfe : end of list ; 0xff : end of sub-list)
  */
+#ifndef IIGS
 U8
 draw_tilesSubList()
 {
@@ -222,6 +223,7 @@ draw_tilesSubList()
   }
   return i;
 }
+#endif
 
 
 /*
