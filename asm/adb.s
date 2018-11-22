@@ -25,7 +25,9 @@ KeyArray start ASMCODE
 	ds 128
 
 RemoveKeyboardDriver entry
-
+	php
+	sei
+	
 	phb
 	phk
 	plb
@@ -46,10 +48,13 @@ RemoveKeyboardDriver entry
 	_SRQRemove
 	
 	plb
+	plp
 	rtl	
 	   
 AddKeyboardDriver entry
-
+	php
+	sei
+	
 	phb
 	phk
 	plb
@@ -103,6 +108,7 @@ clear stz KeyArray,x
 	_SetVector	
 
 	plb
+	plp
 	rtl	; Back to C
 
 * end for the AddKeyboardDriver
