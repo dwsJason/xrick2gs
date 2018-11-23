@@ -9,9 +9,8 @@
 *
 *****************************
 
-;                        dsk ntpplayer.a
-;						typ $b1
-;                        org $0f0000
+                        dsk ntpplayer.a
+                        org $0f0000
                         mx  %00
 
 
