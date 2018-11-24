@@ -74,6 +74,26 @@ extern void game_toggleCheat(U8);
 #endif
 
 #ifdef ENABLE_SOUND
+#ifdef IIGS
+
+extern sound_t WAV_GAMEOVER;
+extern sound_t WAV_SBONUS2;
+extern sound_t WAV_BULLET;
+extern sound_t WAV_BOMBSHHT;
+extern sound_t WAV_EXPLODE;
+extern sound_t WAV_STICK;
+extern sound_t WAV_WALK;
+extern sound_t WAV_CRAWL;
+extern sound_t WAV_JUMP;
+extern sound_t WAV_PAD;
+extern sound_t WAV_BOX;
+extern sound_t WAV_BONUS;
+extern sound_t WAV_SBONUS1;
+extern sound_t WAV_DIE;
+extern sound_t WAV_ENTITY[];
+
+#else
+
 extern sound_t *WAV_GAMEOVER;
 extern sound_t *WAV_SBONUS2;
 extern sound_t *WAV_BULLET;
@@ -89,7 +109,9 @@ extern sound_t *WAV_BONUS;
 extern sound_t *WAV_SBONUS1;
 extern sound_t *WAV_DIE;
 extern sound_t *WAV_ENTITY[];
-#endif
+
+#endif /* IIGS */
+#endif /* ENABLE_SOUND */
 
 #endif
 

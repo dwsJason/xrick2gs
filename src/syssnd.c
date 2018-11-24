@@ -33,6 +33,174 @@
 
 segment "system";
 
+
+#ifdef IIGS
+
+char* pNtpDriver = NULL;
+char* pNtpSong   = NULL;
+
+extern char ntpplayer_lz4;
+extern char samerica_lz4;
+
+void SetAudioBank(char bankNo);
+void NTPstop(void);
+void NTPplay(int bPlayOnce);
+int NTPprepare(void* pNTPData);
+
+void
+syssnd_init(void)
+{
+	U32* handle = NULL;
+	printf("syssnd_init\n");
+	// Allocate a buffer for the NTPAudio Driver
+	// and to place the various NTP songs that will play
+	printf("Alloc NTPDriver\n");
+	handle = (U32*)NewHandle(0x10000, userid(), 0xC014, 0);  
+	if (toolerror())
+	{
+		printf("Unable to allocate Audio Driver Mem\n");
+		printf("Game can't run\n");
+		sys_sleep(5000);  // Wait 5 seconds
+		exit(1);
+	}
+	printf("SUCCESS\n");
+
+	pNtpDriver = (char*)*handle;
+	pNtpSong   = pNtpDriver + 0x8000;
+
+	//printf("%p\n", pNtpDriver );
+	//printf("%p\n", pNtpSong );
+
+	printf("Decompress NTP Driver\n");
+	LZ4_Unpack(pNtpDriver, &ntpplayer_lz4);
+	printf("Decompress samerica\n");
+	LZ4_Unpack(pNtpSong, &samerica_lz4);
+
+	printf("SetAudioBank\n");
+	SetAudioBank( (*handle)>>16 );
+
+	printf("NTPprepare\n");
+
+	if (NTPprepare(pNtpSong))
+	{
+		printf("NTPprepare failed\n");
+	}
+	else
+	{
+		printf("NTPplay\n");
+		NTPplay(0);
+	}
+	
+}
+
+/*
+ * Shutdown
+ */
+void
+syssnd_shutdown(void)
+{
+	printf("syssnd_shutdown\n");
+  //if (!isAudioActive) return;
+  //isAudioActive = FALSE;
+}
+
+/*
+ * Toggle mute
+ *
+ * When muted, sounds are still managed but not sent to the dsp, hence
+ * it is possible to un-mute at any time.
+ */
+void
+syssnd_toggleMute(void)
+{
+	printf("syssnd_toggleMute\n");
+}
+
+void
+syssnd_vol(S8 d)
+{
+	printf("syssnd_vol: %d\n", d);
+}
+
+/*
+ * Play a sound
+ *
+ * loop: number of times the sound should be played, -1 to loop forever
+ * returns: channel number, or -1 if none was available
+ *
+ * NOTE if sound is already playing, simply reset it (i.e. can not have
+ * twice the same sound playing -- tends to become noisy when too many
+ * bad guys die at the same time).
+ */
+S8
+syssnd_play(sound_t sound, S8 loop)
+{
+	printf("syssnd_play\n");
+	return 0;
+}
+
+/*
+ * Pause
+ *
+ * pause: TRUE or FALSE
+ * clear: TRUE to cleanup all sounds and make sure we start from scratch
+ */
+void
+syssnd_pause(U8 pause, U8 clear)
+{
+	printf("syssnd_pause\n");
+}
+
+/*
+ * Stop a channel
+ */
+void
+syssnd_stopchan(S8 chan)
+{
+	printf("syssnd_stopchan\n");
+}
+
+/*
+ * Stop a sound
+ */
+void
+syssnd_stopsound(sound_t sound)
+{
+	printf("syssnd_stopsound\n");
+}
+
+/*
+ * See if a sound is playing
+ */
+int
+syssnd_isplaying(sound_t sound)
+{
+	printf("syssnd_isplaying\n");
+	return 0;
+}
+
+
+/*
+ * Stops all channels.
+ */
+void
+syssnd_stopall(void)
+{
+	printf("syssnd_stopall\n");
+}
+
+/*
+ *
+ */
+void
+syssnd_free(sound_t s)
+{
+	printf("syssnd_free\n");
+}
+
+
+#else
+
 #define ADJVOL(S) (((S)*sndVol)/SDL_MIX_MAXVOLUME)
 
 static U8 isAudioActive = FALSE;
@@ -435,6 +603,7 @@ sdlRWops_close(SDL_RWops *context)
 	return 0;
 }
 
+#endif /* IIGS */
 #endif /* ENABLE_SOUND */
 
 /* eof */

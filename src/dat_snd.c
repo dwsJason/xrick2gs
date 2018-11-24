@@ -22,6 +22,21 @@
 
 #include "system.h"
 
+#ifdef IIGS
+
+sound_t WAV_WAA;
+sound_t WAV_BOMB;
+sound_t WAV_BULLET;
+sound_t WAV_WALK;
+sound_t WAV_JUMP;
+sound_t WAV_TING;
+sound_t WAV_BOMBSHHT;
+sound_t WAV_BONUS;
+sound_t WAV_SHHT;
+sound_t WAV_BOX;
+sound_t WAV_DDDING;
+
+#else
 sound_t *WAV_WAA;
 sound_t *WAV_BOMB;
 sound_t *WAV_BULLET;
@@ -33,6 +48,7 @@ sound_t *WAV_BONUS;
 sound_t *WAV_SHHT;
 sound_t *WAV_BOX;
 sound_t *WAV_DDDING;
+#endif /* IIGS */
 
 #endif /* ENABLE_SOUND */
 

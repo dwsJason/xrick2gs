@@ -129,6 +129,38 @@ extern U8 syskbd_fire;
  * sound section
  */
 #ifdef ENABLE_SOUND
+
+#ifdef IIGS
+typedef int sound_t;
+
+/*
+ * Output from the Mr.Audio Bank packer
+ */
+enum {
+	SND_BOMBSHHT,
+	SND_BONUS,
+	SND_BOX,
+	SND_BULLET,
+	SND_CRAWL,
+	SND_DIE,
+	SND_ENT0,
+	SND_ENT1,
+	SND_ENT2,
+	SND_ENT3,
+	SND_ENT4,
+	SND_ENT6,
+	SND_ENT8,
+	SND_EXPLODE,
+	SND_JUMP,
+	SND_PAD,
+	SND_SBONUS1,
+	SND_SBONUS2,
+	SND_STICK,
+	SND_WALK,
+};
+
+
+#else
 typedef struct {
 #ifdef DEBUG
   char *name;
@@ -137,19 +169,27 @@ typedef struct {
   U32 len;
   U8 dispose;
 } sound_t;
+#endif
 
 extern void syssnd_init(void);
 extern void syssnd_shutdown(void);
 extern void syssnd_vol(S8);
 extern void syssnd_toggleMute(void);
+#ifdef IIGS
+extern S8 syssnd_play(sound_t, S8);
+extern void syssnd_stopsound(sound_t);
+extern int syssnd_isplaying(sound_t);
+extern void syssnd_free(sound_t);
+#else
 extern S8 syssnd_play(sound_t *, S8);
+extern void syssnd_stopsound(sound_t *);
+extern int syssnd_isplaying(sound_t *);
+extern void syssnd_free(sound_t *);
+extern sound_t *syssnd_load(char *name);
+#endif
 extern void syssnd_pause(U8, U8);
 extern void syssnd_stopchan(S8);
-extern void syssnd_stopsound(sound_t *);
 extern void syssnd_stopall();
-extern int syssnd_isplaying(sound_t *);
-extern sound_t *syssnd_load(char *name);
-extern void syssnd_free(sound_t *);
 #endif
 
 /*

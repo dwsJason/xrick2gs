@@ -102,23 +102,42 @@ hscore_t game_hscores[8] = {
   { 1000, "ANDYSPLEEN" }
 };
 #endif
+
 #ifdef ENABLE_SOUND
+#ifdef IIGS
+sound_t WAV_GAMEOVER;
+sound_t WAV_SBONUS2;
+//sound_t WAV_BULLET;
+//sound_t WAV_BOMBSHHT;
+sound_t WAV_EXPLODE;
+sound_t WAV_STICK;
+//sound_t WAV_WALK;
+sound_t WAV_CRAWL;
+//sound_t WAV_JUMP;
+sound_t WAV_PAD;
+//sound_t WAV_BOX;
+//sound_t WAV_BONUS;
+sound_t WAV_SBONUS1;
+sound_t WAV_DIE;
+sound_t WAV_ENTITY[10];
+#else
 sound_t *WAV_GAMEOVER;
 sound_t *WAV_SBONUS2;
-sound_t *WAV_BULLET;
-sound_t *WAV_BOMBSHHT;
+//sound_t *WAV_BULLET;
+//sound_t *WAV_BOMBSHHT;
 sound_t *WAV_EXPLODE;
 sound_t *WAV_STICK;
-sound_t *WAV_WALK;
+//sound_t *WAV_WALK;
 sound_t *WAV_CRAWL;
-sound_t *WAV_JUMP;
+//sound_t *WAV_JUMP;
 sound_t *WAV_PAD;
-sound_t *WAV_BOX;
-sound_t *WAV_BONUS;
+//sound_t *WAV_BOX;
+//sound_t *WAV_BONUS;
 sound_t *WAV_SBONUS1;
 sound_t *WAV_DIE;
 sound_t *WAV_ENTITY[10];
-#endif
+#endif /*IIGS*/
+#endif /*ENABLE_SOUND*/
 
 
 /*
@@ -187,6 +206,7 @@ game_toggleCheat(U8 nbr)
 void
 game_setmusic(char *name, U8 loop)
 {
+#ifndef IIGS
 	U8 channel;
 
 	if (music_snd)
@@ -197,13 +217,16 @@ game_setmusic(char *name, U8 loop)
 		music_snd->dispose = TRUE; /* music is always "fire and forget" */
 		channel = syssnd_play(music_snd, loop);
 	}
+#endif
 }
 
 void
 game_stopmusic(void)
 {
+#ifndef IIGS
 	syssnd_stopsound(music_snd);
 	music_snd = NULL;
+#endif
 }
 #endif
 
@@ -387,14 +410,10 @@ frame(void)
 			game_state = PLAY0;
 			return;
 
-
-
 		case PAUSE_PRESSED1:
 			screen_pause(TRUE);
 			game_state = PAUSE_PRESSED1B;
 			break;
-
-
 
 		case PAUSE_PRESSED1B:
 			if (control_status & CONTROL_PAUSE)
@@ -766,6 +785,7 @@ loaddata()
 	 *
 	 * tune[0-5].wav not cached
 	 */
+	#ifndef IIGS
 	WAV_GAMEOVER = syssnd_load("sounds/gameover.wav");
 	WAV_SBONUS2 = syssnd_load("sounds/sbonus2.wav");
 	WAV_BULLET = syssnd_load("sounds/bullet.wav");
@@ -789,6 +809,8 @@ loaddata()
 	WAV_ENTITY[6] = syssnd_load("sounds/ent6.wav");
 	WAV_ENTITY[7] = syssnd_load("sounds/ent7.wav");
 	WAV_ENTITY[8] = syssnd_load("sounds/ent8.wav");
+	#endif
+
 #endif
 }
 

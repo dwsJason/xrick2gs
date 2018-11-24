@@ -22,8 +22,6 @@ DummyNTP start ASM_CODE
 *
 NTPprepare start ASM_CODE
 
-aNTPprepare EQU ntpplayer
-			
 	lda 4,s
 	tax
 	lda 6,s
@@ -38,7 +36,8 @@ aNTPprepare EQU ntpplayer
 	lda #0
 	sta 1,s
 	
-	jsl aNTPprepare
+ntpb0 entry	
+	jsl >$000000  ; NTPprepare
 	
 	bcc okgo
 	
@@ -59,8 +58,6 @@ okgo pla
 *
 NTPplay start ASM_CODE
 
-aNTPplay EQU ntpplayer+3
-
 	lda 4,s
 	tax
 	lda 2,s
@@ -69,7 +66,8 @@ aNTPplay EQU ntpplayer+3
 	sta 3,s
 	pla
 	txa
-	jmp >aNTPplay
+ntpb1 entry	
+	jml >$000003	; NTPplay
 *-------------------------------------------------------------------------------
 	end
 					  
@@ -82,9 +80,8 @@ aNTPplay EQU ntpplayer+3
 *
 NTPstop start ASM_CODE
 
-aNTPstop EQU ntpplayer+6
-
-	jmp >aNTPstop
+ntpb2 entry	
+	jml >$000006 ; NTPstop
 *-------------------------------------------------------------------------------
 	end
 	
@@ -129,6 +126,35 @@ NTPforcesongpos start ASM_CODE
 	rtl
 *-------------------------------------------------------------------------------
 	end
+	
+*
+* void SetAudioBank(u8 bankNo);
+*
+SetAudioBank start ASM_CODE
+
+iBank equ 4
+
+	sep #$30
+
+	lda iBank,s
+
+	sta >ntpb0+3
+	sta >ntpb1+3
+	sta >ntpb2+3
+	
+	rep #$30
+	
+	lda 2,s
+	sta iBank,s
+	lda 1,s
+	sta iBank-1,s
+	
+	pla
+
+	rtl
+*-------------------------------------------------------------------------------
+	end
+
 
 
 
