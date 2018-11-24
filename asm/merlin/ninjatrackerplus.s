@@ -9,7 +9,7 @@
 *
 *****************************
 
-                        dsk ntpplayer.a
+                        dsk ntpplayer.bin
                         org $0f0000
                         mx  %00
 

@@ -73,5 +73,8 @@ rem
 cd asm\merlin
 call make.bat
 cd ..\..
-iix makelib -P data.lib +asm\merlin\ntpplayer.a
+lz4 -c2 asm\merlin\ntpplayer.bin data\ntpplayer.lz4
+iix mkobj ntpplayer_lz4 data:ntpplayer.lz4 data:ntpplayer.a ntpdata
+iix makelib -P data.lib +data\ntpplayer.a
+
 
