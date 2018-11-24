@@ -1,5 +1,5 @@
 *
-* ORCA/M Fomat!!
+* ORCA/M Format!!
 * NinjaTrackerPlus C interfaces for ORCA
 *
 	case on
