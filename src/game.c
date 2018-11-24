@@ -538,18 +538,18 @@ frame(void)
       }
       break;
 
-
-
     case CHAIN_END:
       map_init();                     /* initialize the map */
       isave();                        /* save data in case of a restart */
       ent_clprev();                   /* cleanup entities */
       draw_map();                     /* draw the map onto the buffer */
       draw_drawStatus();              /* draw the status bar onto the buffer */
-      game_rects = &draw_SCREENRECT;  /* request full screen refresh */
+	  draw_STATUSRECT.next = NULL;
       game_state = PLAY3;
+	  frame();
+	  frame();
+      game_rects = &draw_SCREENRECT;  /* request full screen refresh */
       return;
-
 
 
     case SCROLL_UP:
