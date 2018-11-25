@@ -40,7 +40,6 @@ char* pNtpDriver = NULL;
 char* pNtpSong   = NULL;
 
 extern char ntpplayer_lz4;
-extern char samerica_lz4;
 extern char sfx_lz4;
 extern char sfx_lz5;
 

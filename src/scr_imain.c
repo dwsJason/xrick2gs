@@ -53,7 +53,11 @@ screen_introMain(void)
     game_period = 50;
     game_rects = &draw_SCREENRECT;
 #ifdef ENABLE_SOUND
+	#ifdef IIGS
+	game_setmusic(&rick1_lz4, -1);
+	#else
 	game_setmusic("sounds/tune5.wav", -1);
+	#endif
 #endif
   }
 

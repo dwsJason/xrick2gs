@@ -243,6 +243,15 @@ extern void wait_vsync(void);
 extern char KeyArray[128];
 extern void RemoveKeyboardDriver();
 extern void AddKeyboardDriver();
+
+// IIGS NTP Songs
+extern char egypt_lz4;
+extern char mbase_lz4;
+extern char rick1_lz4;
+extern char rick1victory_lz4;
+extern char samerica_lz4;
+extern char schwarz_lz4;
+
 #endif
 
 #endif

@@ -200,12 +200,25 @@ game_toggleCheat(U8 nbr)
 #endif
 
 #ifdef ENABLE_SOUND
+#ifdef IIGS
+void NTPstop(void);
+void NTPplay(int bPlayOnce);
+int NTPprepare(void* pNTPData);
+extern char* pNtpSong;
+#endif
 /*
  * Music
  */
 void
 game_setmusic(char *name, U8 loop)
 {
+#ifdef IIGS
+	NTPstop();
+	LZ4_Unpack(pNtpSong, name);
+	NTPprepare((void*)pNtpSong);
+	NTPplay(0);
+#endif
+
 #ifndef IIGS
 	U8 channel;
 
@@ -223,6 +236,10 @@ game_setmusic(char *name, U8 loop)
 void
 game_stopmusic(void)
 {
+#ifdef IIGS
+	NTPstop();
+#endif
+
 #ifndef IIGS
 	syssnd_stopsound(music_snd);
 	music_snd = NULL;

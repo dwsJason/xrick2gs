@@ -49,7 +49,9 @@ screen_gameover(void)
 		period = game_period; /* save period, */
 		game_period = 50;     /* and use our own */
 #ifdef ENABLE_SOUND
+		#ifndef IIGS
 		game_setmusic("sounds/gameover.wav", 1);
+		#endif
 #endif
 	}
 

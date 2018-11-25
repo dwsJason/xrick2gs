@@ -61,7 +61,11 @@ screen_xrick(void)
 	case 1:  /* wait */
 		if (wait++ > 0x2) {
 #ifdef ENABLE_SOUND
+			#ifdef IIGS
+			syssnd_play(SND_BULLET,1);
+			#else
 			game_setmusic("sounds/bullet.wav", 1);
+			#endif
 #endif
 			seq = 2;
 			wait = 0;
