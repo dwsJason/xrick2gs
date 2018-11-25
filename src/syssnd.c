@@ -48,6 +48,8 @@ void SetAudioBank(char bankNo);
 void NTPstop(void);
 void NTPplay(int bPlayOnce);
 int NTPprepare(void* pNTPData);
+void mraLoadBank(char* pAudioBank);
+void mraPlay(U8 sfxNo);
 
 void
 syssnd_init(void)
@@ -150,7 +152,11 @@ syssnd_vol(S8 d)
 S8
 syssnd_play(sound_t sound, S8 loop)
 {
-	printf("syssnd_play\n");
+	//printf("syssnd_play\n");
+	if ((sound >= 0) && (sound<SND_MAX))
+	{
+		mraPlay((U8)sound);
+	}
 	return 0;
 }
 

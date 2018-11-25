@@ -163,11 +163,12 @@ iSize equ 3
 	php
 	sei
 	phd
+	
 	lda #$C000
 	tcd
 	xba ; Zero out the high byte
 	
-	rep #$21
+	sep #$21
 	longa off
 	longi on
 	
@@ -175,7 +176,7 @@ iSize equ 3
 * Just Round Robin
 
 	lda |channelNo
-	adc #2
+	adc #1 ; c=1
 	cmp #30
 	blt channelGood
 	lda #16
@@ -213,7 +214,7 @@ channelGood ANOP
 	sta <$3D
 	sta <$3D
 	
-	lda |channleNo
+	lda |channelNo
 	ora #$80	; Address Register
 	sta <$3E
 	
@@ -246,7 +247,7 @@ channelGood ANOP
 	plp
 	longa on
 	longi on
-	
+
 	lda 3,s
 	sta iSfxNo,s
 	lda 1,s

@@ -157,6 +157,8 @@ enum {
 	SND_SBONUS2,
 	SND_STICK,
 	SND_WALK,
+
+	SND_MAX
 };
 
 
