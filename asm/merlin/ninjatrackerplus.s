@@ -439,7 +439,8 @@ generate_osc_3          = *
 ;--------------------------
 
 copy_instruments_to_doc = *
-                        jsr clear_docram
+						;;++JGA we don't want this
+                        ;;jsr clear_docram
 
                         ldy #0
 
