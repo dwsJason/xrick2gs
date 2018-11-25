@@ -16,22 +16,181 @@ mraDummy start ASM_CODE
 *
 mraLoadBank start ASM_CODE
 
-pAudioBank equ 4
-	lda 2,s
-	sta pAudioBank+2,s
-	lda 1,s
-	sta pAudioBank+1,s
+pAudioBank equ 5
+	
+	phb
+	phk
+	plb
+	
+* Get the pointer, and poke it into
+* the fetch code
 
+	lda pAudioBank,s
+	sta |ReadByte+1
+	lda pAudioBank+1,s
+	sta |ReadByte+2
+	
+*
+* Fix up Return Address
+* 	
+	lda 1,s
+	sta pAudioBank,s
+	lda 3,s
+	sta pAudioBank+2,s
 	pla
 	pla
+	 
+	php
+	sei
+	phd
+	
+	lda #$c000
+	tcd
+	
+	longi on
+	longa off
+	
+	sep #$20
+	lda >$E100CA	; RAM Volume
+	and #%00001111  ; Leave Volume alone
+	ora #%01100000  ; RAM with auto increment
+	sta <$3C
+	
+*
+* Clear our the entire DOC RAM, because
+* Mr. Audio doesn't add play stop bytes
+*
+	stz <$3E	; Address Zero
+	stz <$3F
+	
+	ldx #0
+zeroloop ANOP
+	stz <$3D
+	dex
+	bne zeroloop
+
+* 1 byte, version # (should be zero)
+* 1 byte, number of waves
+* For each wave
+*   1 byte address in DOC
+*   2 byte, length of wave
+*     wave data
+
+	jsr ReadByte
+	cmp #0
+	bne BadVersion 	; If the version bad, don't try to upload wave
+	
+	lda #0
+	xba
+	jsr ReadByte
+	tay		  ; Y is the countdown for the total number of Waves
+	
+* Now for each wave, load the address
+   
+WaveLoop ANOP   
+	jsr ReadByte
+	stz <$3E  		; DOC Addr Low
+	sta <$3F    	; DOC Addr High
+
+* Get the Length, of the Wave, and put it in X
+	jsr ReadByte
+	pha
+	jsr ReadByte
+	xba
+	pla
+	tax
+	
+* Copy the Wave Data	
+	
+CopyLoop ANOP
+	jsr ReadByte
+	sta <$3D
+	dex
+	bne CopyLoop
+	
+* Dec Wave Count, and move to next Wave	
+	
+	dey
+	bne WaveLoop 
+
+*
+* Restore Registers, and return
+*
+BadVersion ANOP
+	pld
+	plp
+	plb
 	rtl
+
+	longa off
+	longi on
+ReadByte lda >$0
+	inc |ReadByte+1
+	bne ReadReturn
+	inc |ReadByte+2
+ReadReturn rts
+
 *-------------------------------------------------------------------------------
 	end
+	
+	longa on
+	longi on
 	
 *
 * void mraPlay(U8 sfxNo);
 *
 mraPlay start ASM_CODE
+
+* Stack offsets
+iSfxNo equ 5
+
+* Sound Play Register Value offsets
+iFreq equ 0
+iAddress equ 2
+iSize equ 3
+
+	phb
+	phk
+	plb
+	
+	lda iSfxNo,s
+	asl a
+	tax
+	
+	lda |AudioTable,x
+	tax
+	
+	php
+	sei
+	phd
+	lda #$C000
+	tcd
+	
+	rep #$20
+	longa off
+	longi on
+	
+* Incrememnt the channel we're going to play on
+
+* Setup Doc for Register Stores on the Appropriate channel
+
+* copy Register Values from the play table
+
+* play the audio
+	
+	pld
+	plp
+	longa on
+	longi on
+	
+	lda 3,s
+	sta iSfxNo,s
+	lda 1,s
+	sta iSfxNo-2,s
+	
+	pla
+	plb
+
 	rtl
 *-------------------------------------------------------------------------------
 	end
