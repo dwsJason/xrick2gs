@@ -165,16 +165,80 @@ iSize equ 3
 	phd
 	lda #$C000
 	tcd
+	xba ; Zero out the high byte
 	
-	rep #$20
+	rep #$21
 	longa off
 	longi on
 	
 * Incrememnt the channel we're going to play on
+* Just Round Robin
+
+	lda |channelNo
+	adc #2
+	cmp #30
+	blt channelGood
+	lda #16
+channelGood ANOP
+	sta |channelNo	
 
 * Setup Doc for Register Stores on the Appropriate channel
 
+	lda >$E100CA ; BEEP Volume
+	and #$0F
+	ora #$10	 ; Auto Increment
+	sta <$3C	; ACCESS to DOC registers
+
 * copy Register Values from the play table
+
+	lda |channelNo
+	sta <$3E	; oscillator freq low Register
+	
+	lda |iFreq,x
+	sta <$3D
+	sta <$3D
+	
+	lda |channelNo
+	ora #$20
+	sta <$3E   ; Freq High Register
+	lda |iFreq+1,x
+	sta <$3D
+	sta <$3D
+	
+	lda |channelNo
+	ora #$40   ; Volume Register
+	sta <$3E
+	
+	lda #$FF   ; Volume
+	sta <$3D
+	sta <$3D
+	
+	lda |channleNo
+	ora #$80	; Address Register
+	sta <$3E
+	
+	lda |iAddress,x
+	sta <$3D
+	sta <$3D
+	
+	lda |channelNo
+	ora #$C0	; Size Register
+	sta <$3E
+	
+	lda |iSize,x
+	sta <$3D
+	sta <$3D
+	
+	lda |channelNo
+	ora #$A0	; Oscillator Control Register
+	sta <$3E
+	
+* Store the Controls to make the Osciallors go
+
+	lda #$02	; left single shot
+	sta <$3D
+	ora #$12	; right single shot
+	sta <$3D	
 
 * play the audio
 	
@@ -192,6 +256,7 @@ iSize equ 3
 	plb
 
 	rtl
+channelNo dc i'16'
 *-------------------------------------------------------------------------------
 	end
 
