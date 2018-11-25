@@ -15,6 +15,15 @@ mraDummy start ASM_CODE
 * void mraLoadBank(char* pAudioBank);
 *
 mraLoadBank start ASM_CODE
+
+pAudioBank equ 4
+	lda 2,s
+	sta pAudioBank+2,s
+	lda 1,s
+	sta pAudioBank+1,s
+
+	pla
+	pla
 	rtl
 *-------------------------------------------------------------------------------
 	end
@@ -37,7 +46,6 @@ mraPlay start ASM_CODE
 *
 
 AudioTable start ASM_CODE
-
 	dc	a'SND_BOMBSHHT'
 	dc	a'SND_BONUS'
 	dc	a'SND_BOX'
@@ -60,85 +68,85 @@ AudioTable start ASM_CODE
 	dc	a'SND_WALK'
 
 SND_BOMBSHHT anop
-	dc	i,'$013B'	; Frequency
-	dc	b,'$2B'	; Address
-	dc	b,'$00'	; Size
+	dc	i'$013B'	; Frequency
+	dc	h'2B'	; Address
+	dc	h'00'	; Size
 SND_BONUS anop
-	dc	i,'$003D'	; Frequency
-	dc	b,'$A0'	; Address
-	dc	b,'$24'	; Size
+	dc	i'$003D'	; Frequency
+	dc	h'A0'	; Address
+	dc	h'24'	; Size
 SND_BOX anop
-	dc	i,'$0039'	; Frequency
-	dc	b,'$D0'	; Address
-	dc	b,'$1B'	; Size
+	dc	i'$0039'	; Frequency
+	dc	h'D0'	; Address
+	dc	h'1B'	; Size
 SND_BULLET anop
-	dc	i,'$0033'	; Frequency
-	dc	b,'$70'	; Address
-	dc	b,'$24'	; Size
+	dc	i'$0033'	; Frequency
+	dc	h'70'	; Address
+	dc	h'24'	; Size
 SND_CRAWL anop
-	dc	i,'$005D'	; Frequency
-	dc	b,'$9E'	; Address
-	dc	b,'$09'	; Size
+	dc	i'$005D'	; Frequency
+	dc	h'9E'	; Address
+	dc	h'09'	; Size
 SND_DIE anop
-	dc	i,'$0042'	; Frequency
-	dc	b,'$90'	; Address
-	dc	b,'$24'	; Size
+	dc	i'$0042'	; Frequency
+	dc	h'90'	; Address
+	dc	h'24'	; Size
 SND_ENT0 anop
-	dc	i,'$0065'	; Frequency
-	dc	b,'$D8'	; Address
-	dc	b,'$1B'	; Size
+	dc	i'$0065'	; Frequency
+	dc	h'D8'	; Address
+	dc	h'1B'	; Size
 SND_ENT1 anop
-	dc	i,'$0030'	; Frequency
-	dc	b,'$30'	; Address
-	dc	b,'$24'	; Size
+	dc	i'$0030'	; Frequency
+	dc	h'30'	; Address
+	dc	h'24'	; Size
 SND_ENT2 anop
-	dc	i,'$0032'	; Frequency
-	dc	b,'$40'	; Address
-	dc	b,'$24'	; Size
+	dc	i'$0032'	; Frequency
+	dc	h'40'	; Address
+	dc	h'24'	; Size
 SND_ENT3 anop
-	dc	i,'$0033'	; Frequency
-	dc	b,'$80'	; Address
-	dc	b,'$24'	; Size
+	dc	i'$0033'	; Frequency
+	dc	h'80'	; Address
+	dc	h'24'	; Size
 SND_ENT4 anop
-	dc	i,'$0036'	; Frequency
-	dc	b,'$50'	; Address
-	dc	b,'$24'	; Size
+	dc	i'$0036'	; Frequency
+	dc	h'50'	; Address
+	dc	h'24'	; Size
 SND_ENT6 anop
-	dc	i,'$006D'	; Frequency
-	dc	b,'$E8'	; Address
-	dc	b,'$1B'	; Size
+	dc	i'$006D'	; Frequency
+	dc	h'E8'	; Address
+	dc	h'1B'	; Size
 SND_ENT8 anop
-	dc	i,'$005D'	; Frequency
-	dc	b,'$AC'	; Address
-	dc	b,'$12'	; Size
+	dc	i'$005D'	; Frequency
+	dc	h'AC'	; Address
+	dc	h'12'	; Size
 SND_EXPLODE anop
-	dc	i,'$0036'	; Frequency
-	dc	b,'$B0'	; Address
-	dc	b,'$24'	; Size
+	dc	i'$0036'	; Frequency
+	dc	h'B0'	; Address
+	dc	h'24'	; Size
 SND_JUMP anop
-	dc	i,'$0072'	; Frequency
-	dc	b,'$F0'	; Address
-	dc	b,'$1B'	; Size
+	dc	i'$0072'	; Frequency
+	dc	h'F0'	; Address
+	dc	h'1B'	; Size
 SND_PAD anop
-	dc	i,'$003A'	; Frequency
-	dc	b,'$E0'	; Address
-	dc	b,'$1B'	; Size
+	dc	i'$003A'	; Frequency
+	dc	h'E0'	; Address
+	dc	h'1B'	; Size
 SND_SBONUS1 anop
-	dc	i,'$003D'	; Frequency
-	dc	b,'$C0'	; Address
-	dc	b,'$24'	; Size
+	dc	i'$003D'	; Frequency
+	dc	h'C0'	; Address
+	dc	h'24'	; Size
 SND_SBONUS2 anop
-	dc	i,'$0041'	; Frequency
-	dc	b,'$60'	; Address
-	dc	b,'$24'	; Size
+	dc	i'$0041'	; Frequency
+	dc	h'60'	; Address
+	dc	h'24'	; Size
 SND_STICK anop
-	dc	i,'$0067'	; Frequency
-	dc	b,'$2C'	; Address
-	dc	b,'$12'	; Size
+	dc	i'$0067'	; Frequency
+	dc	h'2C'	; Address
+	dc	h'12'	; Size
 SND_WALK anop
-	dc	i,'$007B'	; Frequency
-	dc	b,'$AB'	; Address
-	dc	b,'$00'	; Size
+	dc	i'$007B'	; Frequency
+	dc	h'AB'	; Address
+	dc	h'00'	; Size
 
 *-------------------------------------------------------------------------------
 	end

@@ -41,7 +41,12 @@ iix mkobj rick1_lz4 data:rick1.lz4 data:rick1.a ntpdata
 iix mkobj rick1victory_lz4 data:rick1victory.lz4 data:rick1victory.a ntpdata
 iix mkobj samerica_lz4 data:samerica.lz4 data:samerica.a ntpdata
 iix mkobj schwarz_lz4 data:schwarz.lz4 data:schwarz.a ntpdata
-iix mkobj sfx_lz4 data:sfx.lz4 data:lz4.a sfxdata
+rem iix mkobj sfx_lz4 data:sfx.lz4 data:sfx.a sfxdata
+del data\sfx.part.bat
+gfsplit data\sfx.lz4 data\sfx.part 32
+iix mkobj sfx_lz4 data:sfx.part1 data:sfx.a sfxdata
+iix mkobj sfx_lz5 data:sfx.part2 data:sfx2.a sfxdata
+
 rem
 rem Packed Mr.Sprites into object files
 rem
@@ -67,6 +72,7 @@ iix makelib -P data.lib +data:rick1victory.a
 iix makelib -P data.lib +data:samerica.a
 iix makelib -P data.lib +data:schwarz.a
 iix makelib -P data.lib +data:sfx.a
+iix makelib -P data.lib +data:sfx2.a
 rem
 rem NinjaTrackerPlus Library
 rem

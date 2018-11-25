@@ -41,6 +41,8 @@ char* pNtpSong   = NULL;
 
 extern char ntpplayer_lz4;
 extern char samerica_lz4;
+extern char sfx_lz4;
+extern char sfx_lz5;
 
 void SetAudioBank(char bankNo);
 void NTPstop(void);
@@ -70,6 +72,17 @@ syssnd_init(void)
 
 	//printf("%p\n", pNtpDriver );
 	//printf("%p\n", pNtpSong );
+	
+	//--- Take Advantage of the 64k bank we just
+	//    Allocated, as a temp buffer to get our
+	//    SFX loaded into the DOC
+
+	printf("Decompress SFX %p\n", &sfx_lz4); // Force this to be linked in
+	printf("Decompress SFX %p\n", &sfx_lz5); // Force this to be linked in
+	LZ4_Unpack(pNtpDriver, &sfx_lz4);
+
+	printf("Load SFX into the DOC\n");
+	mraLoadBank(pNtpDriver);
 
 	printf("Decompress NTP Driver\n");
 	LZ4_Unpack(pNtpDriver, &ntpplayer_lz4);
@@ -79,6 +92,7 @@ syssnd_init(void)
 	printf("SetAudioBank\n");
 	SetAudioBank( (*handle)>>16 );
 
+	#if 0
 	printf("NTPprepare\n");
 
 	if (NTPprepare(pNtpSong))
@@ -90,6 +104,7 @@ syssnd_init(void)
 		printf("NTPplay\n");
 		NTPplay(0);
 	}
+	#endif
 	
 }
 
