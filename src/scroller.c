@@ -136,7 +136,7 @@ scroll_down(void)
 
   /* translate map */
   pDst = &map_map[MAP_ROW_SCRBOT][0];
-  pSrc = pDst+32;
+  pSrc = pDst-32;
   for (i = MAP_ROW_SCRBOT; i > MAP_ROW_HTTOP; i--)
   {
 	  memcpy(pDst, pSrc, (size_t)32);
