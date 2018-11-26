@@ -414,7 +414,7 @@ e_them_t2_action2(ent_t* pEnt)
     pEnt->flgclmb = FALSE;  /* not climbing */
 
     /* calc new y (falling) and test environment */
-    i = (pEnt->y << 8) + pEnt->offsy + pEnt->ylow;
+    i = (((U32)pEnt->y) << 8) + pEnt->offsy + pEnt->ylow;
     y = i >> 8;
     u_envtest(pEnt->x, y, FALSE, &env0, &env1);
     if (!(env1 & (MAP_EFLG_SOLID|MAP_EFLG_SPAD|MAP_EFLG_WAYUP))) {
