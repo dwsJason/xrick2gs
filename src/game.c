@@ -562,9 +562,8 @@ frame(void)
       draw_map();                     /* draw the map onto the buffer */
       draw_drawStatus();              /* draw the status bar onto the buffer */
 	  draw_STATUSRECT.next = NULL;
-      game_state = PLAY3;
-	  frame();
-	  frame();
+	  ent_action();
+	  game_state = PLAY3;
       game_rects = &draw_SCREENRECT;  /* request full screen refresh */
       return;
 
