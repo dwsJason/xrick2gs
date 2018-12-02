@@ -282,7 +282,7 @@ void GetLoadSegments()
 	int idx;
 static LoadSegRec result;
 
-	outData[0] = 16;	// first value, the number of segments
+	outData[0] = 19;	// first value, the number of segments
 
 	printf("$%08p GetLoadSegments\n", (Pointer)&GetLoadSegments);
 	printf("$%04X userid\n", userid());
