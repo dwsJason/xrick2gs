@@ -68,26 +68,36 @@ static void map_eflg_expand(U8);
 void
 map_expand(void)
 {
-  U8 i, j, k, l;
-  U8 row, col;
+  U16 i, j, k, l;
+  U16 col;
   U16 pbnum;
 
-  pbnum = map_submaps[game_submap].bnum + ((2 * map_frow) & 0xfff8);
-  row = col = 0;
+  U8* pMap_map = &map_map[0][0];
 
-  for (i = 0; i < 0x0b; i++) {  /* 0x0b rows of blocks */
-    for (j = 0; j < 0x08; j++) {  /* 0x08 blocks per row */
-      for (k = 0, l = 0; k < 0x04; k++) {  /* expand one block */
-	map_map[row][col++] = map_blocks[map_bnums[pbnum]][l++];
-	map_map[row][col++] = map_blocks[map_bnums[pbnum]][l++];
-	map_map[row][col++] = map_blocks[map_bnums[pbnum]][l++];
-	map_map[row][col]   = map_blocks[map_bnums[pbnum]][l++];
-	row += 1; col -= 3;
-      }
-      row -= 4; col += 4;
-      pbnum++;
-    }
-    row += 4; col = 0;
+  U8* pBlock;
+
+  pbnum = map_submaps[game_submap].bnum + ((2 * map_frow) & 0xfff8);
+  col = 0;
+
+  for (i = 0; i < 0x0b; i++)
+  {  /* 0x0b rows of blocks */
+	  for (j = 0; j < 0x08; j++)
+	  {  /* 0x08 blocks per row */
+
+		  pBlock = &map_blocks[map_bnums[pbnum]][0];
+
+		  for (k = 0, l = 0; k < 0x04; k++)
+		  {  /* expand one block */
+			  pMap_map[col++] = pBlock[l++];
+			  pMap_map[col++] = pBlock[l++];
+			  pMap_map[col++] = pBlock[l++];
+			  pMap_map[col]   = pBlock[l++];
+			  pMap_map+=32; col -= 3;
+		  }
+		  pMap_map -= (128); col += 4;
+		  pbnum++;
+	  }
+	  pMap_map += 128; col = 0;
   }
 }
 
