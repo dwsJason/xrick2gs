@@ -555,7 +555,7 @@ sysvid_update(rect_t *rects)
 			   rects->height
 		);
 		#endif
-		result = BlitRect(rects->x, rects->y, rects->width, rects->height);
+		result = BlitRect(rects->x, rects->y, rects->width-1, rects->height-1);
 		rects = rects->next;
 	}
 #endif
