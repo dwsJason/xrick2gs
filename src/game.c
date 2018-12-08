@@ -59,24 +59,24 @@ typedef enum {
 /*
  * global vars
  */
-U8 game_period = 0;
-U8 game_waitevt = FALSE;
+U16 game_period = 0;
+U16 game_waitevt = FALSE;
 rect_t *game_rects = NULL;
 
-U8 game_lives = 0;
-U8 game_bombs = 0;
-U8 game_bullets = 0;
+U16 game_lives = 0;
+U16 game_bombs = 0;
+U16 game_bullets = 0;
 U32 game_score = 0;
 
 U16 game_map = 0;
 U16 game_submap = 0;
 
-U8 game_dir = 0;
-U8 game_chsm = FALSE;
+U16 game_dir = 0;
+U16 game_chsm = FALSE;
 
-U8 game_cheat1 = 0;
-U8 game_cheat2 = 0;
-U8 game_cheat3 = 0;
+U16 game_cheat1 = 0;
+U16 game_cheat2 = 0;  // no die
+U16 game_cheat3 = 0;
 
 U16 game_status_dirty = 0;
 
@@ -464,11 +464,9 @@ frame(void)
 		return;
 
 
-
 		case PLAY0:
 			play0();
 			break;
-
 
 
 		case PLAY1:

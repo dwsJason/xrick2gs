@@ -43,9 +43,9 @@ typedef struct {
 } hscore_t;
 
 extern U16 game_status_dirty; /* status dirty flag */
-extern U8 game_lives;      /* lives counter */
-extern U8 game_bombs;      /* bombs counter */
-extern U8 game_bullets;    /* bullets counter */
+extern U16 game_lives;      /* lives counter */
+extern U16 game_bombs;      /* bombs counter */
+extern U16 game_bullets;    /* bullets counter */
 
 extern U32 game_score;     /* score */
 
@@ -54,11 +54,11 @@ extern hscore_t game_hscores[8];  /* highest scores (hall of fame) */
 extern U16 game_map;       /* current map */
 extern U16 game_submap;    /* current submap */
 
-extern U8 game_dir;        /* direction (LEFT, RIGHT) */
-extern U8 game_chsm;       /* change submap request (TRUE, FALSE) */
+extern U16 game_dir;        /* direction (LEFT, RIGHT) */
+extern U16 game_chsm;       /* change submap request (TRUE, FALSE) */
 
-extern U8 game_waitevt;    /* wait for events (TRUE, FALSE) */
-extern U8 game_period;     /* time between each frame, in millisecond */
+extern U16 game_waitevt;    /* wait for events (TRUE, FALSE) */
+extern U16 game_period;     /* time between each frame, in millisecond */
 
 extern rect_t *game_rects; /* rectangles to redraw at each frame */
 
@@ -68,9 +68,9 @@ extern void game_stopmusic(void);
 
 
 #ifdef ENABLE_CHEATS
-extern U8 game_cheat1;     /* infinite lives, bombs and bullets */
-extern U8 game_cheat2;     /* never die */
-extern U8 game_cheat3;     /* highlight sprites */
+extern U16 game_cheat1;     /* infinite lives, bombs and bullets */
+extern U16 game_cheat2;     /* never die */
+extern U16 game_cheat3;     /* highlight sprites */
 extern void game_toggleCheat(U8);
 #endif
 

@@ -133,7 +133,7 @@ extern U8 map_eflg[0x100];  /* current */
 /*
  * map_map top row within the submap
  */
-extern U8 map_frow;
+extern U16 map_frow;
 
 /*
  * tiles offset

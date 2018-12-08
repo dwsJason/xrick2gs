@@ -115,6 +115,9 @@ e_bomb_action(UNUSED(ent_t* pEnt))
 	}
 	else if (e_bomb_ticker == 0x09)
 	{
+      		if (E_RICK_STTST (E_RICK_STZOMBIE))
+        		 return;
+
 		/*
 		 * explode
 		 */
@@ -138,6 +141,9 @@ e_bomb_action(UNUSED(ent_t* pEnt))
 	}
 	else
 	{
+      		if (E_RICK_STTST (E_RICK_STZOMBIE))
+         		return;
+
 		/*
 		 * exploding
 		 */

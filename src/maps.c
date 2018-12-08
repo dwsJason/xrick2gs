@@ -47,7 +47,7 @@
  */
 U8 map_map[0x2C][0x20];
 U8 map_eflg[0x100];
-U8 map_frow;
+U16 map_frow;
 U16 map_tilesBank;
 
 
