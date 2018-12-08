@@ -81,6 +81,7 @@ e_them_gozombie(ent_t* pEnt)
   syssnd_play(WAV_DIE, 1);
 #endif
   game_score += 50;
+	game_status_dirty = 1;
   if (pEnt->flags & ENT_FLG_ONCE) {
     /* make sure entity won't be activated again */
     map_marks[pEnt->mark].ent |= MAP_MARK_NACT;

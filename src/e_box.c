@@ -77,6 +77,8 @@ e_box_action(ent_t* pEnt)
 				game_bombs = GAME_BOMBS_INIT;
 			else  /* 0x11 */
 				game_bullets = GAME_BULLETS_INIT;
+
+			game_status_dirty = 1;
 			pEnt->n = 0;
 			map_marks[pEnt->mark].ent |= MAP_MARK_NACT;
 		}

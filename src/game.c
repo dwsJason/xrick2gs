@@ -78,6 +78,8 @@ U8 game_cheat1 = 0;
 U8 game_cheat2 = 0;
 U8 game_cheat3 = 0;
 
+U16 game_status_dirty = 0;
+
 #if defined(GFXST) || defined(GFXGS)
 hscore_t game_hscores[8] = {
   { 8000, "SIMES@@@@@" },
@@ -183,6 +185,7 @@ game_toggleCheat(U8 nbr)
       game_lives = 6;
       game_bombs = 6;
       game_bullets = 6;
+	  game_status_dirty = 1;
       break;
     case 2:
       game_cheat2 = ~game_cheat2;
@@ -497,6 +500,7 @@ frame(void)
 				} else {
 					game_state = GAMEOVER;
 				}
+				game_status_dirty = 1;
 			}
 			else if (game_chsm)  /* request to chain to next submap */
 				game_state = CHAIN_SUBMAP;
@@ -516,6 +520,7 @@ frame(void)
       if (map_chain())
 	game_state = CHAIN_END;
       else {
+    game_status_dirty = 1;
 	game_bullets = 0x06;
 	game_bombs = 0x06;
 	game_map++;
@@ -577,8 +582,6 @@ frame(void)
 	break;
       }
       break;
-
-
 
     case SCROLL_DOWN:
       switch (scroll_down()) {
@@ -651,6 +654,7 @@ init(void)
   game_bombs = 6;
   game_bullets = 6;
   game_score = 0;
+  game_status_dirty = 1;
 
   game_map = sysarg_args_map;
 
@@ -719,13 +723,20 @@ play3(void)
 {
   static rect_t *r;
 
-  draw_clearStatus();  /* clear the status bar */
-  ent_draw();          /* draw all entities onto the buffer */
-  /* sound */
-  draw_drawStatus();   /* draw the status bar onto the buffer*/
-
-  r = &draw_STATUSRECT; r->next = ent_rects;  /* refresh status bar too */
-  game_rects = r;  /* take care to cleanup draw_STATUSRECT->next later! */
+  if (game_status_dirty)
+  {
+	  draw_clearStatus();  /* clear the status bar */
+	  ent_draw();          /* draw all entities onto the buffer */
+	  draw_drawStatus();   /* draw the status bar onto the buffer*/
+	  r = &draw_STATUSRECT; r->next = ent_rects;  /* refresh status bar too */
+	  game_rects = r;  /* take care to cleanup draw_STATUSRECT->next later! */
+	  game_status_dirty = 0;
+  }
+  else
+  {
+	  ent_draw();          /* draw all entities onto the buffer */
+	  game_rects = ent_rects;
+  }
 
   if (!E_RICK_STTST(E_RICK_STZOMBIE)) {  /* need to scroll ? */
     if (ent_ents[1].y >= 0xCC) {
@@ -753,6 +764,8 @@ restart(void)
 
   game_bullets = 6;
   game_bombs = 6;
+
+  game_status_dirty = 1;
 
   ent_ents[1].n = 1;
 

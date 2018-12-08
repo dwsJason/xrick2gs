@@ -42,6 +42,7 @@ typedef struct {
   U8 name[10];
 } hscore_t;
 
+extern U16 game_status_dirty; /* status dirty flag */
 extern U8 game_lives;      /* lives counter */
 extern U8 game_bombs;      /* bombs counter */
 extern U8 game_bullets;    /* bullets counter */

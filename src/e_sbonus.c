@@ -73,6 +73,7 @@ e_sbonus_stop(ent_t* pEnt)
 		e_sbonus_counting = FALSE;  /* stop counting */
 		pEnt->n = 0;  /* deactivate entity */
 		game_score += e_sbonus_bonus;  /* add bonus to score */
+		game_status_dirty = 1;
 #ifdef ENABLE_SOUND
 		syssnd_play(WAV_SBONUS2, 1);
 #endif

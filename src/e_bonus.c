@@ -37,6 +37,7 @@ e_bonus_action(ent_t *pEnt)
   if (pEnt->seq == 0) {
     if (e_rick_boxtest(pEnt)) {
       game_score += 500;
+	  game_status_dirty = 1;
 #ifdef ENABLE_SOUND
       syssnd_play(WAV_BONUS, 1);
 #endif
