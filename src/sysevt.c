@@ -91,33 +91,85 @@ processEvent()
 	if (KeyArray[ LARROW ])
 	{
 		control_status |= CONTROL_LEFT;
+		if (!(control_last & CONTROL_LEFT))
+		{
+			control_last |= CONTROL_LEFT;
+			KeyArray[ RARROW ] = 0;
+		}
+	}
+	else
+	{
+		control_last &= ~CONTROL_LEFT;
 	}
 	if (KeyArray[ RARROW ])
 	{
 		control_status |= CONTROL_RIGHT;
+		if (!(control_last & CONTROL_RIGHT))
+		{
+			control_last |= CONTROL_RIGHT;
+			KeyArray[ LARROW ] = 0;
+		}
+	}
+	else
+	{
+		control_last &= ~CONTROL_RIGHT;
 	}
 	if (KeyArray[ DARROW ])
 	{
 		control_status |= CONTROL_DOWN;
+		if (!(control_last & CONTROL_DOWN))
+		{
+			control_last |= CONTROL_DOWN;
+			KeyArray[ UARROW ] = 0;
+		}
+	}
+	else
+	{
+		control_last &= ~CONTROL_DOWN;
 	}
 	if (KeyArray[ UARROW ])
 	{
 		control_status |= CONTROL_UP;
+		if (!(control_last & CONTROL_UP))
+		{
+			control_last |= CONTROL_UP;
+			KeyArray[ DARROW ] = 0;
+		}
+	}
+	else
+	{
+		control_last &= ~CONTROL_UP;
 	}
 	if (KeyArray[ SPACEBAR ])
 	{
 		control_status |= CONTROL_FIRE;
+		if (!(control_last & CONTROL_FIRE))
+		{
+			control_last |= CONTROL_FIRE;
+		}
+	}
+	else
+	{
+		control_last &= ~CONTROL_FIRE;
 	}
 	if (KeyArray[ ESC ])
 	{
 		control_status |= CONTROL_END;
+		control_last |= CONTROL_END;
+	}
+	else
+	{
+		control_last &= ~CONTROL_END;
 	}
 	if (KeyArray[ Q_KEY ])
 	{
 		control_status |= CONTROL_EXIT;
+		control_last   |= CONTROL_EXIT;
 	}
-
-
+	else
+	{
+		control_last &= ~CONTROL_EXIT;
+	}
 #endif
 
 #ifndef IIGS
