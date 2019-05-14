@@ -207,11 +207,11 @@ SRMerge1 phx		; Save 2nd
 	longi on
 	
 PostIt pha	; Save Key
-	sep #$20
-	longa off
 	cmp #$80 ; set/clear c
 	and #$7f ; keycode idx
 	tax
+	sep #$20
+	longa off
 	lda #$00
 	rol	a	 ; key state
 	eor #$01 ; 0 for key up
