@@ -68,6 +68,17 @@ clear stz KeyArray,x
 	bpl clear
 	
 *
+* Blast any previous existing handler
+* This is probably mean, but I want input to work
+*
+	ldx #1				;Restart internal keyboard scanning
+	ldy #clearModes
+	lda #1				;Clear mode flag
+	jsr CallSendInfo
+	pea $2				;Remove my handler for keyboard
+	_SRQRemove
+	
+*
 * Install SRQ Completion Handler
 *	
 * Disable ADB Auto Polling
