@@ -18,8 +18,9 @@
 #include <SDL.h>
 #endif
 
-extern char img_splash_lz4;
-extern void* IMG_SPLASH;
+
+#include <Memory.h>
+extern char credits_lz4;
 
 /*
  * main
@@ -28,12 +29,20 @@ int
 main(int argc, char *argv[])
 {
 	printf("Hello from xrick IIgs\n");
+//	tHandle = (U32*)NewHandle(0x10000, userid(), 0xC014, 0); 
+//	LZ4_Unpack((char*)*tHandle, &samerica_lz4);
 
-//	printf("Unpacking Splash!\n");
-//	LZ4_Unpack((char*)(0xE12000), &img_splash_lz4);
+//	NTPprepare((void*)*tHandle);
+//	NTPplay(1);
+	// Keep the Screen on
+	*VIDEO_REGISTER|=0xC0;
+	// Blank the screen, so you don't see trash in the Frame Buffer
+	memset((void*)0xE19D00, (int)0, (size_t)200);
+	memset((void*)0xE19E00, (int)0, (size_t)32);
+	// Display the Credits
+	LZ4_Unpack((char*)(0xE12000), &credits_lz4);
 //	printf("%08x\n", &img_splash_lz4 );
 //	printf("%08x\n", IMG_SPLASH );
-//	sys_sleep(10000);
 
 	sys_init(argc, argv);
 	if (sysarg_args_data)
