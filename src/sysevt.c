@@ -49,8 +49,26 @@ segment "system";
 #define SPACEBAR 0x31
 
 #define ESC 0x35
-#define Z_KEY 0x07
+#define Z_KEY 0x06
 #define Q_KEY 0x0C
+
+#define A_KEY 0x00
+#define S_KEY 0x01
+#define D_KEY 0x02
+#define W_KEY 0x0D
+#define I_KEY 0x22
+#define J_KEY 0x26
+#define K_KEY 0x28
+#define L_KEY 0x25
+
+
+// If the IIGs, we just automatically support all the things
+void ReadPaddles();
+extern U16 paddle0;
+extern U16 paddle1;
+extern U16 paddle_button0;
+ 
+U16 bUseJoy = 0; 
 
 #endif
 
