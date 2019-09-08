@@ -45,6 +45,7 @@ typedef enum {
 #ifdef ENABLE_DEVTOOLS
   DEVTOOLS,
 #endif
+  CHOOSE_JOYKEY,
   XRICK,
   INIT_GAME, INIT_BUFFER,
   INTRO_MAIN, INTRO_MAP,
@@ -262,7 +263,7 @@ game_run(void)
 
 	game_period = sysarg_args_period ? sysarg_args_period : GAME_PERIOD;
 	tm = sys_gettime();
-	game_state = XRICK;
+	game_state = CHOOSE_JOYKEY;
 
 	/* main loop */
 	while (game_state != EXIT) {
@@ -360,7 +361,19 @@ frame(void)
 		break;
 #endif
 
-
+		case CHOOSE_JOYKEY:
+			switch (screen_joykey())
+			{
+			case SCREEN_RUNNING:
+				return;
+			case SCREEN_DONE:
+				game_state = INIT_GAME;
+				break;
+			case SCREEN_EXIT:
+				game_state = EXIT;
+				return;
+			}
+			break;
 
 		case XRICK:
 			switch(screen_xrick()) {

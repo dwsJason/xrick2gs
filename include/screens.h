@@ -47,6 +47,8 @@ extern U8 screen_gameover(void);  /* gameover */
 extern U8 screen_getname(void);  /* enter you name */
 extern void screen_pause(U8);  /* pause indicator */
 
+U8 screen_joykey(void); /* choose Joystick or Keyboard */
+
 #endif
 
 /* eof */
