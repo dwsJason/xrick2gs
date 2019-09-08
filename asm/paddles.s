@@ -22,7 +22,7 @@ paddle0 start ASMCODE
 	ds 2
 paddle1 entry
 	ds 2
-paddle_button_0 entry
+paddle_button0 entry
 	ds 2
 	
 ReadPaddles entry
@@ -37,7 +37,7 @@ ReadPaddles entry
 	
 	lda >$E0C061
 	and #$0080
-	sta paddle_button_0
+	sta paddle_button0
 			
 	plb	
 	rtl
@@ -55,7 +55,11 @@ ReadPaddles entry
 * Return: X=JoyX, Y=JoyY 
 GetJoyXY start ASMCODE
                php              ;Save irq & mx reg size 
-               sep   #$34       ;sei & 8-bit mx 
+               sep   #$34       ;sei & 8-bit mx
+			   
+	longa off
+	longi off
+			    
                phd              ;Save DPage 
                pea   $C000      ;DP to I/O 
                pld              ;DP=$C000 

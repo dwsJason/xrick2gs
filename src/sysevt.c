@@ -70,6 +70,12 @@ extern U16 paddle_button0;
  
 U16 bUseJoy = 0; 
 
+#define TOLERANCE 48
+#define JOY_LEFT  (128-TOLERANCE)
+#define JOY_RIGHT (128+TOLERANCE)
+#define JOY_UP    (128-TOLERANCE)
+#define JOY_DOWN  (128+TOLERANCE)
+
 #endif
 
 /*
@@ -105,71 +111,138 @@ processEvent()
 
 	control_status = 0;
 
-	// ADB Keyboard Driver
-	if (KeyArray[ LARROW ])
+	if (bUseJoy)
 	{
-		control_status |= CONTROL_LEFT;
-		if (!(control_last & CONTROL_LEFT))
+		ReadPaddles();
+
+		if (paddle0 <= JOY_LEFT)
 		{
-			control_last |= CONTROL_LEFT;
-			KeyArray[ RARROW ] = 0;
+			control_status |= CONTROL_LEFT;
+			if (!(control_last & CONTROL_LEFT))
+				control_last |= CONTROL_LEFT;
+		}
+		else
+		{
+			control_last &= ~CONTROL_LEFT;
+		}
+		if (paddle0 >= JOY_RIGHT)
+		{
+			control_status |= CONTROL_RIGHT;
+			if (!(control_last & CONTROL_RIGHT))
+				control_last |= CONTROL_RIGHT;
+		}
+		else
+		{
+			control_last &= ~CONTROL_RIGHT;
+		}
+
+		if (paddle1 <= JOY_UP)
+		{
+			control_status |= CONTROL_UP;
+			if (!(control_last & CONTROL_UP))
+				control_last |= CONTROL_UP;
+		}
+		else
+		{
+			control_last &= ~CONTROL_UP;
+		}
+		if (paddle1 >= JOY_DOWN)
+		{
+			control_status |= CONTROL_DOWN;
+			if (!(control_last & CONTROL_DOWN))
+				control_last |= CONTROL_DOWN;
+		}
+		else
+		{
+			control_last &= ~CONTROL_DOWN;
+		}
+
+		if (paddle_button0 >= 128)
+		{
+			control_status |= CONTROL_FIRE;
+			if (!(control_last & CONTROL_FIRE))
+			{
+				control_last |= CONTROL_FIRE;
+			}
+		}
+		else
+		{
+			control_last &= ~CONTROL_FIRE;
 		}
 	}
 	else
 	{
-		control_last &= ~CONTROL_LEFT;
-	}
-	if (KeyArray[ RARROW ])
-	{
-		control_status |= CONTROL_RIGHT;
-		if (!(control_last & CONTROL_RIGHT))
+		// ADB Keyboard Driver
+		if (KeyArray[ A_KEY ] || KeyArray[ J_KEY ])
 		{
-			control_last |= CONTROL_RIGHT;
-			KeyArray[ LARROW ] = 0;
+			control_status |= CONTROL_LEFT;
+			if (!(control_last & CONTROL_LEFT))
+			{
+				control_last |= CONTROL_LEFT;
+				KeyArray[ D_KEY ] = 0;
+				KeyArray[ L_KEY ] = 0;
+			}
+		}
+		else
+		{
+			control_last &= ~CONTROL_LEFT;
+		}
+		if (KeyArray[ D_KEY ] || KeyArray[ L_KEY ])
+		{
+			control_status |= CONTROL_RIGHT;
+			if (!(control_last & CONTROL_RIGHT))
+			{
+				control_last |= CONTROL_RIGHT;
+				KeyArray[ A_KEY ] = 0;
+				KeyArray[ J_KEY ] = 0;
+			}
+		}
+		else
+		{
+			control_last &= ~CONTROL_RIGHT;
+		}
+		if (KeyArray[ S_KEY ] || KeyArray[ K_KEY ])
+		{
+			control_status |= CONTROL_DOWN;
+			if (!(control_last & CONTROL_DOWN))
+			{
+				control_last |= CONTROL_DOWN;
+				KeyArray[ W_KEY ] = 0;
+				KeyArray[ I_KEY ] = 0;
+			}
+		}
+		else
+		{
+			control_last &= ~CONTROL_DOWN;
+		}
+		if (KeyArray[ W_KEY ] || KeyArray[ I_KEY ])
+		{
+			control_status |= CONTROL_UP;
+			if (!(control_last & CONTROL_UP))
+			{
+				control_last |= CONTROL_UP;
+				KeyArray[ S_KEY ] = 0;
+				KeyArray[ K_KEY ] = 0;
+			}
+		}
+		else
+		{
+			control_last &= ~CONTROL_UP;
+		}
+		if (KeyArray[ SPACEBAR ])
+		{
+			control_status |= CONTROL_FIRE;
+			if (!(control_last & CONTROL_FIRE))
+			{
+				control_last |= CONTROL_FIRE;
+			}
+		}
+		else
+		{
+			control_last &= ~CONTROL_FIRE;
 		}
 	}
-	else
-	{
-		control_last &= ~CONTROL_RIGHT;
-	}
-	if (KeyArray[ DARROW ])
-	{
-		control_status |= CONTROL_DOWN;
-		if (!(control_last & CONTROL_DOWN))
-		{
-			control_last |= CONTROL_DOWN;
-			KeyArray[ UARROW ] = 0;
-		}
-	}
-	else
-	{
-		control_last &= ~CONTROL_DOWN;
-	}
-	if (KeyArray[ UARROW ])
-	{
-		control_status |= CONTROL_UP;
-		if (!(control_last & CONTROL_UP))
-		{
-			control_last |= CONTROL_UP;
-			KeyArray[ DARROW ] = 0;
-		}
-	}
-	else
-	{
-		control_last &= ~CONTROL_UP;
-	}
-	if (KeyArray[ SPACEBAR ])
-	{
-		control_status |= CONTROL_FIRE;
-		if (!(control_last & CONTROL_FIRE))
-		{
-			control_last |= CONTROL_FIRE;
-		}
-	}
-	else
-	{
-		control_last &= ~CONTROL_FIRE;
-	}
+
 	if (KeyArray[ ESC ])
 	{
 		control_status |= CONTROL_END;

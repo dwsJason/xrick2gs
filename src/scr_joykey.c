@@ -17,6 +17,10 @@ segment "screen";
 
 extern char joys_lz4;
 
+#define J_KEY 0x26
+#define K_KEY 0x28
+
+extern U16 bUseJoy; 
 
 /*
  * Display (J)oystick or (K)eyboard screen
@@ -26,8 +30,10 @@ extern char joys_lz4;
 U8
 screen_joykey(void)
 {
-	static U8 seq = 0;
-	static U8 wait = 0;
+	static U16 seq = 0;
+	static U16 wait = 0;
+
+	U16 bChosen = 0;
 
 	if (seq == 0) {
 		sysvid_clearPalette();
@@ -42,26 +48,24 @@ screen_joykey(void)
 		seq = 1;
 	}
 
-	switch (seq) {
-	case 1:  /* wait */
-		if (wait++ > 0x2) {
-			seq = 2;
-			wait = 0;
-		}
-		break;
-
-	case 2:  /* wait */
-		if (wait++ > 0x20) {
-			seq = 99;
-			wait = 0;
-		}
-	}
-
 	if (control_status & CONTROL_EXIT)  /* check for exit request */
 		return SCREEN_EXIT;
 
-	#if 0
-	if (seq == 99) {  /* we're done */
+	if (KeyArray[ J_KEY ])
+	{
+		// Choose JoyStick
+		bUseJoy = 1;
+		bChosen = 1;
+	}
+
+	if (KeyArray[ K_KEY ])
+	{
+		// Choose Keyboard
+		bUseJoy = 0;
+		bChosen = 1;
+	}
+
+	if (bChosen) {  /* we're done */
 		sysvid_clear();
 		sysvid_setGamePalette();
 		sysvid_clearPalette();
@@ -70,9 +74,9 @@ screen_joykey(void)
 		PresentSCB();
 		PresentFrameBuffer();
 		seq = 0;
+		wait = 0;
 		return SCREEN_DONE;
 	}
-	#endif
 
 	return SCREEN_RUNNING;
 }
