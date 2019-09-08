@@ -10,6 +10,39 @@
 DummyPaddles start ASMCODE
 	end
 
+*PEEK 49249 - PADDLE 0 BUTTON (>127 IF BUTTON PRESSED)
+*PEEK 49250 - PADDLE 1 BUTTON (>127 IF BUTTON PRESSED)
+*PEEK 49251 - PADDLE 2 BUTTON (>127 IF BUTTON PRESSED)
+
+*
+* XRick GS C Interface to read
+* the joystick, and the button
+*
+paddle0 start ASMCODE
+	ds 2
+paddle1 entry
+	ds 2
+paddle_button_0 entry
+	ds 2
+	
+ReadPaddles entry
+	phb
+	phk
+	plb
+	
+	jsr GetJoyXY
+	
+	stx	paddle0
+	sty paddle1
+	
+	lda >$E0C061
+	and #$0080
+	sta paddle_button_0
+			
+	plb	
+	rtl
+	end
+
 *
 *------------------------------- 
 * IIGS 1MHz single-pass GetJoyXY 
