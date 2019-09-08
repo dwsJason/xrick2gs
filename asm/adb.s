@@ -2,7 +2,7 @@
 * ORCA/M Format!!!
 * ADB/Keyboard Event Handling
 * Based on Secrets of Wolf-3d code
-* from Eric Shepherd
+* Thanks Eric Shepherd
 * Thanks Burger Becky
 * Thanks Jesse Blue
 *
