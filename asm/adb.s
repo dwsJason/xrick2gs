@@ -23,6 +23,7 @@ Dummy2 start ASMCODE
 	
 KeyArray start ASMCODE
 	ds 128
+	ds 128
 
 RemoveKeyboardDriver entry
 	php
@@ -32,7 +33,7 @@ RemoveKeyboardDriver entry
 	phk
 	plb
 	
-	pea toBRamSetupVector ;Restore the previous vector
+	pea $12 ;toBRamSetupVector ;Restore the previous vector
 	lda VecBRamSetup+3
 	and #$ff
 	pha
@@ -66,7 +67,8 @@ clear stz KeyArray,x
 	dex
 	dex
 	bpl clear
-	
+ 
+	_ClearSRQTable   
 *
 * Blast any previous existing handler
 * This is probably mean, but I want input to work
@@ -102,7 +104,7 @@ clear stz KeyArray,x
 *
 	pha
 	pha
-	pea toBRamSetupVector
+	pea $12 ;toBRamSetupVector
 	_GetVector 				; preserve original vector address
 	pla
 	sta VecBRamSetup+1
@@ -113,7 +115,7 @@ clear stz KeyArray,x
 	
 * Hook in our vector handler
 	
-	pea toBRamSetupVector
+	pea $12 ;toBRamSetupVector
 	pea VecBRamSetup|-16
 	pea VecBRamSetup
 	_SetVector	
@@ -322,7 +324,7 @@ VecBRamSetup entry
 	plp					;Restore MX
 	rtl 				;Exit
 
-toBRamSetupVector entry
-	ds 4
+*toBRamSetupVector entry
+*	ds 4
 	end
    
