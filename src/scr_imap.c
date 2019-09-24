@@ -139,14 +139,18 @@ screen_introMap(void)
   if (control_status & CONTROL_EXIT)  /* check for exit request */
   {
 	#ifdef IIGS
+	#ifdef ENABLE_SOUND
 	game_stopmusic();
+	#endif
 	#endif
     return SCREEN_EXIT;
   }
 
   if (seq == 5) {  /* end as soon as key pressed */
 	#ifdef IIGS
+	#ifdef ENABLE_SOUND
 	game_stopmusic();
+	#endif
 	#endif
     sysvid_clear();
     seq = 0;
