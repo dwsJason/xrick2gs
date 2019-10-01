@@ -21,6 +21,15 @@
 
 #include <Memory.h>
 
+#include <orca.h>
+
+/* According to the ORCA/C Documentation
+ 
+    The Tool Locater, Memory Manager, Loader and
+	SANE are started by all C programs. 
+
+*/
+
 void scr_credit();
 
 /*
