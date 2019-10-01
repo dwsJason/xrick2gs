@@ -61,6 +61,17 @@ segment "system";
 #define K_KEY 0x28
 #define L_KEY 0x25
 
+#define KEY_1 0x12
+#define KEY_2 0x13
+#define KEY_3 0x14
+#define KEY_4 0x15
+#define KEY_5 0x17
+#define KEY_6 0x16
+#define KEY_7 0x1A
+#define KEY_8 0x1C
+#define KEY_9 0x19
+#define KEY_0 0x1D
+
 
 // If the IIGs, we just automatically support all the things
 void ReadPaddles();
@@ -75,6 +86,10 @@ U16 bUseJoy = 0;
 #define JOY_RIGHT (128+TOLERANCE)
 #define JOY_UP    (128-TOLERANCE)
 #define JOY_DOWN  (128+TOLERANCE)
+
+int last_key7 = 0;
+int last_key8 = 0;
+int last_key9 = 0;
 
 #endif
 
@@ -261,6 +276,50 @@ processEvent()
 	{
 		control_last &= ~CONTROL_EXIT;
 	}
+
+#ifdef ENABLE_CHEATS
+	if (KeyArray[ KEY_7 ])
+	{
+		if (!last_key7)
+		{
+			last_key7 = 1;
+			game_toggleCheat(1);
+		}
+	}
+	else
+	{
+		last_key7 = 0;
+	}
+	if (KeyArray[ KEY_8 ])
+	{
+		if (!last_key8)
+		{
+			last_key8 = 1;
+			game_toggleCheat(2);
+		}
+	}
+	else
+	{
+		last_key8 = 0;
+	}
+	if (KeyArray[ KEY_9 ])
+	{
+		if (!last_key9)
+		{
+			last_key9 = 1;
+			//game_toggleCheat(3);
+			if (game_cheat2)
+			{
+				game_toggleCheat(2);
+			}
+			e_rick_gozombie();
+		}
+	}
+	else
+	{
+		last_key9 = 0;
+	}
+#endif
 #endif
 
 #ifndef IIGS
