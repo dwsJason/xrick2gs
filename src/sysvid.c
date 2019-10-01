@@ -355,6 +355,7 @@ sysvid_init(void)
 
 	GetLoadSegments();
 
+#if 0
 	// Allocate Bank E1 memory - Actual Video memory
 	printf("Allocate Bank $E1 memory\n");
 	hndl = NewHandle(0x8000, userid(), 0xC003, (pointer) 0xE12000);
@@ -366,10 +367,11 @@ sysvid_init(void)
 		exit(1);
 	}
 	printf("SUCCESS\n");
+#endif
 
 	// Allocate Some Direct Page memory
-	printf("Allocate Direct Page space 512 bytes\n");
-	directPageHandle = (U32*)NewHandle( 0x200, userid(), 0xC005, 0 );
+	printf("Allocate Direct Page space 256 bytes\n");
+	directPageHandle = (U32*)NewHandle( 0x100, userid(), 0xC005, 0 );
 	if (toolerror())
 	{
 		printf("Unable to allocate 512 bytes Direct Page\n");
@@ -407,6 +409,22 @@ sysvid_init(void)
 		exit(1);
 	}
 
+	printf("Enable Tick Timer\n");
+	SetHeartBeat((pointer)&dummyTask); // Force the Tick Timer On
+	DelHeartBeat((pointer)&dummyTask); // Clear the dummy task from the list
+	// Address of GetTick internal tick variable
+	tick = (unsigned long*)GetAddr(tickCnt);
+
+	printf("EventManager Startup(why?)\n");
+	EMStartUp((Word)(*directPageHandle),(Word)32,(Integer)0,(Integer)320,(Integer)0,(Integer)200,(Word)userid());
+	if (toolerror())
+	{
+		printf("Unable to Start Event Manager\n");
+		printf("ROM3, game can't run\n");
+		sys_sleep(5000);
+		exit(1);
+	}
+
 	printf("ADBTool Startup\n");
 	ADBStartUp();
 	if (toolerror())
@@ -429,11 +447,6 @@ sysvid_init(void)
 			  (Integer)200,
 			  (Word)userid());
 	#endif
-	printf("Enable Tick Timer\n");
-	SetHeartBeat((pointer)&dummyTask); // Force the Tick Timer On
-	DelHeartBeat((pointer)&dummyTask); // Clear the dummy task from the list
-	// Address of GetTick internal tick variable
-	tick = (unsigned long*)GetAddr(tickCnt);
 
 	// Framebuffer
 	sysvid_fb = (U8*)0x12000;
@@ -442,7 +455,7 @@ sysvid_init(void)
 	*VIDEO_REGISTER|=0xC0;
 
 	// ENABLE Shadowing of SHR
-	*SHADOW_REGISTER&=~0x08; // Shadow Enable
+	//*SHADOW_REGISTER&=~0x08; // Shadow Enable
 	// DISABLE Shadowing of SHR
 	*SHADOW_REGISTER|=0x08; // Shadow Disable
 
