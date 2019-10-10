@@ -31,13 +31,15 @@
 */
 
 void scr_credit();
-
+void IIGShutdown();
 /*
  * main
  */
 int
 main(int argc, char *argv[])
 {
+	atexit( IIGShutdown );	// Make Sure cleanup stuff is done
+
 	// Get the credit screen up ASAP
 	scr_credit();
 

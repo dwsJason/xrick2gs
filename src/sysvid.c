@@ -312,6 +312,21 @@ static LoadSegRec result;
 
 }
 
+//
+// Attempt a proper shutdown
+//
+void IIGShutdown()
+{
+	RemoveKeyboardDriver();
+	ADBShutDown();
+	EMShutDown();
+	MTShutDown();
+
+	DisposeAll(userid());
+
+	//SystemMMShutDown();
+}
+
 #endif
 
 
@@ -355,7 +370,7 @@ sysvid_init(void)
 
 	GetLoadSegments();
 
-#if 0
+#if 1
 	// Allocate Bank E1 memory - Actual Video memory
 	printf("Allocate Bank $E1 memory\n");
 	hndl = NewHandle(0x8000, userid(), 0xC003, (pointer) 0xE12000);
@@ -374,7 +389,7 @@ sysvid_init(void)
 	directPageHandle = (U32*)NewHandle( 0x100, userid(), 0xC005, 0 );
 	if (toolerror())
 	{
-		printf("Unable to allocate 512 bytes Direct Page\n");
+		printf("Unable to allocate 256 bytes Direct Page\n");
 		printf("Game can't run\n");
 		sys_sleep(5000);  // Wait 5 seconds
 		exit(1);
