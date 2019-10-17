@@ -90,7 +90,7 @@ syssnd_init(void)
 	printf("Decompress samerica\n");
 	LZ4_Unpack(pNtpSong, &samerica_lz4);
 
-	printf("SetAudioBank\n");
+	printf("NTPSetAudioBank\n");
 	SetAudioBank( (*handle)>>16 );
 
 	#if 0
@@ -115,7 +115,12 @@ syssnd_init(void)
 void
 syssnd_shutdown(void)
 {
-	printf("syssnd_shutdown\n");
+	// If the driver has been loaded
+	if (pNtpDriver)
+	{
+		printf("syssnd_shutdown\n");
+		NTPstop();
+	}
   //if (!isAudioActive) return;
   //isAudioActive = FALSE;
 }

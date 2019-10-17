@@ -322,6 +322,8 @@ void IIGShutdown()
 	EMShutDown();
 	MTShutDown();
 
+	syssnd_shutdown();  // Shutdown the NTP player
+
 	DisposeAll(userid());
 
 	//SystemMMShutDown();
