@@ -346,6 +346,18 @@ BRET entry	; Blit Return
 	iny 	; next direct page
 	iny
 	
+* SONGS SOUND BETTER IF WE ALLOW INTERRUPTS	
+* FPS IS BETTER WITHOUT THIS CODE
+	lda stack
+	tcs
+	
+	_auxOFF
+	_shadowOFF
+	cli
+	sei
+	_shadowON
+	_auxON
+	
 * TODO, every 4 lines or so (or every so many clocks)
 * re-enable interrupts, for audio, and the heartbeat	
 	
