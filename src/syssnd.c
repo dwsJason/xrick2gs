@@ -87,8 +87,8 @@ syssnd_init(void)
 
 	printf("Decompress NTP Driver\n");
 	LZ4_Unpack(pNtpDriver, &ntpplayer_lz4);
-	printf("Decompress samerica\n");
-	LZ4_Unpack(pNtpSong, &samerica_lz4);
+	//printf("Decompress samerica\n");
+	//LZ4_Unpack(pNtpSong, &samerica_lz4);
 
 	printf("NTPSetAudioBank\n");
 	SetAudioBank( (*handle)>>16 );
