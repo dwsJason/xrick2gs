@@ -336,15 +336,7 @@ frame(void)
 {
 	while (1) {
 
-		{
-//			printf("%ld game_state = %s\n", *tick, game_state_strings[game_state]);
-		}
-
-
-
 		switch (game_state) {
-
-
 
 #ifdef ENABLE_DEVTOOLS
 		case DEVTOOLS:
