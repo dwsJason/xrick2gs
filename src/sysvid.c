@@ -244,6 +244,7 @@ void PrepareSprites()
 		handles[idx] = (U32*)NewHandle(0x10000, userid(), 0xC014, 0); 
 		if (toolerror())
 		{
+			*VIDEO_REGISTER&=0x3F;
 			printf("Unable to allocate 64k Sprites Bank %d\n", idx);
 			printf("Game can't run\n");
 			sys_sleep(5000);  // Wait 5 seconds
@@ -362,6 +363,7 @@ sysvid_init(void)
 	hndl = NewHandle(0x9600, userid(), 0xC003, (pointer) 0x011000);
 	if (toolerror())
 	{
+		*VIDEO_REGISTER&=0x3F;
 		printf("Unable to allocate backpage at 0x012000\n");
 		printf("Game can't run\n");
 		sys_sleep(5000);  // Wait 5 seconds
@@ -378,6 +380,7 @@ sysvid_init(void)
 	hndl = NewHandle(0x8000, userid(), 0xC003, (pointer) 0xE12000);
 	if (toolerror())
 	{
+		*VIDEO_REGISTER&=0x3F;
 		printf("Unable to allocate display buffer at 0xE12000\n");
 		printf("Game can't run\n");
 		sys_sleep(5000);  // Wait 5 seconds
@@ -391,6 +394,7 @@ sysvid_init(void)
 	directPageHandle = (U32*)NewHandle( 0x100, userid(), 0xC005, 0 );
 	if (toolerror())
 	{
+		*VIDEO_REGISTER&=0x3F;
 		printf("Unable to allocate 256 bytes Direct Page\n");
 		printf("Game can't run\n");
 		sys_sleep(5000);  // Wait 5 seconds
@@ -403,6 +407,7 @@ sysvid_init(void)
 	tilesPageHandle = (U32*)NewHandle(0x10000, userid(), 0xC014, 0); 
 	if (toolerror())
 	{
+		*VIDEO_REGISTER&=0x3F;
 		printf("Unable to allocate 64k Tiles Bank\n");
 		printf("Game can't run\n");
 		sys_sleep(5000);  // Wait 5 seconds
@@ -420,6 +425,7 @@ sysvid_init(void)
 	MTStartUp();	// MiscTool Startup, for the Heartbeat
 	if (toolerror())
 	{
+		*VIDEO_REGISTER&=0x3F;
 		printf("Unable to Start MiscTool\n");
 		printf("Game can't run\n");
 		sys_sleep(5000);  // Wait 5 seconds
@@ -436,6 +442,7 @@ sysvid_init(void)
 	EMStartUp((Word)(*directPageHandle),(Word)32,(Integer)0,(Integer)320,(Integer)0,(Integer)200,(Word)userid());
 	if (toolerror())
 	{
+		*VIDEO_REGISTER&=0x3F;
 		printf("Unable to Start Event Manager\n");
 		printf("ROM3, game can't run\n");
 		sys_sleep(5000);
@@ -446,6 +453,7 @@ sysvid_init(void)
 	ADBStartUp();
 	if (toolerror())
 	{
+		*VIDEO_REGISTER&=0x3F;
 		printf("Unable to Start ADBTool\n");
 		printf("Game can't run\n");
 		sys_sleep(5000);  // Wait 5 seconds
