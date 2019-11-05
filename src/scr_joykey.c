@@ -17,6 +17,12 @@ segment "screen";
 
 extern char joys_lz4;
 
+#define KEY_0 0x1D
+#define KEY_1 0x12
+#define KEY_2 0x13
+#define KEY_3 0x14
+#define KEY_4 0x15
+
 #define J_KEY 0x26
 #define K_KEY 0x28
 
@@ -63,6 +69,23 @@ screen_joykey(void)
 		// Choose Keyboard
 		bUseJoy = 0;
 		bChosen = 1;
+	}
+
+	if (KeyArray[ KEY_0 ])
+	{
+		sysarg_args_map = 0;
+	}
+	if (KeyArray[ KEY_1 ])
+	{
+		sysarg_args_map = 1;
+	}
+	if (KeyArray[ KEY_2 ])
+	{
+		sysarg_args_map = 2;
+	}
+	if (KeyArray[ KEY_3 ])
+	{
+		sysarg_args_map = 3;
 	}
 
 	if (bChosen) {  /* we're done */
